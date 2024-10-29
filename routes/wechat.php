@@ -71,7 +71,9 @@ Route::withoutMiddleware(['auth.wechat'])->group(function () {
                     'jumpType' => null,
                     'jumpAddress' => null,
                     'remark' => null,
-                    'groupId' => 261
+                    'groupId' => 261,
+                    'hasVideo' => true,
+                    'videoSrc' => 'http://wxsnsdy.tc.qq.com/105/20210/snsdyvideodownload?filekey=30280201010421301f0201690402534804102ca905ce620b1241b726bc41dcff44e00204012882540400&bizid=1023&hy=SH&fileparam=302c020101042530230204136ffd93020457e3c4ff02024ef202031e8d7f02030f42400204045a320a0201000400̰'
                 ],
                 [
                     'tenantId' => '00ae459e842642f78b9ab0d8e7c027b4',
@@ -84,7 +86,9 @@ Route::withoutMiddleware(['auth.wechat'])->group(function () {
                     'jumpType' => 8,
                     'jumpAddress' => '7IARD8A04RK58CQ1NZFFZ',
                     'remark' => null,
-                    'groupId' => 263
+                    'groupId' => 263,
+                    'hasVideo' => false,
+                    'videoSrc' => null
                 ],
                 [
                     'tenantId' => '00ae459e842642f78b9ab0d8e7c027b4',
@@ -97,7 +101,9 @@ Route::withoutMiddleware(['auth.wechat'])->group(function () {
                     'jumpType' => 5,
                     'jumpAddress' => 'https://mp.weixin.qq.com/s/bs4Qzeb2JAbAXv5aVtkiqQ',
                     'remark' => null,
-                    'groupId' => 263
+                    'groupId' => 263,
+                    'hasVideo' => false,
+                    'videoSrc' => null
                 ]
             ]
         ]);
