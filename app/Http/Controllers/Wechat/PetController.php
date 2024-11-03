@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Wechat;
 use App\Exceptions\WechatApiException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UserPetRequest;
+use App\Services\UploadFileService;
 use App\Services\UserPetService;
 
 class PetController extends Controller
@@ -62,5 +63,16 @@ class PetController extends Controller
     public function destroy(string $id)
     {
         $this->service->delete($id);
+    }
+
+    public function upload(UserPetRequest $request, UploadFileService $service)
+    {
+        $validated = $request->validated();
+
+        if (is_null($url = $service->petAvatar($validated['avatar']))) {
+            dd('错误');
+        }
+
+        return $this->success(data: ['content' => $url]);
     }
 }

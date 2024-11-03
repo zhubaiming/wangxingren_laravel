@@ -54,7 +54,7 @@ class UserPetRequest extends FormRequest
 //        );
         $action = trim(preg_replace('/(.*)@/i', '', $this->route()->getActionName()));
 
-//        dd($action);
+//        dump($action);
 
 //        $a = match ($action) {
 //            'index' => [],
@@ -105,6 +105,9 @@ class UserPetRequest extends FormRequest
                 'remark' => ['filled', 'string']
             ],
             'destroy' => [],
+            'upload' => [
+                'avatar' => ['required', 'file']
+            ]
         };
     }
 

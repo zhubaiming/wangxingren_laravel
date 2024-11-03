@@ -24,11 +24,18 @@ class AuthenticateWechat
      */
     public function handle(Request $request, Closure $next): Response
     {
+//        if (!$request->hasHeader('token')) {
+//            return response()->json([
+//                'code' => 208,
+//                'message' => '请先进行登录'
+//            ]);
+//        }
+
         if (!$request->cookie($this->auth->guard('wechat')->getRecallerName())) {
             return response()->json([
-                'status' => '-1',
+                'code' => 208,
                 'message' => '请先进行登录'
-            ], 401);
+            ]);
         }
 
         if ($request->is('wechat/registerLogin')) {

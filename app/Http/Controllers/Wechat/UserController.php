@@ -46,11 +46,12 @@ class UserController extends Controller
 
             $token = Auth::guard('wechat')->silentLogin(array_merge_recursive($code_session, $validatedData));
 
-            return response()->json([
-                'status' => '0',
-                'message' => 'success',
-                'data' => ['token' => $token]
-            ]);
+//            return response()->json([
+//                'status' => '0',
+//                'message' => 'success',
+//                'data' => ['token' => $token]
+//            ]);
+            return $this->success(data: ['token' => $token]);
         }, function ($exception) {
             dd($exception);
         }, false);

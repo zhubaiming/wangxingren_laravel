@@ -19,47 +19,12 @@ Route::withoutMiddleware(['auth.wechat'])->group(function () {
 
         dd($app_type, $app_id, $openid);
     });
-//    Route::prefix('/upload')->group(function () {
-//        Route::post('petAvatar', function (Request $request) {
-////        dd($request);
-//
-//
-//            if ($request->hasFile('avatar')) {
-//                $upload_file = $request->file('avatar');
-//                if ($upload_file->isValid()) {
-//                    $file_name = md5_file($upload_file->path()) . '.' . $upload_file->extension();
-//
-//                    if (!\Illuminate\Support\Facades\Storage::disk('public')->exists($file_name)) {
-//                        $upload_file->move(storage_path('app/public'), $file_name);
-//                    }
-//
-//                    return response()->json([
-//                        'status' => '0',
-//                        'message' => 'success',
-//                        'data' => [
-//                            'path' => \Illuminate\Support\Facades\Storage::disk('public')->url($file_name),
-//                        ]
-//                    ]);
-//                }
-//            }
-//
-//            return response()->json([
-//                'status' => '-1',
-//                'message' => 'upload:fail'
-//            ]);
-//        });
-//    });
-
 
     Route::get('/app_banners', function () {
         return response()->json([
-//            'data' => [
-//                ['src' => 'https://dp-live.oss-cn-beijing.aliyuncs.com/marketing/image/hlDebwlcgq.jpg', 'video_src' => ''],
-//                ['src' => 'https://imgs.699pic.com/images/400/057/613.jpg!list1x.v2', 'video_src' => ''],
-//                ['src' => 'https://marketplace.canva.com/EAFW6-Jg4N4/1/0/1600w/canva-blue-white-modern-new-collection-banner-QFvmcmDjV5A.jpg', 'video_src' => 'http://wxsnsdy.tc.qq.com/105/20210/snsdyvideodownload?filekey=30280201010421301f0201690402534804102ca905ce620b1241b726bc41dcff44e00204012882540400&bizid=1023&hy=SH&fileparam=302c020101042530230204136ffd93020457e3c4ff02024ef202031e8d7f02030f42400204045a320a0201000400'],
-//                ['src' => 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTF1LyQKDYGVcjgLpZrjcPkvrbrkcw7LAflf4CyfydbnnpHuk_-w20pI2ISCOdFWZzgBTM&usqp=CAU', 'video_src' => ''],
-//            ]
-            'data' => [
+            'code' => 200,
+            'message' => __('http_response.success'),
+            'payload' => [
                 [
                     'tenantId' => '00ae459e842642f78b9ab0d8e7c027b4',
                     'appId' => 6259662812989361028,
@@ -110,41 +75,51 @@ Route::withoutMiddleware(['auth.wechat'])->group(function () {
     });
 
     Route::post('/silentLogin', [Wechat\UserController::class, 'silentLogin']);
+    Route::prefix('goods')->group(function () {
+        Route::get('/category', function () {
+            return response()->json([
+                'code' => 200,
+                'message' => __('http_response.success'),
+                'payload' => [
+                    ['id' => 1, 'name' => '美白专区'],
+                    ['id' => 2, 'name' => '眼部护理'],
+                    ['id' => 3, 'name' => '清洁补水'],
+                    ['id' => 4, 'name' => '美甲美妆'],
+                    ['id' => 5, 'name' => '夏季脱毛'],
+                    ['id' => 6, 'name' => '祛痘专区'],
+                    ['id' => 7, 'name' => '修复专区'],
+                    ['id' => 8, 'name' => '头皮护理'],
+                    ['id' => 9, 'name' => '飞顿仪器专区'],
+                    ['id' => 10, 'name' => '医学护肤']
+                ]
+            ]);
+        });
+    });
 });
 
 Route::post('/registerLogin', [Wechat\UserController::class, 'registerLogin']);
 
 Route::apiResource('/pets', Wechat\PetController::class);
 
+Route::get('/goods', function (Request $request) {
+    $payload = [
+        ['id' => 1, 'cover' => 'https://public-storages-bucket.oss-rg-china-mainland.aliyuncs.com/wangxingren/2a8405c7-eef9-4c89-90c5-e8132b30e386.jpg', 'name' => '猫咪洗护' . $request->input('categoryId'), 'price' => '100.00'],
+        ['id' => 2, 'cover' => 'https://public-storages-bucket.oss-rg-china-mainland.aliyuncs.com/wangxingren/55cd2327-c148-42ac-b315-ebf4cfa8c6b1.jpg', 'name' => '猫咪精致洗护' . $request->input('categoryId'), 'price' => '180.00'],
+        ['id' => 3, 'cover' => 'https://public-storages-bucket.oss-rg-china-mainland.aliyuncs.com/wangxingren/728f223d-4603-49dc-8b0f-6674087280a0.jpg', 'name' => '小型犬洗护' . $request->input('categoryId'), 'price' => '50.00'],
+        ['id' => 4, 'cover' => 'https://public-storages-bucket.oss-rg-china-mainland.aliyuncs.com/wangxingren/10f11160-f72b-4d4f-8a9a-4c66038fe7a4.jpg', 'name' => '小型犬精致洗护' . $request->input('categoryId'), 'price' => '100.00'],
+        ['id' => 5, 'cover' => 'https://public-storages-bucket.oss-rg-china-mainland.aliyuncs.com/wangxingren/3a8d2155-27ca-4c0d-8272-f85234e60d40.jpg', 'name' => '大型犬洗护' . $request->input('categoryId'), 'price' => '100.00']
+    ];
+
+    return response()->json([
+        'code' => 200,
+        'message' => __('http_response.success'),
+        'payload' => $payload
+    ]);
+});
+
+
 Route::prefix('/upload')->group(function () {
-    Route::post('petAvatar', function (Request $request) {
-//        dd($request);
-
-
-        if ($request->hasFile('image')) {
-            $upload_file = $request->file('image');
-            if ($upload_file->isValid()) {
-                $file_name = md5_file($upload_file->path()) . '.' . $upload_file->extension();
-
-                if (!\Illuminate\Support\Facades\Storage::disk('public')->exists($file_name)) {
-                    $upload_file->move(storage_path('app/public'), $file_name);
-                }
-
-                return response()->json([
-                    'status' => '0',
-                    'message' => 'success',
-                    'data' => [
-                        'path' => \Illuminate\Support\Facades\Storage::disk('public')->url($file_name),
-                    ]
-                ]);
-            }
-        }
-
-        return response()->json([
-            'status' => '-1',
-            'message' => 'upload:fail'
-        ]);
-    });
+    Route::post('petAvatar', [Wechat\PetController::class, 'upload']);
 });
 
 
