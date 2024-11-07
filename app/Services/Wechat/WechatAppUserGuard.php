@@ -114,6 +114,8 @@ class WechatAppUserGuard
          * ]
          */
 
+        $isRegister = false;
+
         // 查询当前静默信息是否存在
         $this->login_info = $this->retrieveSilentLoginInfoByCredentials([
             'wechat_openid' => $credentials['openid']
@@ -129,10 +131,11 @@ class WechatAppUserGuard
             $user_info = $this->login_info->userInfo();
             if (0 != $user_info->count() && !is_null($purePhoneNumber = $user_info->sole(['phone_number'])->phone_number)) {
                 $this->token = $this->attempt(['purePhoneNumber' => $purePhoneNumber], $this->token);
+                $isRegister = true;
             }
         }
 
-        return $this->token;
+        return [$this->token, $isRegister];
     }
 
     /**

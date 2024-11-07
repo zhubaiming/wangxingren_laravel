@@ -38,6 +38,10 @@ Route::any('/getPetsFromMyfoodiepet', function () {
      */
 });
 
+Route::get('strHumpToLine', function (Request $request) {
+    return mb_strtolower(preg_replace('/([A-Z])/', '_$1', $request->input('str')));
+});
+
 Route::any('/test', function (Request $request) {
     dd(config('filesystems.disks.public.root'));
     return response()->json([

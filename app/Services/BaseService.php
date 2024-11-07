@@ -6,6 +6,8 @@ class BaseService
 {
     protected $model;
 
+    protected $events;
+
     protected function setModel($model_name)
     {
         $class = '\\' . ltrim($model_name, '\\');

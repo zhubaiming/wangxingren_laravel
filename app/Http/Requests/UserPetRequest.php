@@ -3,7 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\GenderEnum;
-use App\Enums\PetTypeEnum;
+use App\Enums\PetCategory;
 use App\Exceptions\WechatApiException;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -80,29 +80,39 @@ class UserPetRequest extends FormRequest
         return match ($action) {
             'index' => [],
             'store' => [
+                'variety_id' => ['required'],
+                'variety_name' => ['required'],
                 'name' => ['required'],
-                'type' => [Rule::enum(PetTypeEnum::class), 'required'],
-                'is_default' => ['boolean', 'required'],
+                'category' => [Rule::enum(PetCategory::class), 'required'],
                 'gender' => [Rule::enum(GenderEnum::class), 'required'],
-                'age' => ['filled', 'integer', 'numeric'],
-                'breed' => ['filled', 'string'],
-                'color' => ['filled', 'string'],
                 'weight' => ['filled', 'numeric'],
+                'birth' => ['required', 'string'],
+                'color' => ['filled', 'string'],
                 'avatar' => ['filled', 'url'],
-                'remark' => ['filled', 'string']
+                'remark' => ['filled', 'string'],
+                'is_sterilization' => ['boolean', 'filled'],
+                'is_default' => ['boolean', 'required']
+//                'name' => ['required'],
+//                'name' => ['required'],
+//                'name' => ['required'],
+//                'type' => [Rule::enum(PetTypeEnum::class), 'required'],
+//                'age' => ['filled', 'integer', 'numeric'],
+//                'breed' => ['filled', 'string'],
             ],
             'show' => [],
             'update' => [
-                'name' => ['filled'],
-                'type' => ['filled', Rule::enum(PetTypeEnum::class)],
-                'is_default' => ['filled', 'boolean'],
-                'gender' => ['filled', Rule::enum(GenderEnum::class)],
-                'age' => ['filled', 'integer', 'numeric'],
-                'breed' => ['filled', 'string'],
-                'color' => ['filled', 'string'],
+                'variety_id' => ['required'],
+                'variety_name' => ['required'],
+                'name' => ['required'],
+                'category' => [Rule::enum(PetCategory::class), 'required'],
+                'gender' => [Rule::enum(GenderEnum::class), 'required'],
                 'weight' => ['filled', 'numeric'],
+                'birth' => ['required', 'string'],
+                'color' => ['filled', 'string'],
                 'avatar' => ['filled', 'url'],
-                'remark' => ['filled', 'string']
+                'remark' => ['filled', 'string'],
+                'is_sterilization' => ['boolean', 'filled'],
+                'is_default' => ['boolean', 'required']
             ],
             'destroy' => [],
             'upload' => [

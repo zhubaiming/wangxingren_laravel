@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\CreateUserPet;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
 
@@ -10,6 +11,8 @@ class UserPetService extends BaseService
     public function __construct()
     {
         $this->setModel('App\Models\Pet');
+
+        $this->events = app('events');
     }
 
     public function pageList()
@@ -25,21 +28,9 @@ class UserPetService extends BaseService
             $this->updateDefault();
         }
 
-        Auth::guard('wechat')->user()->pets()->createMany([$data]);
+        $pets = Auth::guard('wechat')->user()->pets()->createMany([$data]);
 
-//        return rescue(function () use ($data) {
-//            Auth::guard('wechat')->user()->pets()->createMany([$data]);
-//        }, function () {
-//        }, false);
-
-
-//        try {
-//
-//        } catch (\Error $error) { // 缺少关联模型的相关关联要求字段
-//            dd($error);
-//        } catch (MassAssignmentException $massAssignmentException) { // 要赋值的数组中包含的某些字段不在模型的可赋值定义中
-//            dd($massAssignmentException);
-//        }
+        $this->events->dispatch(new CreateUserPet($pets[0], $this->model));
     }
 
     public function info(string|int $id)

@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Wechat;
 
 Route::withoutMiddleware(['auth.wechat'])->group(function () {
+    Route::post('/silentLogin', [Wechat\UserController::class, 'silentLogin']);
+
     Route::any('/test', function (Request $request, \App\Services\Wechat\MiniAppServerSideService $service) {
 //    return response()->json([
 //        'ip' => $request->ip(),
@@ -74,49 +76,16 @@ Route::withoutMiddleware(['auth.wechat'])->group(function () {
         ]);
     });
 
-    Route::post('/silentLogin', [Wechat\UserController::class, 'silentLogin']);
-    Route::prefix('goods')->group(function () {
-        Route::get('/category', function () {
-            return response()->json([
-                'code' => 200,
-                'message' => __('http_response.success'),
-                'payload' => [
-                    ['id' => 1, 'name' => '美白专区'],
-                    ['id' => 2, 'name' => '眼部护理'],
-                    ['id' => 3, 'name' => '清洁补水'],
-                    ['id' => 4, 'name' => '美甲美妆'],
-                    ['id' => 5, 'name' => '夏季脱毛'],
-                    ['id' => 6, 'name' => '祛痘专区'],
-                    ['id' => 7, 'name' => '修复专区'],
-                    ['id' => 8, 'name' => '头皮护理'],
-                    ['id' => 9, 'name' => '飞顿仪器专区'],
-                    ['id' => 10, 'name' => '医学护肤']
-                ]
-            ]);
-        });
+    Route::prefix('category')->group(function () {
+        Route::get('/pets/{id}', [Wechat\PetController::class, 'category']);
+        Route::get('/goods', [Wechat\GoodController::class, 'category']);
     });
 });
 
 Route::post('/registerLogin', [Wechat\UserController::class, 'registerLogin']);
 
 Route::apiResource('/pets', Wechat\PetController::class);
-
-Route::get('/goods', function (Request $request) {
-    $payload = [
-        ['id' => 1, 'cover' => 'https://public-storages-bucket.oss-rg-china-mainland.aliyuncs.com/wangxingren/2a8405c7-eef9-4c89-90c5-e8132b30e386.jpg', 'name' => '猫咪洗护' . $request->input('categoryId'), 'price' => '100.00'],
-        ['id' => 2, 'cover' => 'https://public-storages-bucket.oss-rg-china-mainland.aliyuncs.com/wangxingren/55cd2327-c148-42ac-b315-ebf4cfa8c6b1.jpg', 'name' => '猫咪精致洗护' . $request->input('categoryId'), 'price' => '180.00'],
-        ['id' => 3, 'cover' => 'https://public-storages-bucket.oss-rg-china-mainland.aliyuncs.com/wangxingren/728f223d-4603-49dc-8b0f-6674087280a0.jpg', 'name' => '小型犬洗护' . $request->input('categoryId'), 'price' => '50.00'],
-        ['id' => 4, 'cover' => 'https://public-storages-bucket.oss-rg-china-mainland.aliyuncs.com/wangxingren/10f11160-f72b-4d4f-8a9a-4c66038fe7a4.jpg', 'name' => '小型犬精致洗护' . $request->input('categoryId'), 'price' => '100.00'],
-        ['id' => 5, 'cover' => 'https://public-storages-bucket.oss-rg-china-mainland.aliyuncs.com/wangxingren/3a8d2155-27ca-4c0d-8272-f85234e60d40.jpg', 'name' => '大型犬洗护' . $request->input('categoryId'), 'price' => '100.00']
-    ];
-
-    return response()->json([
-        'code' => 200,
-        'message' => __('http_response.success'),
-        'payload' => $payload
-    ]);
-});
-
+Route::resource('/goods', Wechat\GoodController::class)->only(['index', 'show']);
 
 Route::prefix('/upload')->group(function () {
     Route::post('petAvatar', [Wechat\PetController::class, 'upload']);

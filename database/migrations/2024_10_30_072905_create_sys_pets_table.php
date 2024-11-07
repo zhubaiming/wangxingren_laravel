@@ -36,12 +36,13 @@ return new class extends Migration {
             $table->id();
             $table->unsignedTinyInteger('version')->nullable(false)->default(0)->comment('');
             $table->unsignedTinyInteger('type')->nullable(false)->default(0)->comment('');
-            $table->unsignedTinyInteger('sizeType')->nullable(true)->comment('');
+            $table->unsignedTinyInteger('size_type')->nullable(true)->comment('');
             $table->string('name')->nullable(false)->comment('');
             $table->string('code')->nullable(false)->comment('');
+            $table->string('alpha')->nullable(false)->comment('');
             $table->boolean('reference')->nullable(false)->default(true)->comment('');
-            $table->string('createdBy')->nullable(false)->default('sys')->comment('');
-            $table->string('updatedBy')->nullable(true)->comment('');
+            $table->string('created_by')->nullable(false)->default('sys')->comment('');
+            $table->string('updated_by')->nullable(true)->comment('');
             $table->longText('picture')->nullable(true)->comment('');
             $table->longText('remark')->nullable(true)->comment('备注信息');
 
@@ -50,7 +51,7 @@ return new class extends Migration {
 
             $table->index(['version']);
             $table->index(['type']);
-            $table->index(['sizeType']);
+            $table->index(['size_type']);
         });
     }
 

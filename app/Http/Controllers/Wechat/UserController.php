@@ -44,14 +44,14 @@ class UserController extends Controller
 
             $code_session = $service->code2session($validatedData['code']);
 
-            $token = Auth::guard('wechat')->silentLogin(array_merge_recursive($code_session, $validatedData));
+            list($token, $isRegister) = Auth::guard('wechat')->silentLogin(array_merge_recursive($code_session, $validatedData));
 
 //            return response()->json([
 //                'status' => '0',
 //                'message' => 'success',
 //                'data' => ['token' => $token]
 //            ]);
-            return $this->success(data: ['token' => $token]);
+            return $this->success(data: ['token' => $token, 'isRegister' => $isRegister]);
         }, function ($exception) {
             dd($exception);
         }, false);
@@ -78,11 +78,12 @@ class UserController extends Controller
                 ], 500);
             }
 
-            return response()->json([
-                'status' => '0',
-                'message' => 'success',
-                'data' => ['token' => $token]
-            ]);
+//            return response()->json([
+//                'status' => '0',
+//                'message' => 'success',
+//                'data' => ['token' => $token]
+//            ]);
+            return $this->success(data: ['token' => $token]);
         }, function ($exception) {
             dd($exception);
         }, false);

@@ -24,11 +24,12 @@ class SysPetSeeder extends Seeder
             DB::table('sys_pets')->insert([
                 'version' => $item['version'],
                 'type' => $item['type'],
-                'sizeType' => $item['dogSizeType'],
+                'size_type' => $item['dogSizeType'],
                 'name' => $item['name'],
                 'code' => $item['code'],
+                'alpha' => mb_strtoupper(substr($item['code'], 0, 1)),
                 'reference' => $item['reference'],
-                'createdBy' => 'sys',
+                'created_by' => 'sys',
                 'picture' => $item['picture'],
                 'remark' => $item['remark']
             ]);

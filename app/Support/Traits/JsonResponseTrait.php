@@ -130,14 +130,14 @@ trait JsonResponseTrait
 ////    {
 ////        return $this->success($message, code: $code);
 ////    }
-//
-//    public function noData(string $error_code = '0', string $message = 'success')
-//    {
-//        return response()->json([
-//            'code' => $error_code,
-//            'message' => __('http_response.' . $message)
-//        ]);
-//    }
+
+    public function noData(int $error_code = 200, string $message = 'success')
+    {
+        return response()->json([
+            'code' => $error_code,
+            'message' => __('http_response.' . $message)
+        ]);
+    }
 
     public function success(int $error_code = 200, string $message = 'success', array $data = [])
     {

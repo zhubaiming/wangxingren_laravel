@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use App\Services\Wechat\WechatAppUserGuard;
-use App\Services\WechatAppUserService;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Events\QueryExecuted;
@@ -34,12 +33,6 @@ class AppServiceProvider extends ServiceProvider
             // 返回 Illuminate\Contracts\Auth\Guard 的实例
 
             return new WechatAppUserGuard($app, Auth::createUserProvider($config['provider']));
-        });
-        //
-        Auth::provider('wechat', function (Application $app, array $config) {
-            // 返回 Illuminate\Contracts\Auth\UserProvider 的实例
-
-            return new WechatAppUserService($app->make('mongo.connection'));
         });
         // Eloquent
         // 在非生产环境中禁用懒加载

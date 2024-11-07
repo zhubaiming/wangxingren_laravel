@@ -47,6 +47,11 @@ class AuthenticateWechat
 
     private function registerMid($request, $next)
     {
+        if (!$request->hasHeader('appId') || $request->header('appId') !== config('wechat.miniprogram.app_id')) {
+            dd('不让请求');
+        }
+
+
         if (!$this->auth->guard('wechat')->checkSilentUser()) {
             return response()->json([
                 'status' => '-1',
@@ -68,9 +73,9 @@ class AuthenticateWechat
     {
         if (is_null($this->auth->guard('wechat')->user())) {
             return response()->json([
-                'status' => '-1',
+                'code' => 208,
                 'message' => '登录已过期，请重新登录'
-            ], 401);
+            ], 200);
         }
 
         if (!$this->auth->guard('wechat')->refreshTokenExpiredTime()) {
