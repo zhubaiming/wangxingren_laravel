@@ -4,27 +4,10 @@ namespace App\Http\Requests;
 
 use App\Enums\GenderEnum;
 use App\Enums\PetCategory;
-use App\Exceptions\WechatApiException;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Validator;
 
-class UserPetRequest extends FormRequest
+class UserPetRequest extends CommentsRequest
 {
-    protected $stopOnFirstFailure = true;
-
-    /**
-     * Determine if the user is authorized to make this request.
-     */
-    public function authorize(): bool
-    {
-//        if (app()->isLocal()) {
-//            return true;
-//        }
-//
-//        return false;
-        return true;
-    }
 
     /**
      * Get the validation rules that apply to the request.
@@ -33,6 +16,17 @@ class UserPetRequest extends FormRequest
      */
     public function rules(): array
     {
+//        switch ($this->method()) {
+//            case 'GET':
+//            case 'POST':
+//            case 'PUT':
+//            case 'PATCH':
+//            case 'DELETE':
+//            default:
+//                return [];
+//        }
+
+
 //        return [
 //            'name' => ['bail', 'required'],
 //            'type' => ['bail', Rule::enum(PetTypeEnum::class), 'required'],
@@ -80,10 +74,10 @@ class UserPetRequest extends FormRequest
         return match ($action) {
             'index' => [],
             'store' => [
-                'variety_id' => ['required'],
-                'variety_name' => ['required'],
+                'breed_id' => ['required'],
+                'breed_title' => ['required'],
                 'name' => ['required'],
-                'category' => [Rule::enum(PetCategory::class), 'required'],
+                'breed_type' => [Rule::enum(PetCategory::class), 'required'],
                 'gender' => [Rule::enum(GenderEnum::class), 'required'],
                 'weight' => ['filled', 'numeric'],
                 'birth' => ['required', 'string'],
@@ -101,10 +95,10 @@ class UserPetRequest extends FormRequest
             ],
             'show' => [],
             'update' => [
-                'variety_id' => ['required'],
-                'variety_name' => ['required'],
+                'breed_id' => ['required'],
+                'breed_title' => ['required'],
                 'name' => ['required'],
-                'category' => [Rule::enum(PetCategory::class), 'required'],
+                'breed_type' => [Rule::enum(PetCategory::class), 'required'],
                 'gender' => [Rule::enum(GenderEnum::class), 'required'],
                 'weight' => ['filled', 'numeric'],
                 'birth' => ['required', 'string'],

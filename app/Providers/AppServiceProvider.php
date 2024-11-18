@@ -6,6 +6,7 @@ use App\Services\Wechat\WechatAppUserGuard;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -36,7 +37,7 @@ class AppServiceProvider extends ServiceProvider
         });
         // Eloquent
         // 在非生产环境中禁用懒加载
-        Model::preventLazyLoading(!$this->app->isProduction());
+//        Model::preventLazyLoading(!$this->app->isProduction());
         // Http客户端
         // 全局选项
         Http::globalOptions([
@@ -51,5 +52,12 @@ class AppServiceProvider extends ServiceProvider
         DB::listen(function (QueryExecuted $query) {
             Log::channel('sql_daily')->info(Str::replaceArray('?', $query->bindings, $query->sql));
         });
+        // 去除 API资源化 的数据包装(即: 响应资源转换为 JSON 时，最外层资源包装的 data)
+        JsonResource::withoutWrapping();
+        // 启用全局返回 JSON数据 时，不再转义中文字符
+        // 全局设置 JSON_UNESCAPED_UNICODE 选项
+//        response()->macro('json', function ($data = [], $status = 200, array $headers = [], $options = 0) {
+//            return response()->json($data, $status, $headers, JSON_UNESCAPED_UNICODE);
+//        });
     }
 }

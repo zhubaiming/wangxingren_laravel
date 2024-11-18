@@ -76,73 +76,54 @@ Route::withoutMiddleware(['auth.wechat'])->group(function () {
         ]);
     });
 
-    Route::prefix('category')->group(function () {
-        Route::get('/pets/{id}', [Wechat\PetController::class, 'category']);
-        Route::get('/goods', [Wechat\GoodController::class, 'category']);
-    });
 });
 
 Route::post('/registerLogin', [Wechat\UserController::class, 'registerLogin']);
 
-Route::apiResource('/pets', Wechat\PetController::class);
-Route::resource('/goods', Wechat\GoodController::class)->only(['index', 'show']);
+/**
+ * 宠物
+ */
+Route::get('/pet_category/{id}', [Wechat\UserPetController::class, 'category'])->where(['id' => '^[1-9]\d*']);
+Route::apiResource('/pet', Wechat\UserPetController::class);
 
-Route::prefix('/upload')->group(function () {
-    Route::post('petAvatar', [Wechat\PetController::class, 'upload']);
+/**
+ * 商品
+ */
+Route::prefix('goods_category')->group(function () {
+    Route::get('/{parent_id?}', [Wechat\GoodCategoryController::class, 'index'])->where(['parent_id' => '^[1-9]\d*'])->withoutMiddleware(['auth.wechat']); // 如果传递了 parent_id，则从 parent_id 开始获取分类树；否则从顶级开始获取分类树
+    Route::apiResource('/{cid}/goods', Wechat\GoodsSpuController::class)->only(['index', 'show'])->where(['cid' => '^[1-9]\d*', 'good' => '^[1-9]\d*'])->withoutMiddleware(['auth.wechat']);  // 列出某个指定分类的所有商品
+    Route::get('/{cid}/goods/{gid}/sku', [Wechat\GoodsSkuController::class, 'show'])->where(['cid' => '^[1-9]\d*', 'gid' => '^[1-9]\d*']);  // 查询具体sku
+    Route::get('/{cid}/goods/{gid}/service_times', [Wechat\GoodsServieTimeController::class, 'index'])->where(['cid' => '^[1-9]\d*', 'gid' => '^[1-9]\d*']);  // 查询具体sku
 });
 
+/**
+ * 服务/收货 地址
+ */
+Route::apiResource('/address', Wechat\UserAddressController::class);
 
-//Route::post('/login', [Wechat\UserController::class, 'login'])->withoutMiddleware(['auth.wechat']);
-//
-//
+/**
+ * 优惠卷
+ */
+Route::apiResource('/coupon', Wechat\UserCouponController::class);
+
+/**
+ * 订单
+ */
+Route::apiResource('/order', Wechat\UserOrderController::class);
+
+
+/**
+ * 上传
+ */
+Route::prefix('/upload')->group(function () {
+    Route::post('petAvatar', [Wechat\UserPetController::class, 'upload']);
+});
+
+/**
+ * 支付
+ */
 //Route::post('/payment', function (\App\Services\Wechat\MiniProgramPaymentService $service) {
 //    return response()->json($service->requestPayment('a', 1, 'b'));
 //})->withoutMiddleware(['auth.wechat']);
 //
 //Route::post('/getRealtimePhoneNumber', [Wechat\UserController::class, 'getRealtimePhoneNumber']);
-
-/*
- *
- * index-index
-    "van-cell": "@vant/weapp/cell/index",
-    "van-cell-group": "@vant/weapp/cell-group/index",
-    "van-row": "@vant/weapp/row/index",
-    "van-col": "@vant/weapp/col/index",
-    "van-button": "@vant/weapp/button/index",
-    "van-action-sheet": "@vant/weapp/action-sheet/index",
-    "van-grid": "@vant/weapp/grid/index",
-    "van-grid-item": "@vant/weapp/grid-item/index",
-    "van-image": "@vant/weapp/image/index"
- */
-
-/*
- * petPenel-index
- * "van-image": "@vant/weapp/image/index",
-    "van-tag": "@vant/weapp/tag/index",
-    "van-divider": "@vant/weapp/divider/index",
-    "van-grid": "@vant/weapp/grid/index",
-    "van-grid-item": "@vant/weapp/grid-item/index"
- */
-
-/*
- * my-index-index
- * "van-row": "@vant/weapp/row/index",
-    "van-col": "@vant/weapp/col/index",
-    "van-button": "@vant/weapp/button/index",
-    "van-divider": "@vant/weapp/divider/index",
-    "van-grid": "@vant/weapp/grid/index",
-    "van-grid-item": "@vant/weapp/grid-item/index"
- */
-
-/*
- * my-pet-list
- * "van-swipe-cell": "@vant/weapp/swipe-cell/index",
-    "pet-panel": "/components/PetPanel/index",
-    "van-action-sheet": "@vant/weapp/action-sheet/index",
-    "van-cell-group": "@vant/weapp/cell-group/index",
-    "van-field": "@vant/weapp/field/index",
-    "van-radio": "@vant/weapp/radio/index",
-    "van-radio-group": "@vant/weapp/radio-group/index",
-    "van-uploader": "@vant/weapp/uploader/index",
-    "van-button": "@vant/weapp/button/index"
- */

@@ -124,14 +124,14 @@ class MiniProgramPaymentService
      * @param string $openid
      * @return array
      */
-    public function requestPayment(string $out_trade_no, int $total, string $openid)
+    public function requestPayment(string $out_trade_no, int $total, string $openid,string $description = '')
     {
         try {
             $http_response = $this->instance->chain($this->url_path . 'jsapi')
                 ->post(['json' => [
                     'appid' => config('wechat.miniprogram.app_id'), // 公众号ID
                     'mchid' => $this->merchantId, // 直连商户号
-                    'description' => '汪星人宠物服务-服务平台-支付测试', // 商品描述
+                    'description' => $description, // 商品描述
                     'out_trade_no' => app()->isLocal() ? 'test_payment_' . rand(100000, 999999) : $out_trade_no, // 商户系统内部订单号，只能是数字、大小写字母_-*且在同一个商户号下唯一
 //                'time_expire' => '', // 订单失效时间(非必填)，格式为yyyy-MM-DDTHH:mm:ss+TIMEZONE，yyyy-MM-DD表示年月日，T出现在字符串中，表示time元素的开头，HH:mm:ss表示时分秒，TIMEZONE表示时区（+08:00表示东八区时间，领先UTC8小时，即北京时间）。例如：2015-05-20T13:29:35+08:00表示，北京时间2015年5月20日13点29分35秒
 //                'attach' => 'attach_test_123456789', // 附加数据(非必填)，在查询API和支付通知中原样返回，可作为自定义参数使用，实际情况下只有支付完成状态才会返回该字段
@@ -309,7 +309,7 @@ class MiniProgramPaymentService
      * @param string $openid
      * @return array
      */
-    public function requestPayment(string $out_trade_no, int $total, string $openid)
+    public function requestPayment1(string $out_trade_no, int $total, string $openid)
     {
         try {
             $http_response = $this->instance->chain('v3/refund/domestic/refunds')
@@ -390,7 +390,7 @@ class MiniProgramPaymentService
      * @param Request $request
      * @return bool
      */
-    public function decryptNotify(Request $request)
+    public function decryptNotify1(Request $request)
     {
         $wechatpay_header_signature = $request->header('wechatpay-signature');         // 请求头部 - Wechatpay-Signature(请根据实际情况获取)
         $wechatpay_header_nonce = $request->header('wechatpay-nonce');                 // 请求头部 - Wechatpay-Nonce(请根据实际情况获取)

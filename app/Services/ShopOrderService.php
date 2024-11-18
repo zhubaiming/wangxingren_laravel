@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-class ShopOrderService
+class ShopOrderService extends CommentsService
 {
 
 }

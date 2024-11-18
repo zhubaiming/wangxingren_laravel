@@ -2,11 +2,11 @@
 
 namespace App\Services;
 
-use App\Services\BaseService;
+use App\Services\CommentsService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
-class SystemPetCategory extends BaseService
+class SystemPetCategory extends CommentsService
 {
     public function fork()
     {

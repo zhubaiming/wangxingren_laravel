@@ -34,7 +34,7 @@ function calculateAge($birth, $format)
  * @param array $arr
  * @return array
  */
-function arrHumpToLine(array $arr)
+function arrHumpToLine(array $arr): array
 {
     /**
      * $converted = Str::snake('fooBar');
@@ -56,7 +56,7 @@ function arrHumpToLine(array $arr)
  * @param array $arr
  * @return array
  */
-function arrLineToHump(array $arr)
+function arrLineToHump(array $arr): array
 {
     /**
      * $converted = Str::camel('foo_bar');
@@ -74,4 +74,116 @@ function arrLineToHump(array $arr)
     }
 
     return array_combine($keys, $arr);
+}
+
+function applyFloatToIntegerModifier(float|string $value)
+{
+    return intval(bcmul($value, '100', 0));
+}
+
+function applyIntegerToFloatModifier(int $value)
+{
+    return bcdiv($value, '100', 2);
+}
+
+function generateLuhnCheckDigit($number)
+{
+    $number = strrev($number);  // 将数字反转，便于从右至左处理
+    $sum = 0;
+
+    // 遍历数字的每一位
+    for ($i = 0; $i < strlen($number); $i++) {
+        $digit = (int)$number[$i];  // 当前数字
+
+        // 如果是偶数位（从右侧开始计数），乘以 2
+        if ($i % 2 == 1) {
+            $digit *= 2;
+            // 如果结果大于 9，需要对结果的各位数字求和
+            if ($digit > 9) {
+                $digit -= 9;  // 即：9 + (digit - 10)
+            }
+        }
+
+        $sum += $digit;  // 将当前数字加到总和
+    }
+
+    // 计算校验位
+    $checkDigit = (10 - ($sum % 10)) % 10;
+    return $checkDigit;
+}
+
+function luhnCheck($number)
+{
+    $number = strrev($number);  // 将数字反转，便于从右至左处理
+    $sum = 0;
+
+    // 遍历数字的每一位
+    for ($i = 0; $i < strlen($number); $i++) {
+        $digit = (int)$number[$i];  // 当前数字
+
+        // 如果是偶数位（从右侧开始计数），乘以 2
+        if ($i % 2 == 1) {
+            $digit *= 2;
+            // 如果结果大于 9，需要对结果的各位数字求和
+            if ($digit > 9) {
+                $digit -= 9;  // 即：9 + (digit - 10)
+            }
+        }
+
+        $sum += $digit;  // 将当前数字加到总和
+    }
+
+    // 如果总和能被 10 整除，则验证通过
+    return $sum % 10 == 0;
+}
+
+// --------------------------------------------------  以下为测试专用函数  --------------------------------------------------
+/**
+ * 随机生成8:00-22:00中的几个时间段
+ * @param $numSlots
+ * @return array
+ * @throws DateMalformedIntervalStringException
+ */
+function generateRandomTimeSlots($numSlots)
+{
+    $start = new DateTime('08:00');
+    $end = new DateTime('22:00');
+    $interval = new DateInterval('PT30M'); // 30 分钟间隔
+    $allSlots = [];
+
+    // 生成所有可能的 30 分钟间隔的时间段
+    while ($start < $end) {
+        $next = clone $start;
+        $next->add($interval);
+        $allSlots[] = [$start->format('H:i'), $next->format('H:i')];
+        $start = $next;
+    }
+
+    $selectedSlots = [];
+
+    // 确保第一个时间段从 08:00 开始
+    $initialLength = rand(1, min(6, count($allSlots) - $numSlots)); // 随机选择第一个时间段长度
+    $firstEndIndex = $initialLength - 1;
+    $selectedSlots[] = $allSlots[0][0] . '-' . $allSlots[$firstEndIndex][1];
+
+    $i = $firstEndIndex + 1;
+
+    // 生成中间的随机时间段
+    while ($i < count($allSlots) && count($selectedSlots) < $numSlots - 1) {
+        $remainingSlots = count($allSlots) - $i - ($numSlots - count($selectedSlots) - 1);
+        $slotLength = rand(1, min(6, $remainingSlots)); // 确保不会超出数组范围
+        $endIndex = $i + $slotLength - 1;
+
+        $startTime = $allSlots[$i][0];
+        $endTime = $allSlots[$endIndex][1];
+
+        $selectedSlots[] = "$startTime-$endTime";
+        $i = $endIndex + 1;
+    }
+
+    // 确保最后一个时间段以 22:00 结束
+    $lastStartIndex = $i;
+    $selectedSlots[] = $allSlots[$lastStartIndex][0] . '-' . $allSlots[count($allSlots) - 1][1];
+
+    return $selectedSlots;
 }

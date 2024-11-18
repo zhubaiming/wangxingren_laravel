@@ -2,8 +2,12 @@
 
 namespace App\Support\Traits;
 
+use Illuminate\Support\Facades\Response;
+
 trait JsonResponseTrait
 {
+    protected $statusCode = 200;
+
     protected $response_headers = [
         'Content-Type' => 'application/json'
     ];
@@ -131,20 +135,84 @@ trait JsonResponseTrait
 ////        return $this->success($message, code: $code);
 ////    }
 
-    public function noData(int $error_code = 200, string $message = 'success')
+    public function getStatusCode()
     {
-        return response()->json([
-            'code' => $error_code,
-            'message' => __('http_response.' . $message)
+        return $this->statusCode;
+    }
+
+    public function setStatusCode($statusCode, $httpCode = null)
+    {
+        $httpCode = $httpCode ?? $statusCode;
+        $this->statusCode = $httpCode;
+        return $this;
+    }
+
+    public function respond($data, $header = [])
+    {
+        return Response::json($data, $this->getStatusCode(), $header, JSON_UNESCAPED_UNICODE);
+    }
+
+    public function status($status, array $data, $code = null)
+    {
+        if ($code) {
+            $this->setStatusCode($code);
+        }
+
+        $status = [
+            'status' => $status,
+            'code' => $this->statusCode
+        ];
+
+        $data = array_merge($status, $data);
+        return $this->respond($data);
+    }
+
+    public function failed($message, $code = 400, $status = 'error')
+    {
+        return $this->setStatusCode($code)->message($message, $status);
+    }
+
+    public function message($message, $status = 'success')
+    {
+        return $this->status($status, [
+            'message' => $message
         ]);
     }
 
-    public function success(int $error_code = 200, string $message = 'success', array $data = [])
+    public function internalError($message = 'Internal Error!')
     {
-        return response()->json([
-            'code' => $error_code,
-            'message' => __('http_response.' . $message),
-            'payload' => $data
-        ]);
+        return $this->failed($message, 500);
     }
+
+    public function created($message = 'created')
+    {
+        return $this->setStatusCode(201)->message($message);
+    }
+
+    public function success($payload, $status = 'success')
+    {
+        return $this->status($status, compact('payload'));
+    }
+
+    public function notFound($message = 'Not Found!')
+    {
+        return $this->failed($message, 404);
+    }
+
+//    public function noData(int $error_code = 200, string $message = 'success')
+//    {
+//        return response()->json([
+//            'code' => $error_code,
+//            'message' => __('http_response.' . $message)
+//        ]);
+//    }
+//
+//    public function success(int $error_code = 200, string $message = 'success', array $data = [])
+//    {
+//        return response()->json([
+//            'code' => $error_code,
+//            'message' => __('http_response.' . $message),
+//            'payload' => $data
+//        ]);
+//    }
 }

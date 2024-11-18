@@ -7,15 +7,13 @@ use App\Enums\PetCategory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
+use function Webmozart\Assert\Tests\StaticAnalysis\null;
 
-class Pet extends Model
+class Pet extends CommentsModel
 {
-    use SoftDeletes, HasFactory;
-
     protected $table = 'user_pets';
 
     protected $attributes = [
@@ -23,11 +21,7 @@ class Pet extends Model
         'remark' => null
     ];
 
-    protected $guarded = [
-        "deleted_at"
-    ];
-
-    protected $appends = ['gender_conv', 'category_conv', 'weight_type_conv'];
+    protected $appends = ['gender_conv', 'breed_type_conv', 'weight_type_conv'];
 
     // ==============================  属性类型转换  ==============================
     protected function casts(): array
@@ -62,18 +56,41 @@ class Pet extends Model
         );
     }
 
-    protected function categoryConv(): Attribute
+    protected function breedTypeConv(): Attribute
     {
         return Attribute::make(
-            get: fn(mixed $value, array $attributes) => PetCategory::from($attributes['category'])->name('animal')
+            get: fn(mixed $value, array $attributes) => PetCategory::from($attributes['breed_type'])->name('animal')
         );
     }
+
+//    protected function weight(): Attribute
+//    {
+//        return Attribute::make(
+//            get: fn(int|null $value) => is_null($value) ? $value : floatval(bcdiv($value, '100', 2)),
+//            set: fn(float|null $value) => is_null($value) ? $value : intval(bcmul($value, '100', 0))
+//        );
+//    }
+
 
     protected function weight(): Attribute
     {
         return Attribute::make(
             get: fn(int|null $value) => is_null($value) ? $value : floatval(bcdiv($value, '100', 2)),
-            set: fn(float|null $value) => is_null($value) ? $value : intval(bcmul($value, '100', 0))
+            set: fn(float|null $value) => is_null($value) ? $value : intval(bcmul($value, '100', 0)),
+        );
+    }
+
+    protected function weightId(): Attribute
+    {
+        return Attribute::make(
+            set: fn(float|null $value, array $attributes) => is_null($attributes['weight']) ? null : SysPetBreedWeight::where(['breed_id' => $attributes['breed_id'], ['min', '<=', $attributes['weight']], ['max', '>', $attributes['weight']]])->value('id')
+        );
+    }
+
+    protected function age(): Attribute
+    {
+        return Attribute::make(
+            set: fn(string $value, array $attributes) => calculateAge($attributes['birth'], 'Y-m'),
         );
     }
 

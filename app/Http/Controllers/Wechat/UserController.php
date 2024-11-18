@@ -9,6 +9,11 @@ use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
+    public function __construct(MiniAppServerSideService $service)
+    {
+        $this->service = $service;
+    }
+
 //    public function login(Request $request, MiniAppServerSideService $service)
 //    {
 //        try {
@@ -33,41 +38,36 @@ class UserController extends Controller
 //        return response(['status' => 0, 'message' => 'ok', 'data' => $token])->cookie('wxr_session_id', $token);
 //    }
 
-    public function silentLogin(Request $request, MiniAppServerSideService $service)
+    public function silentLogin(Request $request)
     {
-        return rescue(function () use ($request, $service) {
+        return rescue(function () use ($request) {
             $validatedData = $request->validate([
                 'code' => ['bail', 'required', 'string'],
                 'device' => ['bail', 'required'],
                 'app_base' => ['bail', 'required'],
             ]);
 
-            $code_session = $service->code2session($validatedData['code']);
+            $code_session = $this->service->code2session($validatedData['code']);
 
             list($token, $isRegister) = Auth::guard('wechat')->silentLogin(array_merge_recursive($code_session, $validatedData));
 
-//            return response()->json([
-//                'status' => '0',
-//                'message' => 'success',
-//                'data' => ['token' => $token]
-//            ]);
-            return $this->success(data: ['token' => $token, 'isRegister' => $isRegister]);
+            return $this->success(['token' => $token, 'isRegister' => $isRegister]);
         }, function ($exception) {
             dd($exception);
         }, false);
     }
 
 
-    public function registerLogin(Request $request, MiniAppServerSideService $service)
+    public function registerLogin(Request $request)
     {
-        return rescue(function () use ($request, $service) {
+        return rescue(function () use ($request) {
             $validatedData = $request->validate([
                 'code' => ['bail', 'required', 'alpha_num']
             ]);
 
             [$app_type, $appid, $wechat_openid] = Auth::guard('wechat')->decryptSilentToken();
 
-            $phone_info = $service->getPhoneNumber($validatedData['code'], $wechat_openid);
+            $phone_info = $this->service->getPhoneNumber($validatedData['code'], $wechat_openid);
 
             $token = Auth::guard('wechat')->attempt($phone_info);
 
@@ -83,7 +83,7 @@ class UserController extends Controller
 //                'message' => 'success',
 //                'data' => ['token' => $token]
 //            ]);
-            return $this->success(data: ['token' => $token]);
+            return $this->success(['token' => $token]);
         }, function ($exception) {
             dd($exception);
         }, false);

@@ -2,10 +2,9 @@
 
 namespace App\Services;
 
-use App\Services\BaseService;
 use Illuminate\Support\Facades\Storage;
 
-class UploadFileService extends BaseService
+class UploadFileService extends CommentsService
 {
     public function petAvatar(\SplFileInfo $fileInfo)
     {
