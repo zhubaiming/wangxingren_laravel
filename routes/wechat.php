@@ -78,7 +78,11 @@ Route::withoutMiddleware(['auth.wechat'])->group(function () {
 
 });
 
+/**
+ * 用户
+ */
 Route::post('/registerLogin', [Wechat\UserController::class, 'registerLogin']);
+Route::get('/userInfo', [Wechat\UserController::class, 'info']);
 
 /**
  * 宠物

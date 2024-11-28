@@ -2,22 +2,16 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class ClientUserLoginInfo extends Model
+class ClientUserLoginInfo extends CommentsModel
 {
-    use HasFactory;
-
     protected $table = 'client_user_login_infos';
 
     protected $attributes = [
         'is_register' => false
     ];
-
-    protected $guarded = [];
 
     protected $with = ['deviceInfo'];
 
@@ -27,7 +21,7 @@ class ClientUserLoginInfo extends Model
         return $this->hasMany(ClientUserDeviceInfo::class, 'user_login_info_id', 'id');
     }
 
-    public function userInfo(): BelongsTo
+    public function user(): BelongsTo
     {
         return $this->belongsTo(ClientUser::class, 'user_id', 'id');
     }

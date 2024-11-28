@@ -128,7 +128,7 @@ class WechatAppUserGuard
 
             $this->createLoginDeviceByInfo($credentials);
         } else {
-            $user_info = $this->login_info->userInfo();
+            $user_info = $this->login_info->user();
             if (0 != $user_info->count() && !is_null($purePhoneNumber = $user_info->sole(['phone_number'])->phone_number)) {
                 $this->token = $this->attempt(['purePhoneNumber' => $purePhoneNumber], $this->token);
                 $isRegister = true;
@@ -228,6 +228,16 @@ class WechatAppUserGuard
                 'font_size_setting' => $credentials['app_base']['fontSizeSetting']
             ]
         ]);
+    }
+
+    private function createUserInfo($credentials)
+    {
+//        dd($this->login_info);
+//        $this->login_info->userInfo()->create([
+//            'user_id' => $this->login_info->user_id,
+//            'level' => 1,
+//            'integral' => 0
+//        ]);
     }
 
     /**

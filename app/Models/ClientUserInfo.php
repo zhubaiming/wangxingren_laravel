@@ -2,23 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class ClientUserInfo extends Model
+class ClientUserInfo extends CommentsModel
 {
-    use HasFactory;
-
-    protected $table = 'wechat_user_infos';
-
-    protected $attributes = [
-        'is_del' => false
-    ];
-
-    protected $guarded = [
-        "is_del"
-    ];
+    protected $table = 'client_user_info';
 
     /**
      * 所有需要被触摸的关系名

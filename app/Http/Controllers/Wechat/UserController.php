@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Wechat;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Wechat\UserInfoResource;
 use App\Services\Wechat\MiniAppServerSideService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -49,7 +50,7 @@ class UserController extends Controller
 
             $code_session = $this->service->code2session($validatedData['code']);
 
-            list($token, $isRegister) = Auth::guard('wechat')->silentLogin(array_merge_recursive($code_session, $validatedData));
+            [$token, $isRegister] = Auth::guard('wechat')->silentLogin(array_merge_recursive($code_session, $validatedData));
 
             return $this->success(['token' => $token, 'isRegister' => $isRegister]);
         }, function ($exception) {
@@ -87,5 +88,14 @@ class UserController extends Controller
         }, function ($exception) {
             dd($exception);
         }, false);
+    }
+
+    public function info()
+    {
+        $payload = Auth::guard('wechat')->user();
+
+//        dd($payload);
+
+        return $this->success((new UserInfoResource($payload)));
     }
 }

@@ -204,7 +204,6 @@ Route::get('/spu/{id}/sku', function ($id) {
     $sku_ids = array_column($skus, 'id');
 
 
-
     return response()->json($sku_ids);
 });
 
@@ -212,3 +211,116 @@ Route::any('/timeSub', function () {
 //    dd(strtotime('2024-11-14 13:19:30'), strtotime(date('Y-m-d H:i:s')));
     dd(bcsub(strtotime(date('Y-m-d H:i:s')), strtotime('2024-11-14 13:19:30'), 0));
 });
+
+Route::post('/ssqjCode', function (Request $request) {
+    list('code' => $code, 'postcode' => $postcode, 'value' => $value) = $request->post();
+
+    /**
+     * [ // routes/test.php:216
+     * "code" => array:4 [
+     * 0 => "110000"
+     * 1 => "110100"
+     * 2 => "110101"
+     * 3 => "110101001"
+     * ]
+     * "postcode" => "100010"
+     * "value" => array:4 [
+     * 0 => "北京市"
+     * 1 => "北京市"
+     * 2 => "东城区"
+     * 3 => "东华门街道"
+     * ]
+     * ]
+     */
+
+    $province_id = \Illuminate\Support\Facades\DB::connection('mysql_demo')->table('region')->where(['title' => $value[0], 'code' => $code[0], 'level' => 1, 'parent_id' => 0])->value('id');
+    if (is_null($province_id)) {
+        $province_id = \Illuminate\Support\Facades\DB::connection('mysql_demo')->table('region')->insertGetId(
+            ['title' => $value[0], 'level' => 1, 'parent_id' => 0, 'code' => $code[0]]
+        );
+    }
+
+    $city_id = \Illuminate\Support\Facades\DB::connection('mysql_demo')->table('region')->where(['title' => $value[1], 'code' => $code[1], 'level' => 2, 'parent_id' => $province_id])->value('id');
+    if (is_null($city_id)) {
+        $city_id = \Illuminate\Support\Facades\DB::connection('mysql_demo')->table('region')->insertGetId(
+            ['title' => $value[1], 'level' => 2, 'parent_id' => $province_id, 'code' => $code[1]]
+        );
+    }
+
+    $district_id = \Illuminate\Support\Facades\DB::connection('mysql_demo')->table('region')->where(['title' => $value[2], 'code' => $code[2], 'level' => 3, 'parent_id' => $city_id])->value('id');
+    if (is_null($district_id)) {
+        $district_id = \Illuminate\Support\Facades\DB::connection('mysql_demo')->table('region')->insertGetId(
+            ['title' => $value[2], 'level' => 3, 'parent_id' => $city_id, 'code' => $code[2]]
+        );
+    }
+
+    $street = \Illuminate\Support\Facades\DB::connection('mysql_demo')->table('region')->where(['title' => $value[3], 'code' => $code[3], 'level' => 4, 'parent_id' => $district_id])->value('id');
+    if (is_null($street)) {
+        \Illuminate\Support\Facades\DB::connection('mysql_demo')->table('region')->insert(
+            ['title' => $value[3], 'level' => 4, 'parent_id' => $district_id, 'code' => $code[3], 'post_code' => $postcode]
+        );
+    }
+
+    return response()->json([
+        'code' => 200,
+        'message' => 'success'
+    ]);
+});
+
+Route::get('/getNetImage', function () {
+    try {
+//        dd(1);
+        $results = generateAllCombinations();
+
+        dd($results);
+    } catch (Exception $e) {
+        dd("Error: " . $e->getMessage());
+    }
+});
+
+function generateAllCombinations()
+{
+    $alphabet = array_merge(range('a', 'z'), range('A', 'Z')); // 52 字母表
+    $base = count($alphabet); // 进制为 52
+    $length = 10; // 字符串长度
+    $start = str_repeat($alphabet[0], $length); // 初始字符串：aaaaaaaaaa
+    $end = str_repeat($alphabet[$base - 1], $length); // 结束字符串：ZZZZZZZZZZ
+
+    $current = $start; // 当前字符串
+    $results = [];
+
+    do {
+        dump($current);
+//        $results[] = $current; // 将当前字符串存入结果集
+        $current = incrementString($current, $alphabet, $base); // 递增字符串
+    } while ($current !== $end);
+
+//    $results[] = $end; // 加上最后一个字符串
+    return $results;
+}
+
+function incrementString($string, $alphabet, $base)
+{
+    $chars = str_split($string); // 将字符串分解为数组
+    $length = count($chars);
+    $carry = true;
+
+    for ($i = $length - 1; $i >= 0; $i--) {
+        if ($carry) {
+            $index = array_search($chars[$i], $alphabet);
+            if ($index === $base - 1) { // 当前位为 Z，需进位
+                $chars[$i] = $alphabet[0];
+                $carry = true; // 继续向前进位
+            } else { // 其他情况，直接递增
+                $chars[$i] = $alphabet[$index + 1];
+                $carry = false;
+            }
+        }
+    }
+
+    if ($carry) { // 如果最高位需要进位，超出长度限制
+        throw new Exception("String exceeds maximum range!");
+    }
+
+    return implode('', $chars); // 拼接成新的字符串
+}

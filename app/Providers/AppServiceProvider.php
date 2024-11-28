@@ -42,7 +42,8 @@ class AppServiceProvider extends ServiceProvider
         // 全局选项
         Http::globalOptions([
             'connect_timeout' => 20,
-            'debug' => !$this->app->isProduction(),
+//            'debug' => !$this->app->isProduction(),
+            'debug' => $this->app->isLocal(),
             'timeout' => 10
         ]);
         // 大量赋值异常【默认大量赋值时，不在 $fillable 数组红的属性会被默默丢弃，这是预期的生产行为，但在本地开发中，可以尝试在填充一个不可填充的属性时抛出异常】
