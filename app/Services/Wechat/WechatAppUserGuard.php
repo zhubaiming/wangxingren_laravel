@@ -324,7 +324,7 @@ class WechatAppUserGuard
      */
     protected function register($credentials)
     {
-        return $this->provider->createModel()->create([
+        $user = $this->provider->createModel()->create([
             'user_login_info_id' => $this->login_info->id,
             'phone_number' => $credentials['purePhoneNumber'],
             'phone_prefix' => $credentials['countryCode'],
@@ -332,6 +332,13 @@ class WechatAppUserGuard
             'is_login' => true,
             'is_freeze' => false
         ]);
+
+        $user->info()->create([
+            'level' => 1,
+            'integral' => 0
+        ]);
+
+        return $user;
     }
 
     /**
