@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Wechat;
 
 use App\Http\Controllers\Controller;
-use App\Models\Pivot\SysPivotGoodsSkuValue;
-use App\Models\SysGoodsSku;
+use App\Services\GoodsSkuService;
+use App\Services\UserOrderService;
 use App\Services\Wechat\MiniProgramPaymentService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
@@ -12,6 +12,11 @@ use Illuminate\Support\Facades\Auth;
 
 class UserOrderController extends Controller
 {
+    public function __construct(UserOrderService $service)
+    {
+        $this->service = $service;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -25,35 +30,40 @@ class UserOrderController extends Controller
      */
     public function store(Request $request, MiniProgramPaymentService $paymentService)
     {
-//        dd($request->post());
-//        dd(random_int(1000000000, 9999999999), random_bytes(10));
-
-        list('orderGoodInfo' => $orderGoodInfo, 'orderAddressInfo' => $orderAddressInfo, 'orderTimeInfo' => $orderTimeInfo, 'orderPetInfo' => $orderPetInfo, 'orderCouponInfo' => $orderCouponInfo) = $request->post();
+        ['orderGoodInfo' => $orderGoodInfo, 'orderAddressInfo' => $orderAddressInfo, 'orderTimeInfo' => $orderTimeInfo, 'orderPetInfo' => $orderPetInfo, 'orderCouponInfo' => $orderCouponInfo] = $request->post();
 
         $spu_id = $orderGoodInfo['id'];
 
         try {
-            $sku_id = SysPivotGoodsSkuValue::where(['spu_id' => $spu_id, 'spec_group_id' => $orderGoodInfo['specGroups'][0]['id'], 'spec_value_id' => $orderPetInfo['breedId']])->value('sku_id');
+            $sku_conditions = ['spu_id' => $spu_id, 'spec_group_id' => $orderGoodInfo['specGroups'][0]['id'], 'spec_values->breed_id' => $orderPetInfo['breedId']];
+            if (!in_array($orderPetInfo['weightId'], ['null', 'undefined'])) $sku_conditions['spec_values->weight_id'] = $orderPetInfo['weightId'];
 
-//            dump($sku_id);
+            $sku = (new GoodsSkuService)->find($sku_conditions, ['enable' => true], fields: ['id', 'price']);
 
-//            $sku = SysGoodsSku::where(['id' => $sku_id])->firstOrFail();
-            $sku = SysGoodsSku::findOrFail($sku_id);
-
-//            dd($sku);
-
-            list($s1, $s2) = explode(' ', microtime());
+            [$s1, $s2] = explode(' ', microtime());
             $microtime = sprintf('%.0f', (floatval($s1) + floatval($s2)) * 1000);
-            $out_trade_no = date('Ymd') . $microtime . str_pad(1, 4, '0', STR_PAD_LEFT) . random_int(10000000, 99999999);
+            $out_trade_no = date('Ymd') . $microtime . str_pad(1, 4, '0', STR_PAD_LEFT) . random_int(100000, 999999);
 
             $checkDigit = generateLuhnCheckDigit($out_trade_no);
 
             $out_trade_no = $out_trade_no . $checkDigit;
 
-//            dd($out_trade_no);
-
-            //  return response()->json($service->requestPayment('a', 1, 'b'));
             $payload = $paymentService->requestPayment($out_trade_no, $sku->price, Auth::guard('wechat')->user()->fresh()->loginInfo[0]->wechat_openid, "汪星人宠物服务-{$orderGoodInfo['title']}-{$orderPetInfo['breedTitle']}");
+
+            $this->service->create([
+                'user_id' => Auth::guard('wechat')->user()->id,
+                'goods_id' => $spu_id,
+                'sku_id' => $sku->id,
+                'address_id' => $orderAddressInfo['id'],
+                'service_time_id' => $orderTimeInfo['id'],
+                'pet_id' => $orderPetInfo['id'],
+                'coupon_id' => $orderCouponInfo['id'],
+                'total' => $sku->price,
+                'real_total' => $sku->price,
+                'coupon_total' => 0,
+                'trade_no' => $out_trade_no,
+                'status' => 0
+            ]);
 
             return $this->success($payload);
 

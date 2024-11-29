@@ -21,7 +21,7 @@ class GoodsSkuController extends Controller
     {
         // todo: 需要对入参进行前置校验
 
-        list('specGroupId' => $spec_group_id, 'breedId' => $breed_id, 'weightId' => $weight_id) = $request->input();
+        ['specGroupId' => $spec_group_id, 'breedId' => $breed_id, 'weightId' => $weight_id] = $request->input();
 
         // todo: 需要对入参进行前置校验
 
