@@ -57,7 +57,7 @@ class UserOrderController extends Controller
                 'address_id' => $orderAddressInfo['id'],
                 'service_time_id' => $orderTimeInfo['id'],
                 'pet_id' => $orderPetInfo['id'],
-                'coupon_id' => $orderCouponInfo['id'],
+                'coupon_id' => $orderCouponInfo['id'] ?? null,
                 'total' => $sku->price,
                 'real_total' => $sku->price,
                 'coupon_total' => 0,
