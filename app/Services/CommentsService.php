@@ -33,7 +33,9 @@ class CommentsService
 
         // 添加 where 条件
         foreach ($conditions as $field => $value) {
-            if (is_array($value)) {
+            if ($field === 'in') {
+                $query->whereIn($value[0], $value[1]);
+            } elseif (is_array($value)) {
                 $query->where(...$value); // 支持复杂查询条件，例如 ['age', '>', 18]
             } else {
                 $query->where($field, $value); // 普通的键值对条件
@@ -131,7 +133,7 @@ class CommentsService
      *
      * @return mixed
      */
-    public function getList(array $conditions = [], array $scopes = [], array $relations = [], array $aggregates = [], array $fields = ['*'], array $order_by = [], bool $paginate = false, int $page = 1, int $per_page = 15): mixed
+    public function getList(array $conditions = [], array $scopes = [], array $relations = [], array $aggregates = [], array $fields = ['*'], bool $is_distinct = false, array $distinct_fields = ['*'], array $order_by = [], bool $is_without_global_Scopes = false, array $without_global_scopes = [], bool $paginate = false, bool $paginate_simple = false, int $page = 1, int $per_page = 15): mixed
     {
         // 初始化查询构造器
         $query = $this->model->newQuery();
@@ -143,8 +145,20 @@ class CommentsService
             $query->orderBy($column, $direction);
         }
 
+        if ($is_distinct) {
+            $query->distinct(...$distinct_fields);
+        }
+
+        if ($is_without_global_Scopes) {
+            if (count($without_global_scopes) === 0) {
+                $query->withoutGlobalScopes();
+            } else {
+                $query->withoutGlobalScopes($without_global_scopes);
+            }
+        }
+
         // 分页或全量返回
-        return $paginate ? $query->simplePaginate($per_page, page: $page) : $query->get();
+        return $paginate ? ($paginate_simple ? $query->simplePaginate($per_page, page: $page) : $query->paginate($per_page, page: $page)) : $query->get();
     }
 
     /**

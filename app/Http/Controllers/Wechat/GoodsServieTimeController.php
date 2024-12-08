@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Wechat;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\BaseCollection;
 use App\Http\Resources\Wechat\GoodsServiceTimeCollection;
 use App\Services\GoodsSpuService;
 

@@ -324,3 +324,10 @@ function incrementString($string, $alphabet, $base)
 
     return implode('', $chars); // 拼接成新的字符串
 }
+
+Route::get('test_queue', function () {
+    $num = rand(1, 9999999999);
+    \App\Jobs\TestJob::dispatch($num);
+
+    return response()->json('已添加队列');
+});

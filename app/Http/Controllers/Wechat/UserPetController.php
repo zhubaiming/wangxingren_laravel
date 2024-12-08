@@ -5,12 +5,9 @@ namespace App\Http\Controllers\Wechat;
 use App\Exceptions\WechatApiException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UserPetRequest;
-use App\Http\Resources\Wechat\UserPetCollection;
-use App\Models\SysPetBreedWeight;
+use App\Http\Resources\BaseCollection;
 use App\Services\UploadFileService;
 use App\Services\UserPetService;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class UserPetController extends Controller
 {
@@ -29,7 +26,7 @@ class UserPetController extends Controller
 
         $payload = $this->service->getList(scopes: $scopes);
 
-        return (new UserPetCollection($payload));
+        return (new BaseCollection($payload))->additional(['resource' => 'App\Http\Resources\Wechat\UserPetResource']);
     }
 
     /**
@@ -67,9 +64,13 @@ class UserPetController extends Controller
      */
     public function update(UserPetRequest $request, string $id)
     {
+
+        dd($request, $id);
         $validated = $request->validated();
 
         $this->service->update($validated, $id);
+
+        return $this->message();
     }
 
     /**

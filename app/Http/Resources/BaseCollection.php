@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Http\Resources\Wechat;
+namespace App\Http\Resources;
 
-use App\Http\Resources\CommentsCollection;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\AbstractPaginator;
 
@@ -15,6 +14,8 @@ class BaseCollection extends CommentsCollection
      */
     public function toArray(Request $request): array
     {
+        $this->setCollects($this->additional['resource']);
+
         $collects = $this->collects;
         $additionalData = $this->additional;
 
@@ -26,8 +27,16 @@ class BaseCollection extends CommentsCollection
             false => parent::toArray($request),
             true => [
                 'content' => $this->collection,
+                'total' => $this->resource->total(),
                 'nextPageUrl' => $this->resource->nextPageUrl()
             ]
         };
+    }
+
+    private function setCollects($resource)
+    {
+        $collectsName = $resource . '::class';
+
+        $this->collects = eval("return $collectsName;");
     }
 }

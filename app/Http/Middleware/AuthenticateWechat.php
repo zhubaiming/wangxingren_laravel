@@ -24,6 +24,7 @@ class AuthenticateWechat
      */
     public function handle(Request $request, Closure $next): Response
     {
+        return $next($request);
 //        if (!$request->hasHeader('token')) {
 //            return response()->json([
 //                'code' => 208,

@@ -150,6 +150,7 @@ trait JsonResponseTrait
     public function respond($data, $header = [])
     {
         return Response::json($data, $this->getStatusCode(), $header, JSON_UNESCAPED_UNICODE);
+//        return Response::json($data, 200, $header, JSON_UNESCAPED_UNICODE);
     }
 
     public function status($status, array $data, $code = null)
@@ -159,7 +160,7 @@ trait JsonResponseTrait
         }
 
         $status = [
-            'status' => $status,
+            'status' => __('http_response.' . $status),
             'code' => $this->statusCode
         ];
 
@@ -175,7 +176,8 @@ trait JsonResponseTrait
     public function message($message, $status = 'success')
     {
         return $this->status($status, [
-            'message' => $message
+            'message' => $message,
+//            'message' => __('http_response.' . $message),
         ]);
     }
 

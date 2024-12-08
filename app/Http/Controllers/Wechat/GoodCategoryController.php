@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Wechat;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\Wechat\GoodsCategoryCollection;
+use App\Http\Resources\BaseCollection;
 use App\Services\GoodsCategoryService;
 
 class GoodCategoryController extends Controller
@@ -26,6 +26,6 @@ class GoodCategoryController extends Controller
 
         $payload = $this->service->getList($conditions, relations: $relations);
 
-        return new GoodsCategoryCollection($payload);
+        return (new BaseCollection($payload))->additional(['resource' => 'App\Http\Resources\Wechat\GoodsCategoryResource']);
     }
 }

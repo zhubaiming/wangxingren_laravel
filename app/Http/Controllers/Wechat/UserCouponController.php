@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Wechat;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\Wechat\UserCouponCollection;
+use App\Http\Resources\BaseCollection;
 use Illuminate\Http\Request;
 
 class UserCouponController extends Controller
@@ -31,7 +31,7 @@ class UserCouponController extends Controller
 
         return $this->success(arrLineToHump($payload));
 
-        return new UserCouponCollection($payload);
+        return (new BaseCollection($payload))->additional(['resource' => 'App\Http\Resources\Wechat\UserCouponResource']);
     }
 
     /**

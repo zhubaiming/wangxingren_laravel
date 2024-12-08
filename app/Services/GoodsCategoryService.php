@@ -6,7 +6,8 @@ class GoodsCategoryService extends CommentsService
 {
     public function __construct()
     {
-        $this->setModel('App\Models\SysGoodsCategory');
+//        $this->setModel('App\Models\SysGoodsCategory');
+        $this->setModel('App\Models\ProductCategory');
 
         $this->events = app('events');
     }

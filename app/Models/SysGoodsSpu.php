@@ -63,4 +63,12 @@ class SysGoodsSpu extends CommentsModel
     {
         return $this->belongsToMany(SysGoodsServiceTime::class, 'sys_pivot_goods_service_time_spu', 'spu_id', 'service_time_id')->withPivot('stock');
     }
+
+    /**
+     * 订单
+     */
+    public function orders(): HasMany
+    {
+        return $this->hasMany(ClientUserOrder::class, 'goods_id', 'id');
+    }
 }

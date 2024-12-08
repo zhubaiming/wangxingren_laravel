@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Wechat;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\Wechat\GoodsSpuCollection;
+use App\Http\Resources\BaseCollection;
 use App\Http\Resources\Wechat\GoodsSpuResource;
 use App\Services\GoodsSpuService;
 use Illuminate\Http\Request;
@@ -41,7 +41,7 @@ class GoodsSpuController extends Controller
 
         $payload = $this->service->getList($conditions, $scopes, aggregates: $aggregates, fields: $fields, paginate: true);
 
-        return (new GoodsSpuCollection($payload))->additional(['format' => __FUNCTION__]);
+        return (new BaseCollection($payload))->additional(['resource' => 'App\Http\Resources\Wechat\GoodsSpuResource', 'format' => __FUNCTION__]);
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Wechat;
 
+use App\Http\Resources\BaseCollection;
 use Illuminate\Http\Request;
 
 class GoodsServiceTimeCollection extends BaseCollection

@@ -45,4 +45,19 @@ class UploadFileService extends CommentsService
 
         return null;
     }
+
+    public function spuImage(\SplFileInfo $fileInfo)
+    {
+        if ($fileInfo->isValid()) {
+            $fileName = md5_file($fileInfo->path()) . '.' . $fileInfo->extension();
+
+            if (!Storage::disk('public')->exists($fileName)) {
+                $fileInfo->move(config('filesystems.disks.public.root'), $fileName);
+            }
+
+            return Storage::disk('public')->url($fileName);
+        }
+
+        return null;
+    }
 }
