@@ -34,7 +34,7 @@ return [
             'hostname' => env('REVERB_HOST'),
             'options' => [
                 'tls' => [
-//                    'local_cert' => storage_path('app/private/develop.wangxingren.fun_cert_chain.pem'),
+                    'local_cert' => storage_path('app/private/develop.wangxingren.fun_cert_chain.pem'),
                 ],
             ],
             'max_request_size' => env('REVERB_MAX_REQUEST_SIZE', 10_000),
@@ -74,11 +74,8 @@ return [
         'apps' => [
             [
                 'key' => env('REVERB_APP_KEY'),
-//                'key' => 'reverb-key-123456',
                 'secret' => env('REVERB_APP_SECRET'),
-//                'secret' => 'reverb-secret-123456',
                 'app_id' => env('REVERB_APP_ID'),
-//                'app_id' => 'reverb-app_id-123456',
                 'options' => [
                     'host' => env('REVERB_HOST'),
                     'port' => env('REVERB_PORT', 443),
