@@ -11,15 +11,15 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+    protected $table = 'user';
+
     /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
+    protected $guarded = [
+        'deleted_at'
     ];
 
     /**
@@ -29,7 +29,7 @@ class User extends Authenticatable
      */
     protected $hidden = [
         'password',
-        'remember_token',
+//        'remember_token',
     ];
 
     /**
@@ -40,8 +40,16 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'status' => 'boolean',
+            'is_default_passwd' => 'boolean',
+            'can_delete' => 'boolean',
+//            'email_verified_at' => 'datetime',
+//            'password' => 'hashed',
         ];
+    }
+
+    public function role()
+    {
+        return $this->belongsTo(UserRole::class, 'role_id', 'id');
     }
 }

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\V1;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\BaseCollection;
+use App\Models\ProductTrademark;
 use App\Services\ProductTrademarkService;
 use Illuminate\Http\Request;
 
@@ -16,12 +16,12 @@ class ProductTrademarkController extends Controller
 
     public function index(Request $request)
     {
-        $paginate = $request->get('paginate') ?? false;
+        $paginate = $request->has('paginate') ? isTrue($request->get('paginate')) : true; // 是否分页
 
-        $fields = ['id', 'title', 'letter', 'image', 'created_at'];
+        $query = ProductTrademark::orderBy('letter', 'asc');
 
-        $payload = $this->service->getList(fields: $fields, paginate: $paginate);
+        $payload = $paginate ? $query->paginate($request->get('pageSize') ?? $this->pageSize, ['*'], 'page', $request->get('page') ?? $this->page) : $query->get();
 
-        return (new BaseCollection($payload))->additional(['resource' => 'App\Http\Resources\ProductTrademarkResource', 'paginate' => $paginate]);
+        return $this->returnIndex($payload, 'ProductTrademarkResource', __FUNCTION__, $paginate);
     }
 }

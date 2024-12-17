@@ -4,6 +4,7 @@ namespace App\Http\Controllers\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\BaseCollection;
+use App\Models\SysPetBreed;
 use App\Services\PetBreedService;
 use Illuminate\Http\Request;
 
@@ -27,4 +28,16 @@ class PetBreedController extends Controller
 
         return (new BaseCollection($payload))->additional(['resource' => 'App\Http\Resources\PetBreedResource']);
     }
+
+    public function category_breed(string $category_id)
+    {
+        $payload = SysPetBreed::whereHas('specGroup', function ($q) use ($category_id) {
+            $q->whereHas('category', function ($q1) use ($category_id) {
+                $q1->where(['id' => $category_id]);
+            });
+        })->get();
+
+        return (new BaseCollection($payload))->additional(['resource' => 'App\Http\Resources\PetBreedResource', 'format' => __FUNCTION__]);
+    }
 }
+

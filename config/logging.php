@@ -135,6 +135,11 @@ return [
             'bubble' => false,
         ],
 
+        'test' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/test/laravel.log'),
+        ]
+
     ],
 
 ];

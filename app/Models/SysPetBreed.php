@@ -14,4 +14,9 @@ class SysPetBreed extends CommentsModel
     {
         return $this->hasMany(SysPetBreedWeight::class, 'breed_id', 'id');
     }
+
+    public function specGroup()
+    {
+        return $this->belongsToMany(ProductSpecGroup::class, 'sys_pivot_product_spec_group_value', 'spec_value_id', 'spec_group_id', 'id', 'id');
+    }
 }

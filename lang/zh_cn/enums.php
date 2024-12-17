@@ -18,5 +18,10 @@ return [
             'dog' => '狗',
             'cat' => '猫'
         ]
+    ],
+    'user_status' => [
+        'invalid' => '已删除',
+        'normal' => '正常',
+        'freeze' => '已冻结'
     ]
 ];

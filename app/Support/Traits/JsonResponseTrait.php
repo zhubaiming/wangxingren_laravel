@@ -176,8 +176,7 @@ trait JsonResponseTrait
     public function message($message, $status = 'success')
     {
         return $this->status($status, [
-            'message' => $message,
-//            'message' => __('http_response.' . $message),
+            'payload' => ['message' => $message]
         ]);
     }
 

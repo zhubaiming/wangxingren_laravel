@@ -217,7 +217,7 @@ return [
             'username' => env('REDIS_USERNAME'),
             'password' => env('REDIS_PASSWORD'),
             'port' => env('REDIS_PORT', '6379'),
-            'database' => '3'
+            'database' => '15'
         ]
 
     ],

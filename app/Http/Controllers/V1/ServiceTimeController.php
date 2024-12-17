@@ -7,12 +7,31 @@ use App\Http\Resources\BaseCollection;
 use App\Models\ServiceTime;
 use App\Services\ServiceTimeService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 
 class ServiceTimeController extends Controller
 {
     public function __construct(ServiceTimeService $service)
     {
         $this->service = $service;
+    }
+
+    public function index(Request $request)
+    {
+        $paginate = boolval($request->input('paginate') ?? true);
+
+        if ($paginate) {
+            $page = $request->input('page') ?? $this->page;
+            $pageSize = $request->input('pageSize') ?? $this->pageSize;
+
+            return (new BaseCollection($this->service->getPageDateWithTimes($page, $pageSize)))->additional(['resource' => 'App\Http\Resources\ServiceTimeResource', 'format' => __FUNCTION__]);
+        }
+
+
+//        dd($this->service->getAllDateWithTimes());
+
+//        return (new BaseCollection($this->service->getAllDate()))->additional(['resource' => 'App\Http\Resources\ServiceTimeResource', 'format' => __FUNCTION__]);
+        return (new BaseCollection($this->service->getAllDateWithTimes()))->additional(['resource' => 'App\Http\Resources\ServiceTimeResource', 'format' => __FUNCTION__]);
     }
 
     public function dateList()

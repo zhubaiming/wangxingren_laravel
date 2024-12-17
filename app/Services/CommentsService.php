@@ -118,6 +118,88 @@ class CommentsService
         return $query;
     }
 
+    public function getList1(array $fields = ['*'], array $withScopes = [], array $conditions = [], array $order_by = [], bool $paginate = true, bool $simplePaginate = false, int $perPage = 10, int $page = 1)
+    {
+        // 初始化查询构造器
+        $query = $this->model->newQuery();
+
+        $query->select($fields);
+
+        if (!empty($withScopes)) {
+            count($withScopes) === 1 && $withScopes[0] === 'all' ? $query->withoutGlobalScopes() : $query->withoutGlobalScopes($withScopes);
+        }
+
+        // 应用查询条件
+        foreach ($conditions as $field => $condition) {
+            if (is_array($condition)) {
+                $operator = $condition['operator'] ?? '=';
+                $value = $condition['value'] ?? null;
+
+                switch ($operator) {
+                    case 'in':
+                        $query->whereIn($field, $value);
+                        break;
+                    case 'not_in':
+                        $query->whereNotIn($field, $value);
+                        break;
+                    case 'or_in':
+                        $query->orWhereIn($field, $value);
+                        break;
+                    case 'or_not_in':
+                        $query->orWhereNotIn($field, $value);
+                        break;
+                    case 'between':
+                        $query->whereBetween($field, $value);
+                        break;
+                    case 'not_between':
+                        $query->whereNotBetween($field, $value);
+                        break;
+                    case 'or_between':
+                        $query->orWhereBetween($field, $value);
+                        break;
+                    case 'or_not_between':
+                        $query->orWhereNotBetween($field, $value);
+                        break;
+                    case 'null':
+                        $query->whereNull($field);
+                        break;
+                    case 'not_null':
+                        $query->shereNotNull($field);
+                        break;
+                    case 'date':
+                        $query->whereDate($field, $value);
+                        break;
+                    case 'month':
+                        $query->whereMonth($field, $value);
+                        break;
+                    case 'day':
+                        $query->whereDay($field, $value);
+                        break;
+                    case 'year':
+                        $query->whereYear($field, $value);
+                        break;
+                    case 'time':
+                        $query->whereTime($field, '=', $value);
+                        break;
+                }
+            } else {
+                // 默认全等
+                $query->where($field, '=', $condition);
+            }
+        }
+
+        // 添加排序规则
+        foreach ($order_by as $column => $direction) {
+            $query->orderBy($column, $direction);
+        }
+
+        if ($paginate) {
+            return $simplePaginate ? $query->simplePaginate($perPage, $fields, 'page', $page) : $query->paginate($perPage, $fields, 'page', $page);
+        }
+
+        return $query->get();
+    }
+
     /**
      * 获取列表
      *
@@ -212,9 +294,10 @@ class CommentsService
      * @param int $id
      * @return bool|null
      */
-    public function delete(int $id): ?bool
+    public function delete(array|int $id): ?bool
     {
-        $model = $this->model->findOrFail($id);
-        return $model->delete();
+//        $model = $this->model->findOrFail($id);
+//        return $model->delete();
+        return $this->model->destroy($id);
     }
 }

@@ -22,8 +22,18 @@ class ProductSpu extends CommentsModel
     /*
      * 品牌 - 一对一
      */
+    public function detail()
+    {
+        return $this->hasOne(ProductSpuDetail::class, 'spu_id', 'id');
+    }
+
     public function trademark()
     {
         return $this->belongsTo(ProductTrademark::class, 'trademark_id', 'id');
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(ProductCategory::class, 'category_id', 'id');
     }
 }

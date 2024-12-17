@@ -2,10 +2,24 @@
 
 namespace App\Services;
 
+use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Storage;
 
 class UploadFileService extends CommentsService
 {
+    public function uploadImage(\SplFileInfo $file, string $fileName, Filesystem $disk = null)
+    {
+        if (is_null($disk)) {
+            $disk = Storage::disk('public');
+        }
+
+        if (!$disk->exists($fileName)) {
+            $file->move($disk->getConfig()['root'], $fileName);
+        }
+
+        return $disk->url($fileName);
+    }
+
     public function petAvatar(\SplFileInfo $fileInfo)
     {
         /**

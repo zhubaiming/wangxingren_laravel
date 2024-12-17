@@ -28,6 +28,7 @@ class BaseCollection extends CommentsCollection
             true => [
                 'content' => $this->collection,
                 'total' => $this->resource->total(),
+                'pageCount' => $this->resource->lastPage(),
                 'nextPageUrl' => $this->resource->nextPageUrl()
             ]
         };

@@ -15,6 +15,11 @@ class ServiceTimeResource extends CommentsResource
         $format = $this->additional['format'] ?? 'default';
 
         $result = match ($format) {
+            'index' => [
+                'date' => $this->date,
+                'times' => ServiceTimeResource::collection($this->times),
+                'times_count' => $this->times->count()
+            ],
             'dateList' => [
                 'date' => $this->date,
                 'times_count' => $this->times->count()
@@ -43,7 +48,12 @@ class ServiceTimeResource extends CommentsResource
 //                'service_times' => (new GoodsServiceTimeCollection($this->serviceTimes))->additional(['self' => true]),
 //                'service_times' => GoodsServiceTimeResource::collection($this->serviceTimes),
             ],
-            'default' => []
+            'default' => [
+                'id' => $this->id,
+                'start_time' => $this->start_time,
+                'end_time' => $this->end_time,
+                'enable' => $this->enable,
+            ]
         };
 
         return $result;

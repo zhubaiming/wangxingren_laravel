@@ -2,8 +2,6 @@
 
 namespace App\Http\Resources;
 
-use App\Http\Resources\CommentsResource;
-
 class ProductCategoryResource extends CommentsResource
 {
 
@@ -12,18 +10,28 @@ class ProductCategoryResource extends CommentsResource
      */
     protected function resourceData(): array
     {
-        $paginate = boolval($this->additional['paginate'] ?? false);
+        $paginate = $this->additional['paginate'] ?? true;
+        $format = $this->additional['format'] ?? 'default';
 
         $result = match ($paginate) {
-            true => [
-                'value' => $this->id,
-                'title' => $this->title,
-
-            ],
+            true => match ($format) {
+                'index' => [
+                    'value' => $this->id,
+                    'title' => $this->title,
+                ],
+                'show' => [
+//                    'id' => $this->id,
+//                    'title' => $this->title,
+//                    'update_by' => $this->update_by,
+//                    'created_at' => $this->created_at,
+//                    'updated_at' => $this->updated_at
+                ],
+                'default' => []
+            },
             false => [
-                'value' => $this->parent_id === 0 ? $this->id : $this->parent_id . '-' . $this->id,
+                'value' => $this->id,
                 'label' => $this->title,
-                'children' => $this->childrenRecursive->count() === 0 ? null : ProductCategoryResource::collection($this->childrenRecursive)->additional(['paginate' => $paginate])
+                'children' => $this->childrenRecursive->count() === 0 ? null : (new BaseCollection($this->childrenRecursive))->additional($this->additional)
             ]
         };
 

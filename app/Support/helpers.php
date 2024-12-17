@@ -76,14 +76,14 @@ function arrLineToHump(array $arr): array
     return array_combine($keys, $arr);
 }
 
-function applyFloatToIntegerModifier(float|string $value)
+function applyFloatToIntegerModifier(float|string $value, string|int $mul = '100', $scale = 0)
 {
-    return intval(bcmul($value, '100', 0));
+    return intval(bcmul($value, $mul, $scale));
 }
 
-function applyIntegerToFloatModifier(int $value)
+function applyIntegerToFloatModifier(int $value, string|int $mul = '100', int $scale = 2)
 {
-    return bcdiv($value, '100', 2);
+    return bcdiv($value, $mul, $scale);
 }
 
 function generateLuhnCheckDigit($number)
@@ -135,6 +135,13 @@ function luhnCheck($number)
 
     // 如果总和能被 10 整除，则验证通过
     return $sum % 10 == 0;
+}
+
+function isTrue($value, $return_null = false)
+{
+    $boolval = (is_string($value) ? filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) : (bool)$value);
+
+    return ($boolval === null && $return_null ? false : $boolval);
 }
 
 // --------------------------------------------------  以下为测试专用函数  --------------------------------------------------

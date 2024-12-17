@@ -4,7 +4,9 @@ namespace App\Http\Controllers\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\BaseCollection;
+use App\Models\ProductCategory;
 use App\Services\GoodsCategoryService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
 class ProductCategoryController extends Controller
@@ -16,18 +18,35 @@ class ProductCategoryController extends Controller
 
     public function index(Request $request)
     {
-        $paginate = $request->get('paginate') ?? false;
+        $paginate = $request->has('paginate') ? isTrue($request->get('paginate')) : true; // 是否分页
+        $cascader = $request->has('cascader') ? isTrue($request->get('cascader')) : true; // 级联选择
 
-        // 作用域
-        $scopes = ['root']; // 调用 popular 作用域
+//        $query = new ProductCategory();
+        $query = ProductCategory::orderBy('sort', 'asc');
 
-        // 关联关系
-        $relations = ['childrenRecursive'];
+        if ($request->has('trademark_id')) {
+            $query = $query->whereHas('trademark', function (Builder $q) use ($request) {
+                $q->where(['id' => $request->input('trademark_id')]);
+            });
+        }
 
-        $payload = $this->service->getList(scopes: $scopes, relations: $relations, paginate: $paginate);
+        if (($request->get('parent_id') ?? 0) === 0) {
+            $query = $query->root();
+        } else {
+            $query = $query->where(['parent_id' => $request->get('parent_id')]);
+        }
 
-//        dd($payload);
+        if ($cascader) {
+            $query = $query->with(['childrenRecursive']);
+        }
 
-        return (new BaseCollection($payload))->additional(['resource' => 'App\Http\Resources\ProductCategoryResource', 'paginate' => $paginate]);
+        if ($paginate) {
+            $payload = $query->paginate($request->get('pageSize') ?? $this->pageSize, ['*'], 'page', $request->get('page') ?? $this->page);
+        } else {
+            $payload = $query->get();
+        }
+
+        return $this->returnIndex($payload, 'ProductCategoryResource', __FUNCTION__, $paginate);
+//        return (new BaseCollection($payload))->additional(['resource' => 'App\Http\Resources\ProductCategoryResource', 'paginate' => $paginate, 'cascader' => $cascader]);
     }
 }

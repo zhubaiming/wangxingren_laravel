@@ -11,6 +11,14 @@ abstract class CommentsResource extends JsonResource
     {
         $data = $this->resourceData();
 
+        if ($this->created_at) {
+            $data['created_at'] = $this->created_at->format('Y-m-d H:i:s');
+        }
+
+        if ($this->updated_at) {
+            $data['updated_at'] = $this->updated_at->format('Y-m-d H:i:s');
+        }
+
         return arrLineToHump($data);
     }
 

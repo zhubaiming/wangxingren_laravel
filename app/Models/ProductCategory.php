@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\CommentsModel;
+use Illuminate\Database\Eloquent\Builder;
 
 class ProductCategory extends CommentsModel
 {
@@ -13,8 +13,7 @@ class ProductCategory extends CommentsModel
      */
     public function scopeRoot(Builder $query): void
     {
-        $query->where('parent_id', '=', 0);
-//        $query->where(['parent_id' => 0]);
+        $query->where('parent_id', 0);
     }
 
     // 定义与子分类的关系
@@ -27,5 +26,10 @@ class ProductCategory extends CommentsModel
     public function childrenRecursive()
     {
         return $this->children()->with(['childrenRecursive']);
+    }
+
+    public function trademark()
+    {
+        return $this->belongsToMany(ProductTrademark::class, 'sys_pivot_product_tardmark_category', 'category_id', 'trademark_id', 'id', 'id');
     }
 }
