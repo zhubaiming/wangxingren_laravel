@@ -34,7 +34,7 @@ return [
             'hostname' => env('REVERB_HOST'),
             'options' => [
                 'tls' => [
-                    'local_cert' => storage_path('app/private/develop.wangxingren.fun_cert_chain.pem'),
+//                    'local_cert' => storage_path('app/private/develop.wangxingren.fun_cert_chain.pem'),
                 ],
             ],
             'max_request_size' => env('REVERB_MAX_REQUEST_SIZE', 10_000),
@@ -47,7 +47,7 @@ return [
                     'port' => env('REDIS_PORT', '6379'),
                     'username' => env('REDIS_USERNAME'),
                     'password' => env('REDIS_PASSWORD'),
-                    'database' => env('REDIS_DB', '14'),
+                    'database' => '14',
                 ],
             ],
             'pulse_ingest_interval' => env('REVERB_PULSE_INGEST_INTERVAL', 15),
