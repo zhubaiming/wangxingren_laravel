@@ -4,6 +4,8 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Pagination\AbstractPaginator;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
 
 class BaseCollection extends CommentsCollection
 {
@@ -23,15 +25,15 @@ class BaseCollection extends CommentsCollection
             return (new $collects($resource))->additional($additionalData);
         });
 
-        return match ($this->resource instanceof AbstractPaginator) { // 判断当前资源是否为分页资源
-            false => parent::toArray($request),
-            true => [
-                'content' => $this->collection,
-                'total' => $this->resource->total(),
-                'pageCount' => $this->resource->lastPage(),
-                'nextPageUrl' => $this->resource->nextPageUrl()
-            ]
-        };
+        return $this->resource instanceof AbstractPaginator ? ( // 判断当前资源是否为分页资源
+        $this->resource instanceof LengthAwarePaginator ? [ // 判断当前资源是否为正常分页
+            'content' => $this->collection,
+            'total' => $this->resource->total(),
+        ] : ($this->resource instanceof Paginator ? [ // 判断当前资源是否为简单分页
+            'content' => $this->collection,
+            'hasMore' => $this->resource->hasMorePages()
+        ] : parent::toArray($request))
+        ) : parent::toArray($request);
     }
 
     private function setCollects($resource)
