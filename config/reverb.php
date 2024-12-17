@@ -33,11 +33,13 @@ return [
             'port' => env('REVERB_SERVER_PORT', 9001),
             'hostname' => env('REVERB_HOST'),
             'options' => [
-                'tls' => [],
+                'tls' => [
+                    'local_cert' => storage_path('app/private/develop.wangxingren.fun_cert_chain.pem'),
+                ],
             ],
             'max_request_size' => env('REVERB_MAX_REQUEST_SIZE', 10_000),
             'scaling' => [
-                'enabled' => env('REVERB_SCALING_ENABLED', false),
+                'enabled' => env('REVERB_SCALING_ENABLED', true),
                 'channel' => env('REVERB_SCALING_CHANNEL', 'reverb'),
                 'server' => [
                     'url' => env('REDIS_URL'),
