@@ -47,7 +47,7 @@ return [
                     'port' => env('REDIS_PORT', '6379'),
                     'username' => env('REDIS_USERNAME'),
                     'password' => env('REDIS_PASSWORD'),
-                    'database' => '14',
+                    'database' => env('APP_ENV') === 'local' ? '15' : '14',
                 ],
             ],
             'pulse_ingest_interval' => env('REVERB_PULSE_INGEST_INTERVAL', 15),
