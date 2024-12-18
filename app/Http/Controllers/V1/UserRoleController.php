@@ -46,7 +46,7 @@ class UserRoleController extends Controller
             }
 
             $userRole->permissions()->attach($validate['permissions']);
-            $userRole->menus()->attach($validate['menus']);
+//            $userRole->menus()->attach($validate['menus']);
 
             return $this->message('success');
         }
@@ -59,7 +59,7 @@ class UserRoleController extends Controller
      */
     public function show(string $id)
     {
-        $payload = UserRole::with(['menus:id', 'permissions:id'])->findOrFail($id);
+        $payload = UserRole::with(['permissions:id'])->findOrFail($id);
 
         return $this->success((new UserRoleResource($payload))->additional(['format' => __FUNCTION__]));
     }
@@ -82,7 +82,7 @@ class UserRoleController extends Controller
                 $userRole->save();
 
                 $userRole->permissions()->sync($validate['permissions']);
-                $userRole->menus()->sync($validate['menus']);
+//                $userRole->menus()->sync($validate['menus']);
 
                 return $this->message('success');
             } catch (ModelNotFoundException) {
