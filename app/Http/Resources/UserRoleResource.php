@@ -23,7 +23,6 @@ class UserRoleResource extends CommentsResource
                     'id' => $this->id,
                     'title' => $this->title,
                     'permissions' => $this->permissions->pluck('id'),
-                    'menus' => $this->menus->pluck('id')
                 ],
                 'default' => []
             },

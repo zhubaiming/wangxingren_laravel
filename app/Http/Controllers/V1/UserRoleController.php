@@ -46,7 +46,6 @@ class UserRoleController extends Controller
             }
 
             $userRole->permissions()->attach($validate['permissions']);
-//            $userRole->menus()->attach($validate['menus']);
 
             return $this->message('success');
         }
@@ -82,7 +81,6 @@ class UserRoleController extends Controller
                 $userRole->save();
 
                 $userRole->permissions()->sync($validate['permissions']);
-//                $userRole->menus()->sync($validate['menus']);
 
                 return $this->message('success');
             } catch (ModelNotFoundException) {
