@@ -23,11 +23,11 @@ class ProductTrademarkResource extends CommentsResource
                     'created_at' => $this->created_at,
                 ],
                 'show' => [
-//                    'id' => $this->id,
-//                    'title' => $this->title,
-//                    'update_by' => $this->update_by,
-//                    'created_at' => $this->created_at,
-//                    'updated_at' => $this->updated_at
+                    'id' => $this->id,
+                    'title' => $this->title,
+                    'letter' => $this->letter,
+                    'image' => $this->image,
+                    'description' => $this->description,
                 ],
                 'default' => []
             },
