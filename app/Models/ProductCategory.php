@@ -8,6 +8,20 @@ class ProductCategory extends CommentsModel
 {
     protected $table = 'sys_product_category';
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        // 监听 deleting 事件
+        static::deleting(function ($item) {
+            $item->trademarks()->detach();
+            // 递归删除所有子级
+            foreach ($item->children as $child) {
+                $child->delete();
+            }
+        });
+    }
+
     /**
      * 作用域一个查询以只包括热门用户。
      */
@@ -28,8 +42,8 @@ class ProductCategory extends CommentsModel
         return $this->children()->with(['childrenRecursive']);
     }
 
-    public function trademark()
+    public function trademarks()
     {
-        return $this->belongsToMany(ProductTrademark::class, 'sys_pivot_product_tardmark_category', 'category_id', 'trademark_id', 'id', 'id');
+        return $this->belongsToMany(ProductTrademark::class, 'pivot_product_tardmark_category', 'category_id', 'trademark_id', 'id', 'id');
     }
 }
