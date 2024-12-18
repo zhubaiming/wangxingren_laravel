@@ -40,6 +40,8 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
+            'account' => 'string',
+            'phone_number' => 'string',
             'status' => 'boolean',
             'is_default_passwd' => 'boolean',
             'can_delete' => 'boolean',
