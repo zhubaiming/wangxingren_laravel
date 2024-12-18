@@ -16,15 +16,17 @@ class ProductCategoryResource extends CommentsResource
         $result = match ($paginate) {
             true => match ($format) {
                 'index' => [
-                    'value' => $this->id,
+                    'id' => $this->id,
                     'title' => $this->title,
+                    'trademark_title' => $this->trademarks->pluck('title'),
+                    'children' => $this->childrenRecursive->count() === 0 ? null : (new BaseCollection($this->childrenRecursive))->additional($this->additional)
                 ],
                 'show' => [
-//                    'id' => $this->id,
-//                    'title' => $this->title,
-//                    'update_by' => $this->update_by,
-//                    'created_at' => $this->created_at,
-//                    'updated_at' => $this->updated_at
+                    'id' => $this->id,
+                    'title' => $this->title,
+                    'sort' => $this->sort,
+                    'description' => $this->description,
+                    'trademarks' => $this->trademarks->pluck('id')
                 ],
                 'default' => []
             },
