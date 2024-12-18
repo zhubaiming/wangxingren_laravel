@@ -12,7 +12,8 @@ class UserRole extends Model
 
     protected $table = 'roles';
 
-    protected $fillable = ['title', 'updated_by'];
+    protected $fillable = ['title', 'can_delete', 'updated_by'];
+
 
     protected function casts(): array
     {
