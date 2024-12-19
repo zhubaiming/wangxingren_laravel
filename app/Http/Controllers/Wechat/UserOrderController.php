@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Wechat;
 
+use App\Enums\OrderStatusEnum;
 use App\Http\Controllers\Controller;
+use App\Models\ClientUserOrder;
 use App\Services\GoodsSkuService;
 use App\Services\UserOrderService;
 use App\Services\Wechat\MiniProgramPaymentService;
@@ -15,6 +17,30 @@ class UserOrderController extends Controller
     public function __construct(UserOrderService $service)
     {
         $this->service = $service;
+    }
+
+    public function total()
+    {
+        $orderTotal = ClientUserOrder::withoutGlobalScopes()->selectRaw('COUNT(id) as count, status')
+            ->where('user_id', Auth::guard('wechat')->user()->id)
+            ->groupBy('status')
+            ->get()->toArray();
+
+        foreach (OrderStatusEnum::cases() as $case) {
+            // 输出枚举值名称和对应的中文名称
+//            echo "枚举值: {$case->name}, 数值: {$case->value}, 中文名称: {$case->name()}" . PHP_EOL;
+            $result[$case->value] = 0;
+
+            foreach ($orderTotal as $item) {
+                if ($item['status'] === $case->value) {
+                    $result[$case->value] = $item['count'];
+                    break; // 找到后立即退出循环
+                }
+            }
+        }
+
+
+        return $this->success($result);
     }
 
     /**

@@ -1,9 +1,8 @@
 <?php
 
+use App\Http\Controllers\Wechat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
-use App\Http\Controllers\Wechat;
 
 Route::withoutMiddleware(['auth.wechat'])->group(function () {
     Route::post('/silentLogin', [Wechat\UserController::class, 'silentLogin']);
@@ -113,6 +112,7 @@ Route::apiResource('/coupon', Wechat\UserCouponController::class);
 /**
  * 订单
  */
+Route::get('/order/total', [Wechat\UserOrderController::class, 'total']);
 Route::apiResource('/order', Wechat\UserOrderController::class);
 
 
