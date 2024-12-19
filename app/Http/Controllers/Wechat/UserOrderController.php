@@ -46,9 +46,25 @@ class UserOrderController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        if (!$request->has('status')) return $this->failed('无效的查询');
+
+        $query = ClientUserOrder::select()
+//            ->where('user_id', Auth::guard('wechat')->user()->id)
+            ->where('user_id', 1);
+
+        if ('all' !== $request->get('status')) {
+            $query = $query->where('status', intval($request->get('status')));
+        }
+
+        $payload = $query->orderBy('created_at', 'desc')
+            ->with(['spu', 'trademark'])
+            ->simplePaginate($request->get('pageSize') ?? $this->pageSize, ['*'], 'page', $request->get('page') ?? $this->page); // 必须分页
+
+//        dd($payload->toArray());
+
+        return $this->returnIndex($payload, 'Wechat\ClientUserOrderResource', __FUNCTION__);
     }
 
     /**

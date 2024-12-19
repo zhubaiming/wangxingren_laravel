@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class ClientUserOrder extends CommentsModel
 {
@@ -17,6 +16,12 @@ class ClientUserOrder extends CommentsModel
 
     public function spu(): BelongsTo
     {
-        return $this->belongsTo(SysGoodsSpu::class, 'goods_id', 'id');
+        return $this->belongsTo(ProductSpu::class, 'goods_id', 'id');
+//        return $this->belongsTo(ProductSpu::class, 'spu_id', 'id');
+    }
+
+    public function trademark()
+    {
+        return $this->belongsTo(ProductTrademark::class, 'trademark_id', 'id');
     }
 }
