@@ -3,7 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\GenderEnum;
-use App\Enums\PetCategory;
+use App\Enums\PetCategoryEnum;
 use Illuminate\Validation\Rule;
 
 class UserPetRequest extends CommentsRequest
@@ -77,7 +77,7 @@ class UserPetRequest extends CommentsRequest
                 'breed_id' => ['required'],
                 'breed_title' => ['required'],
                 'name' => ['required'],
-                'breed_type' => [Rule::enum(PetCategory::class), 'required'],
+                'breed_type' => [Rule::enum(PetCategoryEnum::class), 'required'],
                 'gender' => [Rule::enum(GenderEnum::class), 'required'],
                 'weight' => ['filled', 'numeric'],
                 'birth' => ['required', 'string'],
@@ -98,7 +98,7 @@ class UserPetRequest extends CommentsRequest
                 'breed_id' => ['required'],
                 'breed_title' => ['required'],
                 'name' => ['required'],
-                'breed_type' => [Rule::enum(PetCategory::class), 'required'],
+                'breed_type' => [Rule::enum(PetCategoryEnum::class), 'required'],
                 'gender' => [Rule::enum(GenderEnum::class), 'required'],
                 'weight' => ['filled', 'numeric'],
                 'birth' => ['required', 'string'],

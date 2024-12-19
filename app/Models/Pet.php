@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Enums\GenderEnum;
-use App\Enums\PetCategory;
+use App\Enums\PetCategoryEnum;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -59,7 +59,7 @@ class Pet extends CommentsModel
     protected function breedTypeConv(): Attribute
     {
         return Attribute::make(
-            get: fn(mixed $value, array $attributes) => PetCategory::from($attributes['breed_type'])->name('animal')
+            get: fn(mixed $value, array $attributes) => PetCategoryEnum::from($attributes['breed_type'])->name('animal')
         );
     }
 

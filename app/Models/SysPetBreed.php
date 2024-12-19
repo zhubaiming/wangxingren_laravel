@@ -8,6 +8,13 @@ class SysPetBreed extends CommentsModel
 {
     protected $table = 'sys_pet_breed';
 
+    protected function casts()
+    {
+        return [
+            'is_sync_attr' => 'boolean'
+        ];
+    }
+
     // ==============================  关联  ==============================
     // 一对多
     public function weights(): HasMany // 宠物品种与宠物重量的关系(一个品种有多个重量)

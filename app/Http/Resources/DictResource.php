@@ -2,14 +2,9 @@
 
 namespace App\Http\Resources;
 
-use App\Enums\PetCategoryEnum;
-
-class PetBreedResource extends CommentsResource
+class DictResource extends CommentsResource
 {
 
-    /**
-     * @inheritDoc
-     */
     protected function resourceData(): array
     {
         $paginate = $this->additional['paginate'] ?? true;
@@ -19,22 +14,20 @@ class PetBreedResource extends CommentsResource
             true => match ($format) {
                 'index' => [
                     'id' => $this->id,
-                    'title' => $this->title,
-                    'type' => PetCategoryEnum::from($this->type)->name(),
-                    'is_sync_attr' => $this->is_sync_attr
+                    'label' => $this->label,
+                    'value' => $this->value,
+                    'name' => $this->name ?? $this->enum_name::from($this->value)->name()
                 ],
                 'show' => [
                     'id' => $this->id,
                     'title' => $this->title,
-                    'type' => $this->type,
-                    'letter' => $this->letter,
-                    'is_sync_attr' => $this->is_sync_attr
+                    'permissions' => $this->permissions->pluck('id'),
                 ],
                 'default' => []
             },
             false => [
-                'value' => $this->id,
-                'label' => $this->title
+                'value' => $this->value,
+                'label' => $this->name ?? $this->enum_name::from($this->value)->name()
             ]
         };
     }
