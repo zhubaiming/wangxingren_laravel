@@ -18,15 +18,16 @@ class ProductTrademarkController extends Controller
 
     public function index(Request $request)
     {
-        $paginate = $request->has('paginate') ? isTrue($request->get('paginate')) : true; // 是否分页
+        $validate = arrHumpToLine($request->input());
+        $paginate = isset($validate['paginate']) ? isTrue($validate['paginate']) : true; // 是否分页
 
         $query = ProductTrademark::orderBy('letter', 'asc');
 
-        if ($request->has('title') && !is_null($request->get('title'))) {
-            $query = $query->where('title', 'like', "%{$request->get('title')}%");
+        if (isset($validate['title'])) {
+            $query = $query->where('title', 'like', "%{$validate['title']}%");
         }
 
-        $payload = $paginate ? $query->paginate($request->get('pageSize') ?? $this->pageSize, ['*'], 'page', $request->get('page') ?? $this->page) : $query->get();
+        $payload = $paginate ? $query->paginate($validate['page_size'] ?? $this->pageSize, ['*'], 'page', $validate['page'] ?? $this->page) : $query->get();
 
         return $this->returnIndex($payload, 'ProductTrademarkResource', __FUNCTION__, $paginate);
     }

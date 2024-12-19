@@ -19,21 +19,22 @@ class ProductCategoryController extends Controller
 
     public function index(Request $request)
     {
-        $paginate = $request->has('paginate') ? isTrue($request->get('paginate')) : true; // 是否分页
-        $cascader = $request->has('cascader') ? isTrue($request->get('cascader')) : false; // 级联选择
+        $validate = arrHumpToLine($request->input());
+        $paginate = isset($validate['paginate']) ? isTrue($validate['paginate']) : true; // 是否分页
+        $cascader = isset($validate['cascader']) ? isTrue($validate['cascader']) : false; // 级联选择
 
         $query = ProductCategory::orderBy('sort', 'asc');
 
-        if ($request->has('trademark_id')) {
-            $query = $query->whereHas('trademarks', function (Builder $q) use ($request) {
-                $q->where(['id' => $request->input('trademark_id')]);
+        if (isset($validate['trademark_id'])) {
+            $query = $query->whereHas('trademarks', function (Builder $q) use ($validate) {
+                $q->where(['id' => $validate['trademark_id']]);
             });
         }
 
-        if (($request->get('parent_id') ?? 0) === 0) {
+        if (($validate['parent_id'] ?? 0) === 0) {
             $query = $query->root();
         } else {
-            $query = $query->where(['parent_id' => $request->get('parent_id')]);
+            $query = $query->where(['parent_id' => $validate['parent_id']]);
         }
 
         if ($paginate && $cascader) {
@@ -45,13 +46,9 @@ class ProductCategoryController extends Controller
         }
 
 
-        if ($paginate) {
-            $payload = $query->paginate($request->get('pageSize') ?? $this->pageSize, ['*'], 'page', $request->get('page') ?? $this->page);
-        } else {
-            $payload = $query->get();
-        }
+        $payload = $paginate ? $query->paginate($validate['page_size'] ?? $this->pageSize, ['*'], 'page', $validate['page'] ?? $this->page) : $query->get();
 
-        return $this->returnIndex($payload, 'ProductCategoryResource', __FUNCTION__, $paginate, $cascader);
+        return $this->returnIndex($payload, 'ProductCategoryResource', __FUNCTION__, $paginate);
     }
 
 
@@ -120,7 +117,7 @@ class ProductCategoryController extends Controller
                 $category->description = $validate['description'] ?? null;
 
                 $category->save();
-                
+
                 $category->trademarks()->detach($category->trademarks->pluck('id')->toArray());
 
                 foreach ($validate['trademarks'] as $trademark) {

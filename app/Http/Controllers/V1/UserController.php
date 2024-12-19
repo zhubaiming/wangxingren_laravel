@@ -65,13 +65,15 @@ class UserController extends Controller
 
     public function index(Request $request)
     {
+        $validate = arrHumpToLine($request->input());
+
         $query = User::with(['role']);
 
-        if ($request->has('name') && !is_null($request->get('name'))) {
+        if (isset($validate['name'])) {
             $query = $query->where('name', 'like', "%{$request->get('name')}%");
         }
 
-        $payload = $query->paginate($request->get('pageSize') ?? $this->pageSize, ['*'], 'page', $request->get('page') ?? $this->page);
+        $payload = $query->paginate($validate['page_size'] ?? $this->pageSize, ['*'], 'page', $validate['page'] ?? $this->page);
 
         return $this->returnIndex($payload, 'UserResource', __FUNCTION__);
     }

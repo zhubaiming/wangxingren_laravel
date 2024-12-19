@@ -24,16 +24,19 @@ class ProductSpuController extends Controller
      */
     public function index(Request $request)
     {
+        $validate = arrHumpToLine($request->input());
+        $paginate = isset($validate['paginate']) ? isTrue($validate['paginate']) : true; // 是否分页
+
         $conditions = [];
 
-        if (!is_null($request->get('title'))) $conditions[] = ['title', 'like', "%{$request->get('title')}%"];
-        if (!is_null($request->get('categoryId'))) $conditions['category_id'] = $request->get('categoryId');
-        if (!is_null($request->get('trademarkId'))) $conditions['trademark_id'] = $request->get('trademarkId');
-        if (!is_null($request->get('saleable'))) $conditions['saleable'] = $request->get('saleable');
+        if (isset($validate['title'])) $conditions[] = ['title', 'like', "%{$validate['title']}%"];
+        if (isset($validate['category_id'])) $conditions['category_id'] = $validate['category_id'];
+        if (isset($validate['trademark_id'])) $conditions['trademark_id'] = $validate['trademark_id'];
+        if (isset($validate['saleable'])) $conditions['saleable'] = $validate['saleable'];
 
         $relations = ['category', 'trademark'];
 
-        $payload = $this->service->getList($conditions, relations: $relations, paginate: true, page: $request->get('page') ?? $this->page, per_page: $request->get('pageSize') ?? $this->pageSize);
+        $payload = $this->service->getList($conditions, relations: $relations, paginate: true, page: $validate['page'] ?? $this->page, per_page: $validate['page_size']);
 
         return (new BaseCollection($payload))->additional(['resource' => 'App\Http\Resources\ProductSpuResource', 'format' => __FUNCTION__]);
     }

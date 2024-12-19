@@ -15,7 +15,8 @@ class UserPermissionController extends Controller
      */
     public function index(Request $request)
     {
-        $paginate = $request->has('paginate') ? isTrue($request->get('paginate')) : true; // 是否分页
+        $validate = arrHumpToLine($request->input());
+        $paginate = isset($validate['paginate']) ? isTrue($validate['paginate']) : true; // 是否分页
 
         $payload = UserPermission::where(['level' => 1])->with(['childrenRecursive'])->orderBy('sort', 'asc')->get();
 
