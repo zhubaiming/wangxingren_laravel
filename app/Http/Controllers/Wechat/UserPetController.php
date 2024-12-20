@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers\Wechat;
 
-use App\Exceptions\WechatApiException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UserPetRequest;
 use App\Http\Resources\BaseCollection;
 use App\Services\UploadFileService;
 use App\Services\UserPetService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class UserPetController extends Controller
 {
@@ -32,23 +33,32 @@ class UserPetController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(UserPetRequest $request)
+//    public function store(UserPetRequest $request)
+    public function store(Request $request)
     {
-        $validated = $request->validated();
+        $validated = arrHumpToLine($request->post());
 
-        $validated['weight_id'] = $validated['weight'];
-        $validated['age'] = $validated['birth'];
+        $data = [
+            'breed_id' => $validated['breed_id'],
+            'breed_title' => $validated['breed_title'],
+            'name' => $validated['name'],
+            'breed_type' => $validated['breed_type'],
+            'gender' => $validated['gender'],
+            'weight' => $validated['weight'],
+            'color' => $validated['color'] ?? null,
+            'avatar' => $validated['avatar'] ?? null,
+            'remark' => $validated['remark'] ?? null,
+            'is_sterilization' => $validated['is_sterilization'] ?? false,
+            'is_default' => $validated['is_default'] ?? false,
+            'birth' => $validated['birth'],
+            'age' => $validated['birth'],
+            'weight_id' => $validated['weight']
+        ];
 
-        $this->service->create($validated);
+
+        Auth::guard('wechat')->user()->pets()->createMany([$data]);
 
         return $this->message('success');
-
-
-        return rescue(function () use ($request) {
-
-        }, function ($exception) {
-            throw new WechatApiException('8848', $exception->getMessage());
-        }, false);
     }
 
     /**
@@ -62,11 +72,14 @@ class UserPetController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UserPetRequest $request, string $id)
+//    public function update(UserPetRequest $request, string $id)
+    public function update(Request $request, string $id)
     {
 
-        dd($request, $id);
-        $validated = $request->validated();
+//        dd($request, $id);
+//        $validated = $request->validated();
+
+        $validated = arrHumpToLine($request->post());
 
         $this->service->update($validated, $id);
 

@@ -109,7 +109,7 @@ class ClientUser extends Model implements AuthenticatableContract
      */
     public function pets(): HasMany
     {
-        return $this->hasMany(Pet::class, 'user_id', 'id')->chaperone();
+        return $this->hasMany(ClientUserPet::class, 'user_id', 'id')->chaperone();
     }
 
     /**
