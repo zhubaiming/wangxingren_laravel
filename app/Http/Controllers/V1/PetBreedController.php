@@ -41,7 +41,7 @@ class PetBreedController extends Controller
 
         if (0 === SysPetBreed::where(['title' => $validate['title']])->count('id')) {
 
-            $userRole = SysPetBreed::create(['type' => $validate['type'], 'title' => $validate['title'], 'letter' => strtoupper($validate['letter'])]);
+            $userRole = SysPetBreed::create(['type' => $validate['type'], 'title' => $validate['title'], 'letter' => strtoupper($validate['letter']), 'is_sync_attr' => $validate['is_sync_attr']]);
 
             if (!$userRole) {
                 return $this->failed('品种创建失败');
@@ -81,6 +81,7 @@ class PetBreedController extends Controller
                 $userRole->type = $validate['type'];
                 $userRole->title = $validate['title'];
                 $userRole->letter = strtoupper($validate['letter']);
+                $userRole->is_sync_attr = $validate['is_sync_attr'];
 
                 $userRole->save();
 
