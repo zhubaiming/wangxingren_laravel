@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Wechat;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UserPetRequest;
-use App\Http\Resources\BaseCollection;
+use App\Models\ClientUserPet;
 use App\Services\UploadFileService;
 use App\Services\UserPetService;
 use Illuminate\Http\Request;
@@ -20,20 +20,20 @@ class UserPetController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        // 作用域
-        $scopes = ['owner' => true]; // 调用 popular 作用域
+        $paginate = $request->has('paginate') ? isTrue($request->get('paginate')) : true; // 是否分页
 
-        $payload = $this->service->getList(scopes: $scopes);
+        $query = ClientUserPet::where(['user_id' => Auth::guard('wechat')->user()->id])->orderBy('is_default', 'desc')->orderBy('created_at', 'asc');
 
-        return (new BaseCollection($payload))->additional(['resource' => 'App\Http\Resources\Wechat\UserPetResource']);
+        $payload = $paginate ? $query->simplePaginate($request->get('pageSize') ?? $this->pageSize, ['*'], 'page', $request->get('page') ?? $this->page) : $query->get();
+
+        return $this->returnIndex($payload, 'Wechat\ClientUserPetResource', __FUNCTION__, $paginate);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-//    public function store(UserPetRequest $request)
     public function store(Request $request)
     {
         $validated = arrHumpToLine($request->post());

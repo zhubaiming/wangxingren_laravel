@@ -134,7 +134,8 @@ class ClientUserPet extends Model
                 return match ($attributes['weight_type']) {
                     1 => 'small',
                     2 => 'middle',
-                    3 => 'big'
+                    3 => 'big',
+                    default => 'all'
                 };
             }
         );
