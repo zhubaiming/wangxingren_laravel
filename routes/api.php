@@ -8,16 +8,11 @@ use Illuminate\Support\Facades\Route;
 Route::get('/testEvent', [Controllers\TestController::class, 'testEvent']);
 Route::get('/message/send', [Controllers\TestController::class, 'send']);
 
-Route::post('/shop_service', function (Request $request, \App\Services\ShopServiceService $service) {
-    dd($service->createServiceInfo($request->post(), false));
-});
-
-
-Route::prefix('goods')->group(function () {
-    Route::apiResource('/category', V1\GoodCategoryController::class);
-});
 
 Route::prefix('v1')->group(function () {
+    Route::apiResource('dict', Controllers\DictController::class);
+
+
     Route::get('captcha', function () {
         // 创建一个新的 XML 文档
         $dom = new DOMDocument('1.0', 'UTF-8');
@@ -104,7 +99,10 @@ Route::prefix('v1')->group(function () {
     // 商品
     Route::prefix('product')->group(function () {
         Route::apiResource('/trademark', V1\ProductTrademarkController::class);
+        Route::delete('/trademark', [V1\ProductTrademarkController::class, 'batchDestroy']);
+
         Route::apiResource('/category', V1\ProductCategoryController::class);
+        Route::delete('/category', [V1\ProductCategoryController::class, 'batchDestroy']);
         Route::get('/category/{category_id}/pet_breed', [V1\PetBreedController::class, 'category_breed']);
 
         // spu
