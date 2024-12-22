@@ -15,6 +15,7 @@ class ProductSpu extends CommentsModel
             'saleable' => 'boolean',
             'sales_volume' => 'integer',
             'score' => 'integer',
+            'images' => 'array',
         ];
     }
 
@@ -35,5 +36,25 @@ class ProductSpu extends CommentsModel
     public function category()
     {
         return $this->belongsTo(ProductCategory::class, 'category_id', 'id');
+    }
+
+    public function attr()
+    {
+        return $this->belongsToMany(ProductAttr::class, 'pivot_product_spu_attr', 'spu_id', 'attr_id', 'id', 'id');
+    }
+
+    public function order()
+    {
+        return $this->hasMany(ClientUserOrder::class, 'spu_id', 'id');
+    }
+
+    public function spu_breed()
+    {
+        return $this->belongsToMany(SysPetBreed::class, 'pivot_product_spu_breed', 'spu_id', 'breed_id', 'id', 'id');
+    }
+
+    public function skus()
+    {
+        return $this->hasMany(ProductSku::class, 'spu_id', 'id');
     }
 }

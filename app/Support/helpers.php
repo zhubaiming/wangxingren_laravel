@@ -44,6 +44,10 @@ function arrHumpToLine(array $arr): array
     $keys = [];
 
     foreach ($arr as $key => $value) {
+        if (is_array($value)) {
+            $arr[$key] = arrHumpToLine($value);
+        }
+
         $keys[] = Str::snake($key);
     }
 

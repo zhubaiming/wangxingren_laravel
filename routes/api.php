@@ -98,20 +98,35 @@ Route::prefix('v1')->group(function () {
     Route::apiResource('/order', V1\OrderController::class);
     // 商品
     Route::prefix('product')->group(function () {
+        // 商品品牌 - 已完成
         Route::apiResource('/trademark', V1\ProductTrademarkController::class);
         Route::delete('/trademark', [V1\ProductTrademarkController::class, 'batchDestroy']);
 
-        Route::apiResource('/category', V1\ProductCategoryController::class);
-        Route::delete('/category', [V1\ProductCategoryController::class, 'batchDestroy']);
+        // 商品分类 - 已完成
         Route::get('/category/{category_id}/pet_breed', [V1\PetBreedController::class, 'category_breed']);
+        Route::get('/category/{category_id}/attr', [V1\ProductAttrController::class, 'category_attr']);
+        Route::delete('/category', [V1\ProductCategoryController::class, 'batchDestroy']);
+        Route::apiResource('/category', V1\ProductCategoryController::class);
 
-        // spu
-        Route::apiResource('/spu', V1\ProductSpuController::class);
+        // attr属性
+        Route::apiResource('/attr', V1\ProductAttrController::class);
+        Route::delete('/attr', [V1\ProductAttrController::class, 'batchDestroy']);
+//        Route::get('/category/{category_id}/pet_breed', [V1\PetBreedController::class, 'category_breed']);
+
+        // spu - 已完成
+        Route::get('/spu/{spu_id}/pet_breed', [V1\PetBreedController::class, 'spu_breed']);
         Route::put('/spu', [V1\ProductSpuController::class, 'batchUpdate']);
         Route::delete('/spu', [V1\ProductSpuController::class, 'batchDestroy']);
+        Route::apiResource('/spu', V1\ProductSpuController::class);
+
+        // sku
+        Route::apiResource('/sku', V1\ProductSkuController::class);
 
 
-        Route::apiResource('/serviceTime', V1\ProductServiceTimeController::class);
+
+
+
+//        Route::apiResource('/serviceTime', V1\ProductServiceTimeController::class);
     });
 
 //    Route::prefix('sreviceTime')->group(function () {

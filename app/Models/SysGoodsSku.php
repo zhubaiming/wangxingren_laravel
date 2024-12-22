@@ -4,9 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\MassPrunable;
 
 class SysGoodsSku extends CommentsModel
 {
+    use MassPrunable;
+
     protected $table = 'sys_goods_sku';
 
     // 属性类型转换

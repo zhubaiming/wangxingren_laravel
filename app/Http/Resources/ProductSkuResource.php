@@ -2,12 +2,9 @@
 
 namespace App\Http\Resources;
 
-class ProductSpuResource extends CommentsResource
+class ProductSkuResource extends CommentsResource
 {
 
-    /**
-     * @inheritDoc
-     */
     protected function resourceData(): array
     {
         $paginate = $this->additional['paginate'] ?? true;
@@ -17,15 +14,13 @@ class ProductSpuResource extends CommentsResource
             true => match ($format) {
                 'index' => [
                     'id' => $this->id,
-                    'title' => $this->title,
-                    'sub_title' => $this->sub_title,
-//                    'duration' => floatval(applyIntegerToFloatModifier($this->duration, '10', 1)),
-                    'category_title' => $this->category->title,
-                    'trademark_title' => $this->trademark->title,
-                    'can_use_pet' => $this->id,
-                    'sales_count' => $this->order_count,
-                    'saleable_color' => $this->transformSaleableColor($this->saleable),
-                    'saleable' => $this->saleable
+                    'spu_id' => $this->spu_id,
+                    'breed_id' => $this->breed_id,
+                    'weight_min' => $this->weight_min,
+                    'weight_max' => $this->weight_max,
+                    'duration' => $this->duration,
+                    'stock' => $this->stock,
+                    'price' => $this->price,
                 ],
                 'show' => [
                     'id' => $this->id,
@@ -51,20 +46,17 @@ class ProductSpuResource extends CommentsResource
                 'default' => []
             },
             false => [
-                'value' => $this->id,
-                'label' => $this->title
+                'id' => $this->id,
+                'spu_id' => $this->spu_id,
+                'breed_id' => $this->breed_id,
+                'weight_min' => $this->weight_min,
+                'weight_max' => $this->weight_max,
+                'duration' => $this->duration,
+                'stock' => $this->stock,
+                'price' => $this->price
             ]
         };
 
         return $result;
-    }
-
-    private function transformSaleableColor($saleable)
-    {
-        if ($saleable) {
-            return ['type' => 'success', 'color' => []];
-        }
-
-        return ['type' => 'error', 'color' => []];
     }
 }

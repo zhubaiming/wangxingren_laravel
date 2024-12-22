@@ -31,6 +31,7 @@ class UserPermissionResource extends CommentsResource
             false => [
                 'key' => $this->id,
                 'label' => $this->title,
+//                'disabled' => !($this->childrenRecursive->count() === 0),
                 'children' => $this->childrenRecursive->count() === 0 ? null : (new BaseCollection($this->childrenRecursive))->additional($this->additional)
             ]
         };

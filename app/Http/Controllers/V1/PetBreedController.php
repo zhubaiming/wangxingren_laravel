@@ -41,14 +41,30 @@ class PetBreedController extends Controller
 
         if (0 === SysPetBreed::where(['title' => $validate['title']])->count('id')) {
 
-            $userRole = SysPetBreed::create(['type' => $validate['type'], 'title' => $validate['title'], 'letter' => strtoupper($validate['letter']), 'is_sync_attr' => $validate['is_sync_attr']]);
+            $data = [
+                'type' => $validate['type'],
+                'title' => $validate['title'],
+                'letter' => strtoupper($validate['letter']),
+                'product_trademark_id' => strtoupper($validate['product_trademark_id']),
+                'product_category_id' => strtoupper($validate['product_category_id']),
+//                'is_sync_attr' => $validate['is_sync_attr']
+            ];
 
-            if (!$userRole) {
+//            if (isTrue($validate['is_sync_attr'])) {
+//                $data['sync_product_trademark_id'] = $validate['sync_product_trademark_id'];
+//                $data['sync_product_category_id'] = $validate['sync_product_category_id'];
+//            }
+
+            $breed = SysPetBreed::create($data);
+
+            if (!$breed) {
                 return $this->failed('品种创建失败');
             }
 
-//            $userRole->permissions()->attach($validate['permissions']);
-            // todo:如果选择同步，需要同步到attr
+//            if (isTrue($validate['is_sync_attr'])) {
+//                $breed->attrs()->attach($validate['sync_product_attr_id']);
+//            }
+
 
             return $this->message('success');
         }
@@ -61,6 +77,7 @@ class PetBreedController extends Controller
      */
     public function show(string $id)
     {
+//        $payload = SysPetBreed::with('attrs')->findOrFail($id);
         $payload = SysPetBreed::findOrFail($id);
 
         return $this->success((new PetBreedResource($payload))->additional(['format' => __FUNCTION__]));
@@ -76,17 +93,28 @@ class PetBreedController extends Controller
         if (0 === SysPetBreed::where(['title' => $validate['title']])->whereNot('id', $id)->count('id')) {
 
             try {
-                $userRole = SysPetBreed::findOrFail($id);
+                $breed = SysPetBreed::findOrFail($id);
 
-                $userRole->type = $validate['type'];
-                $userRole->title = $validate['title'];
-                $userRole->letter = strtoupper($validate['letter']);
-                $userRole->is_sync_attr = $validate['is_sync_attr'];
+                $breed->type = $validate['type'];
+                $breed->title = $validate['title'];
+                $breed->letter = strtoupper($validate['letter']);
+                $breed->product_trademark_id = $validate['product_trademark_id'];
+                $breed->product_category_id = $validate['product_category_id'];
 
-                $userRole->save();
+//                $breed->is_sync_attr = $validate['is_sync_attr'];
+//                $breed->sync_product_trademark_id = null;
+//                $breed->sync_product_category_id = null;
+//
+//                $breed->attrs()->detach();
+//
+//                if (isTrue($validate['is_sync_attr'])) {
+//                    $breed->attrs()->attach($validate['sync_product_attr_id']);
+//
+//                    $breed->sync_product_trademark_id = $validate['sync_product_trademark_id'];
+//                    $breed->sync_product_category_id = $validate['sync_product_category_id'];
+//                }
 
-//                $userRole->permissions()->sync($validate['permissions']);
-                // todo:如果选择同步，需要同步到attr
+                $breed->save();
 
                 return $this->message('success');
             } catch (ModelNotFoundException) {
@@ -106,9 +134,9 @@ class PetBreedController extends Controller
             $breed = SysPetBreed::findOrFail($id);
 
             //todo:如果数据已经同步，需要删除同步的数据
-            if ($breed->is_sync_attr) {
-
-            }
+//            if ($breed->is_sync_attr) {
+//                $breed->attrs()->detach();
+//            }
 
             $breed->delete();
 
@@ -120,11 +148,24 @@ class PetBreedController extends Controller
 
     public function category_breed(string $category_id)
     {
-        $payload = SysPetBreed::whereHas('specGroup', function ($q) use ($category_id) {
-            $q->whereHas('category', function ($q1) use ($category_id) {
-                $q1->where(['id' => $category_id]);
-            });
+//        $payload = SysPetBreed::whereHas('specGroup', function ($query) use ($category_id) {
+//            $query->whereHas('category', function ($withQuery) use ($category_id) {
+//                $withQuery->where(['id' => $category_id]);
+//            });
+//        })->get();
+
+        $payload = SysPetBreed::where('product_category_id', $category_id)->get();
+
+        return $this->returnIndex($payload, 'PetBreedResource', __FUNCTION__, false);
+    }
+
+    public function spu_breed(string $spu_id)
+    {
+        $payload = SysPetBreed::whereHas('spu', function ($spu) use ($spu_id) {
+            $spu->where('id', $spu_id);
         })->get();
+
+//        dd($payload->toArray());
 
         return $this->returnIndex($payload, 'PetBreedResource', __FUNCTION__, false);
     }
