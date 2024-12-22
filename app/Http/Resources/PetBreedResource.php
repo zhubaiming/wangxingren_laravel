@@ -15,6 +15,8 @@ class PetBreedResource extends CommentsResource
         $paginate = $this->additional['paginate'] ?? true;
         $format = $this->additional['format'] ?? 'default';
 
+//        dd($paginate, $format);
+
         return match ($paginate) {
             true => match ($format) {
                 'index' => [
@@ -44,7 +46,7 @@ class PetBreedResource extends CommentsResource
                     'sku' => (new BaseCollection($this->sku))->additional(['resource' => 'App\Http\Resources\ProductSkuResource', 'format' => 'index', 'paginate' => false]),
                     'row_span' => count($this->sku)
                 ],
-                'default' => [
+                default => [
                     'value' => $this->id,
                     'label' => $this->title
                 ]
