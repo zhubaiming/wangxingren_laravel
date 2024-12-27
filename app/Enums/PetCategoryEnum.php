@@ -11,9 +11,12 @@ enum PetCategoryEnum: int implements CommonEnum
     public function name(string $type = null)
     {
         return match ($this) {
-            self::unknown => __('common.unknown'),
-            self::cat => __('enums.animal.type.cat'),
-            self::dog => __('enums.animal.type.dog')
+            self::unknown => '未知',
+            self::cat => '猫',
+            self::dog => '狗'
+//            self::unknown => __('common.unknown'),
+//            self::cat => __('enums.animal.type.cat'),
+//            self::dog => __('enums.animal.type.dog')
         };
     }
 }

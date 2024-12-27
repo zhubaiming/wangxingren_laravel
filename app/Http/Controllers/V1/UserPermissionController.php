@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\V1;
 
+use App\Enums\ResponseEnum;
+use App\Exceptions\BusinessException;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserPermissionResource;
 use App\Models\UserPermission;
@@ -30,25 +32,21 @@ class UserPermissionController extends Controller
     {
         $validate = arrHumpToLine($request->post());
 
-        try {
-            $parentPermisstion = UserPermission::select('level', 'type')->findOrFail($validate['id']);
+        $parentPermission = UserPermission::select('level', 'type')->findOrFail($validate['id']);
 
-            $userPermisstion = UserPermission::create([
-                'title' => $validate['title'],
-                'level' => intval(bcadd($parentPermisstion->level, '1', 0)),
-                'parent_id' => $validate['id'],
-                'code' => $validate['code'],
-                'type' => 3 === $parentPermisstion->level ? 2 : 1,
-                'select' => true,
-                'sort' => $validate['sort']
-            ]);
+        $userPermission = UserPermission::create([
+            'title' => $validate['title'],
+            'level' => intval(bcadd($parentPermission->level, '1', 0)),
+            'parent_id' => $validate['id'],
+            'code' => $validate['code'],
+            'type' => 3 === $parentPermission->level ? 2 : 1,
+            'select' => true,
+            'sort' => $validate['sort']
+        ]);
 
-            $userPermisstion->roles()->attach(1);
-        } catch (ModelNotFoundException) {
-            return $this->failed('非法菜单，无法创建');
-        }
+        $userPermission->roles()->attach(1);
 
-        return $this->message('success');
+        return $this->success();
     }
 
     /**
@@ -68,19 +66,15 @@ class UserPermissionController extends Controller
     {
         $validate = arrHumpToLine($request->post());
 
-        try {
-            $userPermisstion = UserPermission::findOrFail($id);
+        $userPermission = UserPermission::findOrFail($id);
 
-            $userPermisstion->title = $validate['title'];
-            $userPermisstion->code = $validate['code'];
-            $userPermisstion->sort = $validate['sort'];
+        $userPermission->title = $validate['title'];
+        $userPermission->code = $validate['code'];
+        $userPermission->sort = $validate['sort'];
 
-            $userPermisstion->save();
-        } catch (ModelNotFoundException) {
-            return $this->failed('要修改的菜单不存在');
-        }
+        $userPermission->save();
 
-        return $this->message('success');
+        return $this->success();
     }
 
     /**

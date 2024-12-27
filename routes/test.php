@@ -3,6 +3,68 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+Route::post('/test_login', function (Request $request){
+    return \Illuminate\Support\Facades\Broadcast::auth($request);
+});
+
+
+Route::any('/goodSkuToProductSku', function () {
+    $goodsSkus = \Illuminate\Support\Facades\DB::table('sys_goods_sku')->select('spu_id', 'spec_values')->get();
+
+//    dd($goodsSkus->toArray());
+
+    $i = 1;
+    foreach ($goodsSkus as $goodsSku) {
+        $spec_values = json_decode($goodsSku->spec_values, true);
+
+        $data = [
+            'spu_id' => $goodsSku->spu_id,
+            'breed_id' => $spec_values['breed_id']
+        ];
+
+        if (isset($spec_values['weight_id'])) {
+            $weight = \Illuminate\Support\Facades\DB::table('sys_pet_breed_weight')->select('min', 'max')->find($spec_values['weight_id']);
+
+            $data['weight_min'] = $weight->min;
+            $data['weight_max'] = $weight->max;
+        }
+
+        \Illuminate\Support\Facades\DB::table('sys_product_sku')->insert($data);
+
+        $i++;
+    }
+
+    dd('完成，共 ' . $i . '条');
+});
+
+Route::any('/test_attr', function (Request $request) {
+    $related = \App\Models\SysPetBreed::class;
+
+    /**
+     * 插入，已完成
+     */
+//    $validate = arrHumpToLine($request->input());
+//
+//    $attrs = \App\Models\ProductAttr::get();
+//    $pets = \App\Models\SysPetBreed::select('id')->get()->pluck('id')->toArray();
+//
+//    foreach (\App\Models\ProductAttr::get() as $attr) {
+//        $attr->pivotValues($related)->attach($pets);
+//    }
+
+//    dd($validate, $pets);
+
+    /**
+     * 输出
+     */
+//    $attr = \App\Models\ProductAttr::find(1);
+
+    $attrs = \App\Models\ProductAttr::with('aaa')->get();
+
+
+    dd($attrs->toArray());
+});
+
 Route::any('/getPetsFromMyfoodiepet', function () {
     list($s1, $s2) = explode(' ', microtime());
     $microtime = sprintf('%.0f', (floatval($s1) + floatval($s2)) * 1000);

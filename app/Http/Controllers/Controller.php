@@ -3,12 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\BaseCollection;
-use App\Support\Traits\JsonResponseTrait;
+use App\Support\Traits\ApiResponse;
 
 abstract class Controller
 {
     //
-    use JsonResponseTrait;
+//    use JsonResponseTrait;
+    use ApiResponse;
 
     protected $service;
 

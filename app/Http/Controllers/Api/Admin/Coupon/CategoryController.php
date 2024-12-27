@@ -1,18 +1,26 @@
 <?php
 
-namespace App\Http\Controllers\V1;
+namespace App\Http\Controllers\Api\Admin\Coupon;
 
 use App\Http\Controllers\Controller;
+use App\Models\CouponCategory;
 use Illuminate\Http\Request;
 
-class PetGoodController extends Controller
+class CategoryController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $validate = arrHumpToLine($request->input());
+        $paginate = isset($validate['paginate']) ? isTrue($validate['paginate']) : true; // 是否分页
+
+        $query = CouponCategory::orderBy('id', 'asc');
+
+        $payload = $paginate ? $query->paginate($request->get('pageSize') ?? $this->pageSize, ['*'], 'page', $request->get('page') ?? $this->page) : $query->get();
+
+        return $this->returnIndex($payload, 'CouponCategoryResource', __FUNCTION__, $paginate);
     }
 
     /**
@@ -20,7 +28,7 @@ class PetGoodController extends Controller
      */
     public function store(Request $request)
     {
-        dd($request->input());
+        //
     }
 
     /**

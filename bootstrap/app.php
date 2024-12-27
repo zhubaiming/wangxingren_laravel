@@ -1,11 +1,18 @@
 <?php
 
+use App\Enums\ResponseEnum;
+use App\Exceptions\BusinessException;
+use App\Http\Middleware as CustomMiddleware;
+use Illuminate\Database\Eloquent\MassAssignmentException;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
-use App\Http\Middleware as CustomMiddleware;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -32,7 +39,23 @@ return Application::configure(basePath: dirname(__DIR__))
         }
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        // 手动管理 Laravel 默认的中间件组
+        $middleware->group('web', [
+            \Illuminate\Cookie\Middleware\EncryptCookies::class,
+            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+            \Illuminate\Session\Middleware\StartSession::class,
+            \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+            \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
+            \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            // \Illuminate\Session\Middleware\AuthenticateSession::class,
+        ]);
+
+        $middleware->group('api', [
+            // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+            // 'throttle:api',
+            \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            CustomMiddleware\ApiAuthMiddleware::class,
+        ]);
         // 中间件别名
         $middleware->alias([
             'auth.wechat' => CustomMiddleware\AuthenticateWechat::class
@@ -67,4 +90,80 @@ return Application::configure(basePath: dirname(__DIR__))
 //            $state = -2;
 //            $code = 500;
 //        });
+        $exceptions->render(function (Exception $e) {
+//            dd($e);
+            // 生产环境直接返回 500
+            if (!config('app.debug')) {
+                // ResponseEnum::SYSTEM_ERROR
+            }
+
+            switch (true) {
+                case $e instanceof MethodNotAllowedHttpException: // 请求类型错误异常抛出
+                    throw new BusinessException(ResponseEnum::CLIENT_METHOD_HTTP_TYPE_ERROR);
+                case $e instanceof ValidationException: // 参数校验错误异常抛出
+                    throw new BusinessException(ResponseEnum::CLIENT_PARAMETER_ERROR, config('app.debug') ? $e->getMessage() : '');
+                case $e instanceof QueryException: // Sql错误异常抛出
+                case $e instanceof MassAssignmentException: // Sql错误异常抛出
+                    throw new BusinessException(ResponseEnum::HTTP_ERROR, config('app.debug') ? $e->getMessage() : '');
+                case $e instanceof NotFoundHttpException:
+                    throw new BusinessException(ResponseEnum::CLIENT_DELETED_ERROR, config('app.debug') ? $e->getMessage() : '');
+                case $e instanceof BusinessException: // 自定义错误异常抛出
+                    return response()->json([
+                        'status' => 'fail',
+                        'code' => $e->getCode(),
+                        'message' => $e->getMessage(),
+                        'data' => null,
+                        'error' => null
+                    ]);
+            }
+
+            dd($e);
+
+            // 参数校验错误异常抛出
+            if ($e instanceof \Illuminate\Validation\ValidationException) {
+                // ResponseEnum::CLIENT_PARAMETER_ERROR
+            }
+
+            // 路由不存在异常抛出
+            if ($e instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException) {
+                // ResponseEnum::CLIENT_NOT_FOUND_ERROR
+            }
+        });
+
+//        dd(request()->expectsJson());
+
+        if (\request()->expectsJson()) {
+            $exceptions->render(function (Exception $e) {
+                // 生产环境直接返回 500
+                if (!config('app.debug')) {
+                    // ResponseEnum::SYSTEM_ERROR
+                }
+
+//                switch (true){
+//                    case $e instanceof
+//                }
+
+                // 请求类型错误异常抛出
+                if ($e instanceof \Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException) {
+                    throw
+                        // ResponseEnum::CLIENT_METHOD_HTTP_TYPE_ERROR
+                    dd(456);
+                }
+
+                // 参数校验错误异常抛出
+                if ($e instanceof \Illuminate\Validation\ValidationException) {
+                    // ResponseEnum::CLIENT_PARAMETER_ERROR
+                }
+
+                // 路由不存在异常抛出
+                if ($e instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException) {
+                    // ResponseEnum::CLIENT_NOT_FOUND_ERROR
+                }
+
+                // 自定义错误异常抛出
+                if ($e instanceof \App\Exceptions\BusinessException) {
+                    return response()->json();
+                }
+            });
+        }
     })->create();

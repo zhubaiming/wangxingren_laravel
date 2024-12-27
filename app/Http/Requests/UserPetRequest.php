@@ -115,6 +115,19 @@ class UserPetRequest extends CommentsRequest
         };
     }
 
+    public function messages()
+    {
+        return [
+            'breed_id.required' => '缺少宠物品种1',
+            'breed_title.required' => '缺少宠物品种2',
+            'name.required' => '缺少宠物名称',
+            'breed_type.enum' => '宠物类型不在选择范围内',
+            'breed_type.required' => '缺少宠物类型',
+            'gender.enum' => '宠物性别不在选择范围内',
+            'gender.required' => '缺少宠物性别',
+        ];
+    }
+
 //    public function after(Validator $validator)
 //    {
 ////        throw new WechatApiException('0100001', $validator->errors()->first());

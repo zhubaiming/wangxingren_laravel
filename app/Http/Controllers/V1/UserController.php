@@ -7,6 +7,7 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -32,7 +33,7 @@ class UserController extends Controller
             $query->select('id', 'title')->with(['permissions' => function ($perQuery) {
                 $perQuery->select('id', 'code', 'type')->wherePivotNotIn('permission_id', [1]);
             }]);
-        }])->where(['id' => 1])->firstOrFail();
+        }])->where('uid', Auth::guard('admin')->id())->firstOrFail();
 
         return $this->success((new UserResource($payload))->additional(['format' => __FUNCTION__]));
     }

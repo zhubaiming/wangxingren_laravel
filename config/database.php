@@ -189,7 +189,7 @@ return [
             'username' => env('REDIS_USERNAME'),
             'password' => env('REDIS_PASSWORD'),
             'port' => env('REDIS_PORT', '6379'),
-            'database' => env('REDIS_CACHE_DB', '0'),
+            'database' => env('REDIS_CACHE_DB', '1'),
         ],
 
         'wechat_user' => [
@@ -198,17 +198,17 @@ return [
             'username' => env('REDIS_USERNAME'),
             'password' => env('REDIS_PASSWORD'),
             'port' => env('REDIS_PORT', '6379'),
-            'database' => '1',
+            'database' => env('APP_ENV') === 'local' ? '15' : '1',
             'prefix' => 'client_wechat_app_'
         ],
 
-        'web_user' => [
+        'admin_user' => [
             'url' => env('REDIS_URL'),
             'host' => env('REDIS_HOST', '127.0.0.1'),
             'username' => env('REDIS_USERNAME'),
             'password' => env('REDIS_PASSWORD'),
             'port' => env('REDIS_PORT', '6379'),
-            'database' => '2'
+            'database' => env('APP_ENV') === 'local' ? '15' : '2',
         ],
 
         'queue' => [
@@ -217,7 +217,7 @@ return [
             'username' => env('REDIS_USERNAME'),
             'password' => env('REDIS_PASSWORD'),
             'port' => env('REDIS_PORT', '6379'),
-            'database' => '15'
+            'database' => env('APP_ENV') === 'local' ? '15' : '14'
         ]
 
     ],

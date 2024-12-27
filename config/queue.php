@@ -40,7 +40,7 @@ return [
             'connection' => env('DB_QUEUE_CONNECTION'),
             'table' => env('DB_QUEUE_TABLE', 'jobs'),
             'queue' => env('DB_QUEUE', 'default'),
-            'retry_after' => (int) env('DB_QUEUE_RETRY_AFTER', 90),
+            'retry_after' => (int)env('DB_QUEUE_RETRY_AFTER', 90),
             'after_commit' => false,
         ],
 
@@ -48,7 +48,7 @@ return [
             'driver' => 'beanstalkd',
             'host' => env('BEANSTALKD_QUEUE_HOST', 'localhost'),
             'queue' => env('BEANSTALKD_QUEUE', 'default'),
-            'retry_after' => (int) env('BEANSTALKD_QUEUE_RETRY_AFTER', 90),
+            'retry_after' => (int)env('BEANSTALKD_QUEUE_RETRY_AFTER', 90),
             'block_for' => 0,
             'after_commit' => false,
         ],
@@ -67,13 +67,13 @@ return [
         'redis' => [
             'driver' => 'redis',
 //            'connection' => env('REDIS_QUEUE_CONNECTION', 'default'),
-            'connection' => 'queue',
-            'queue' => env('REDIS_QUEUE', 'default'),
-            'retry_after' => (int) env('REDIS_QUEUE_RETRY_AFTER', 90),
+            'connection' => 'queue',                              // 对应config/database.php中redis的default配置
+            'queue' => env('REDIS_QUEUE', 'default'), // 默认队列名称
+//            'expire'=>'', // 队列任务过期时间（秒）
+            'retry_after' => (int)env('REDIS_QUEUE_RETRY_AFTER', 90),
             'block_for' => null,
             'after_commit' => false,
         ],
-
     ],
 
     /*
@@ -95,6 +95,7 @@ return [
     /*
     |--------------------------------------------------------------------------
     | Failed Queue Jobs
+    | 配置失败队列任务存放的数据库及数据表
     |--------------------------------------------------------------------------
     |
     | These options configure the behavior of failed queue job logging so you

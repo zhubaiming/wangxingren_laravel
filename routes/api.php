@@ -1,12 +1,13 @@
 <?php
 
 use App\Http\Controllers;
+use App\Http\Controllers\Api\Admin;
 use App\Http\Controllers\V1;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/testEvent', [Controllers\TestController::class, 'testEvent']);
-Route::get('/message/send', [Controllers\TestController::class, 'send']);
+Route::get('/message/send', [Controllers\TestController::class, 'send'])->withoutMiddleware([\App\Http\Middleware\ApiAuthMiddleware::class]);
 
 
 Route::prefix('v1')->group(function () {
@@ -68,15 +69,23 @@ Route::prefix('v1')->group(function () {
 
         exit(0);
     });
+
+
+    Route::prefix('broadcasting')->group(function () {
+        Route::post('/auth', [Admin\AuthController::class, 'authenticate']);
+    });
+
     // 账户操作
     Route::prefix('user')->group(function () {
-        Route::post('login', [V1\UserController::class, 'login']);
+        Route::controller(Admin\AuthController::class)->group(function () {
+            Route::post('registered', 'registered');
+            Route::post('login', 'login');
+            Route::post('logout', 'logout');
+        });
         Route::get('info', [V1\UserController::class, 'info']);
-        Route::post('logout', [V1\UserController::class, 'logout']);
         Route::apiResource('role', V1\UserRoleController::class);
         Route::put('batchToggle', [V1\UserController::class, 'batchToggle']);
         Route::put('resetPasswd/{id}', [V1\UserController::class, 'resetPasswd']);
-        Route::apiResource('menu', V1\UserMenuController::class);
         Route::apiResource('permission', V1\UserPermissionController::class);
     });
     Route::apiResource('/user', V1\UserController::class);
@@ -121,21 +130,7 @@ Route::prefix('v1')->group(function () {
 
         // sku
         Route::apiResource('/sku', V1\ProductSkuController::class);
-
-
-
-
-
-//        Route::apiResource('/serviceTime', V1\ProductServiceTimeController::class);
     });
-
-//    Route::prefix('sreviceTime')->group(function () {
-//        Route::get('/', [V1\ServiceTimeController::class, 'index']);
-//
-//        Route::get('date', [V1\ServiceTimeController::class, 'dateList']);
-//        Route::post('checkDate', [V1\ServiceTimeController::class, 'checkDate']);
-//        Route::post('/', [V1\ServiceTimeController::class, 'store']);
-//    });
 
 
     Route::prefix('pet')->group(function () {
@@ -143,8 +138,9 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('weight', V1\PetWeightController::class);
     });
 
-    Route::apiResource('/goods_category', V1\GoodCategoryController::class);
-    Route::apiResource('/goods', V1\GoodsController::class);
+    Route::apiResource('coupon/category', Admin\Coupon\CategoryController::class);
+    Route::apiResource('coupon', Admin\Coupon\CouponController::class);
+
 
     // 上传
     Route::prefix('upload')->group(function () {
@@ -175,4 +171,13 @@ Route::prefix('v1')->group(function () {
             ]);
         });
     });
+
+
+//    Route::prefix('sreviceTime')->group(function () {
+//        Route::get('/', [V1\ServiceTimeController::class, 'index']);
+//
+//        Route::get('date', [V1\ServiceTimeController::class, 'dateList']);
+//        Route::post('checkDate', [V1\ServiceTimeController::class, 'checkDate']);
+//        Route::post('/', [V1\ServiceTimeController::class, 'store']);
+//    });
 });

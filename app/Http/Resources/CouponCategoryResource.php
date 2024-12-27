@@ -2,29 +2,20 @@
 
 namespace App\Http\Resources;
 
-use App\Enums\PetCategoryEnum;
-
-class PetBreedResource extends CommentsResource
+class CouponCategoryResource extends CommentsResource
 {
-
-    /**
-     * @inheritDoc
-     */
     protected function resourceData(): array
     {
         $paginate = $this->additional['paginate'] ?? true;
         $format = $this->additional['format'] ?? 'default';
-
-//        dd($paginate, $format);
 
         return match ($paginate) {
             true => match ($format) {
                 'index' => [
                     'id' => $this->id,
                     'title' => $this->title,
-//                    'type' => $this->type,
-                    'type' => PetCategoryEnum::from($this->type)->name(),
-//                    'is_sync_attr' => $this->is_sync_attr
+                    'code' => $this->code,
+                    'updated_by' => $this->updated_by
                 ],
                 'show' => [
                     'id' => $this->id,

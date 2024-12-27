@@ -40,10 +40,14 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'admin' => [
+            'driver' => 'admin',
+            'provider' => 'admin'
+        ],
         'wechat' => [
             'driver' => 'wechat',
             'provider' => 'wechat_user'
-        ]
+        ],
     ],
 
     /*
@@ -64,15 +68,20 @@ return [
     */
 
     'providers' => [
-        'users' => [
-            'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', App\Models\User::class),
-        ],
+//        'users' => [
+//            'driver' => 'eloquent',
+//            'model' => env('AUTH_MODEL', App\Models\User::class),
+//        ],
 
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
+//        'users' => [
+//            'driver' => 'database',
+//            'table' => 'user',
+//        ],
+
+        'admin' => [
+            'driver' => 'eloquent',
+            'model' => env('AUTH_ADMIN_MODEL', App\Models\User::class),
+        ],
 
         'wechat_user' => [
             'driver' => 'eloquent',

@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Events\DemoEvent;
-use App\Events\MessageNotification;
+use App\Events\NewPayedOrderEvent;
 use App\Models\Demo\Message;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Broadcast;
 
 class TestController extends Controller
 {
@@ -27,9 +27,14 @@ class TestController extends Controller
 
         $message->save();
 
+//        Broadcast::channel('1', '', ['guards' => ['admin']]);
+
 //        broadcast(new MessageNotification($message));
 //        event(new MessageNotification(987654321));
-        MessageNotification::dispatch($message);
+//        MessageNotification::dispatch($message);
+
+//        broadcast(new NewPayedOrderEvent());
+        NewPayedOrderEvent::dispatch();
 
         return response()->json(['message' => '成功']);
     }

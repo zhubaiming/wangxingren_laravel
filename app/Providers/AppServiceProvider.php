@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Services\Guard\AdminGuard;
 use App\Services\Wechat\WechatAppUserGuard;
+use Illuminate\Auth\RequestGuard;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Events\QueryExecuted;
@@ -35,6 +37,27 @@ class AppServiceProvider extends ServiceProvider
 
             return new WechatAppUserGuard($app, Auth::createUserProvider($config['provider']));
         });
+        Auth::extend('admin', function ($app, $name, $config) {
+
+//            dd(Auth::createUserProvider($config['provider']));
+
+            return new AdminGuard($app, Auth::createUserProvider($config['provider']));
+
+//            return new RequestGuard(
+//                new AdminGuard(),
+//                request(),
+//                Auth::createUserProvider($config['provider'])
+//            );
+
+
+//             new Illuminate\Auth\RequestGuard(
+            //    new Guard($auth, config('sanctum.expiration), $config['provider']),
+            //    request(),
+            //    $auth->createUserProvider($config['provider'] ?? null)
+//            );
+        });
+
+
         // Eloquent
         // 在非生产环境中禁用懒加载
 //        Model::preventLazyLoading(!$this->app->isProduction());
