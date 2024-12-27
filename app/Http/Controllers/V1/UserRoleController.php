@@ -48,7 +48,7 @@ class UserRoleController extends Controller
 
             $userRole->permissions()->attach($validate['permissions']);
 
-            return $this->message('success');
+            return $this->success();
         }
 
         return $this->failed('当前角色已存在，请重新建立');
@@ -83,7 +83,7 @@ class UserRoleController extends Controller
 
                 $userRole->permissions()->sync($validate['permissions']);
 
-                return $this->message('success');
+                return $this->success();
             } catch (ModelNotFoundException) {
                 return $this->failed('要修改的角色不存在');
             }
@@ -110,6 +110,6 @@ class UserRoleController extends Controller
             DB::table('pivot_role_menu')->where(['role_id' => $id])->delete();
         }
 
-        return $this->message('success');
+        return $this->success();
     }
 }

@@ -47,7 +47,7 @@ class ProductTrademarkController extends Controller
                 return $this->failed('品牌创建失败');
             }
 
-            return $this->message('success');
+            return $this->success();
         }
 
         return $this->failed('当前品牌已存在，请重新建立');
@@ -87,7 +87,7 @@ class ProductTrademarkController extends Controller
 
                 $trademark->save();
 
-                return $this->message('success');
+                return $this->success();
             } catch (ModelNotFoundException) {
                 return $this->failed('要修改的品牌不存在');
             }
@@ -103,13 +103,13 @@ class ProductTrademarkController extends Controller
     {
         ProductTrademark::destroy($id);
 
-        return $this->message('success');
+        return $this->success();
     }
 
     public function batchDestroy(Request $request)
     {
         ProductTrademark::destroy($request->post('ids'));
 
-        return $this->message('success');
+        return $this->success();
     }
 }

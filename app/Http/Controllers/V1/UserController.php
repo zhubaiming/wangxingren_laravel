@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -53,7 +54,7 @@ class UserController extends Controller
 
             $user->save();
 
-            return $this->message('success');
+            return $this->success();
         } catch (ModelNotFoundException) {
             return $this->failed('当前用户不存在');
         }
@@ -104,7 +105,7 @@ class UserController extends Controller
 
         User::create($validated);
 
-        return $this->message('success');
+        return $this->success();
     }
 
     public function update(Request $request, string $id)
@@ -119,7 +120,7 @@ class UserController extends Controller
 
         User::where(['id' => $id])->update($validated);
 
-        return $this->message('success');
+        return $this->success();
     }
 
     public function batchToggle(Request $request)
@@ -128,21 +129,21 @@ class UserController extends Controller
 
         User::whereIn('id', $validated['ids'])->update(['status' => $validated['status']]);
 
-        return $this->message('success');
+        return $this->success();
     }
 
     public function resetPasswd(string $id)
     {
-        User::where(['id' => $id])->update(['password' => 'Dcba@1234', 'is_default_passwd' => true]);
+        User::where(['id' => $id])->update(['password' => Hash::make('Dcba@1234'), 'is_default_passwd' => true]);
 
-        return $this->message('success');
+        return $this->success();
     }
 
     public function destroy(string $id)
     {
         $this->delete($id);
 
-        return $this->message('success');
+        return $this->success();
     }
 
     private function delete(array|string $id)

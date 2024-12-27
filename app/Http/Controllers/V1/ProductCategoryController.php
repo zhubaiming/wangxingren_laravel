@@ -97,7 +97,7 @@ class ProductCategoryController extends Controller
             $category->trademarks()->attach($trademark);
         }
 
-        return $this->message('success');
+        return $this->success();
     }
 
 
@@ -124,7 +124,7 @@ class ProductCategoryController extends Controller
                     $category->trademarks()->attach($trademark);
                 }
 
-                return $this->message('success');
+                return $this->success();
             }
 
             return $this->failed('当前分类已存在，请重新建立');
@@ -149,6 +149,6 @@ class ProductCategoryController extends Controller
             return $this->failed('要删除的菜单不存在');
         }
 
-        return $this->message('success');
+        return $this->success();
     }
 }

@@ -44,7 +44,7 @@ class CompanyController extends Controller
 
         CompanyInfo::updateOrCreate(['id' => $id], $data);
 
-        return $this->message('success');
+        return $this->success();
     }
 
     /**

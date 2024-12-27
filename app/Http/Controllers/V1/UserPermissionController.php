@@ -90,6 +90,6 @@ class UserPermissionController extends Controller
             return $this->failed('要删除的菜单不存在');
         }
 
-        return $this->message('success');
+        return $this->success();
     }
 }

@@ -39,7 +39,7 @@ class UserAddressController extends Controller
 
         ClientUserAddress::create($validate);
 
-        return $this->message('success');
+        return $this->success();
     }
 
     /**
@@ -88,7 +88,7 @@ class UserAddressController extends Controller
             return $this->message('地址不存在，请核实');
         }
 
-        return $this->message('success');
+        return $this->success();
     }
 
     /**
@@ -104,6 +104,6 @@ class UserAddressController extends Controller
             return $this->message('地址不存在，请核实');
         }
 
-        return $this->message('success');
+        return $this->success();
     }
 }

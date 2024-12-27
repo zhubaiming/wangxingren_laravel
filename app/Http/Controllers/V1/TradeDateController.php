@@ -60,7 +60,7 @@ class TradeDateController extends Controller
             $request->post()
         );
 
-        return $this->message('success');
+        return $this->success();
     }
 
     /**

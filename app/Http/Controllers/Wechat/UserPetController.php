@@ -58,7 +58,7 @@ class UserPetController extends Controller
 
         Auth::guard('wechat')->user()->pets()->createMany([$data]);
 
-        return $this->message('success');
+        return $this->success();
     }
 
     /**

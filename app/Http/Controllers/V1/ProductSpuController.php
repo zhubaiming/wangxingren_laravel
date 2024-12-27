@@ -121,7 +121,7 @@ class ProductSpuController extends Controller
 //            DB::table('sys_pivot_product_spu_value')->insert($pivot_product_spu_value);
         }
 
-        return $this->message('success');
+        return $this->success();
     }
 
     /**
@@ -169,7 +169,7 @@ class ProductSpuController extends Controller
 
             $spu->save();
 
-            return $this->message('success');
+            return $this->success();
         } catch (ModelNotFoundException $e) {
             return $this->failed('要修改的spu不存在');
         }
@@ -179,7 +179,7 @@ class ProductSpuController extends Controller
     {
         ProductSpu::whereIn('id', $request->post('ids'))->update($request->post('data'));
 
-        return $this->message('success');
+        return $this->success();
     }
 
     /**
@@ -189,13 +189,13 @@ class ProductSpuController extends Controller
     {
         $this->service->delete($id);
 
-        return $this->message('success');
+        return $this->success();
     }
 
     public function batchDestroy(Request $request)
     {
         $this->service->delete($request->post('ids'));
 
-        return $this->message('success');
+        return $this->success();
     }
 }

@@ -66,7 +66,7 @@ class PetBreedController extends Controller
 //            }
 
 
-            return $this->message('success');
+            return $this->success();
         }
 
         return $this->failed('当前品种已存在，请重新建立');
@@ -116,7 +116,7 @@ class PetBreedController extends Controller
 
                 $breed->save();
 
-                return $this->message('success');
+                return $this->success();
             } catch (ModelNotFoundException) {
                 return $this->failed('要修改的品种不存在');
             }
@@ -140,7 +140,7 @@ class PetBreedController extends Controller
 
             $breed->delete();
 
-            return $this->message('success');
+            return $this->success();
         } catch (ModelNotFoundException) {
             return $this->failed('要删除的品种不存在');
         }
