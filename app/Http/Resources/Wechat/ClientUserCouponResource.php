@@ -4,7 +4,7 @@ namespace App\Http\Resources\Wechat;
 
 use App\Http\Resources\CommentsResource;
 
-class ClientUserAddressResource extends CommentsResource
+class ClientUserCouponResource extends CommentsResource
 {
     protected function resourceData(): array
     {
@@ -35,15 +35,12 @@ class ClientUserAddressResource extends CommentsResource
             },
             false => [
                 'id' => $this->id,
-                'province' => $this->province,
-                'city' => $this->city,
-                'district' => $this->district,
-                'street' => $this->street,
-                'address' => $this->address,
-                'person_name' => $this->person_name,
-                'person_phone_prefix' => $this->person_phone_prefix,
-                'person_phone_number' => $this->person_phone_number,
-                'is_default' => $this->is_default
+                'code' => $this->code,
+                'title' => $this->title,
+                'amount' => $this->amount,
+                'amount_conv' => applyIntegerToFloatModifier($this->amount),
+                'min_total' => $this->min_total,
+                'min_total_conv' => applyIntegerToFloatModifier($this->min_total)
             ]
         };
     }

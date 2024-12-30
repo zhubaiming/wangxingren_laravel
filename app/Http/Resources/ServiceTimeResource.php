@@ -44,7 +44,7 @@ class ServiceTimeResource extends CommentsResource
                 'after_service' => $this->detail->after_service,
                 'spec_groups' => GoodsSpecGroupResource::collection($this->specGroups),
 //                'sku_ids'=>
-//                'skus' => GoodsSkuResource::collection($this->skus),
+//                'skus' => ProductSkuResource::collection($this->skus),
 //                'service_times' => (new GoodsServiceTimeCollection($this->serviceTimes))->additional(['self' => true]),
 //                'service_times' => GoodsServiceTimeResource::collection($this->serviceTimes),
             ],

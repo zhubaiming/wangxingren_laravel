@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Wechat;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\Wechat\GoodsSkuResource;
+use App\Http\Resources\Wechat\ProductSkuResource;
 use App\Services\GoodsSkuService;
 use Illuminate\Http\Request;
 
@@ -37,6 +37,6 @@ class GoodsSkuController extends Controller
 
         $payload = $this->service->find($conditions, $scopes, fields: $fields);
 
-        return $this->success(new GoodsSkuResource($payload));
+        return $this->success(new ProductSkuResource($payload));
     }
 }

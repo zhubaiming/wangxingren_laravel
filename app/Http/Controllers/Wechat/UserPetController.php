@@ -22,7 +22,8 @@ class UserPetController extends Controller
      */
     public function index(Request $request)
     {
-        $paginate = $request->has('paginate') ? isTrue($request->get('paginate')) : true; // 是否分页
+        $validate = arrHumpToLine($request->input());
+        $paginate = isset($validate['paginate']) ? isTrue($validate['paginate']) : true; // 是否分页
 
         $query = ClientUserPet::where(['user_id' => Auth::guard('wechat')->user()->id])->orderBy('is_default', 'desc')->orderBy('created_at', 'asc');
 

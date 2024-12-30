@@ -8,10 +8,12 @@ class ClientUserOrder extends CommentsModel
 {
     protected $table = 'client_user_order';
 
+    protected $guarded = [];
+
     // ==============================  关联  ==============================
     public function user()
     {
-        return $this->belongsTo();
+        return $this->belongsTo(ClientUser::class, 'id', 'user_id');
     }
 
     public function spu(): BelongsTo

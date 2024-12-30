@@ -28,7 +28,7 @@ class ProductSku extends Model
     protected function price(): Attribute
     {
         return Attribute::make(
-            get: fn(float $value) => floatval(applyIntegerToFloatModifier($value)),
+//            get: fn(float $value) => floatval(applyIntegerToFloatModifier($value)),
             set: fn(float $value) => applyFloatToIntegerModifier($value)
         );
     }

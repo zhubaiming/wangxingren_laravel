@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Wechat;
 
+use App\Enums\PetCategoryEnum;
 use App\Http\Resources\CommentsResource;
 
 class ClientUserPetResource extends CommentsResource
@@ -19,7 +20,7 @@ class ClientUserPetResource extends CommentsResource
                     'breed_title' => $this->breed_title,
                     'name' => $this->name,
                     'breed_type' => $this->breed_type,
-                    'breed_type_conv' => $this->breed_type_conv,
+                    'breed_type_conv' => strtoupper(PetCategoryEnum::from($this->breed_type)->name),
                     'gender' => $this->gender,
                     'gender_conv' => $this->gender_conv,
                     'weight' => $this->weight,
