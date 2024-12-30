@@ -31,8 +31,8 @@ class AddressController extends Controller
     {
         $validate = arrHumpToLine($request->input());
 
-        ClientUserAddress::create([
-            'user_id' => Auth::guard('wechat')->user()->id,
+        $data = [
+//            'user_id' => Auth::guard('wechat')->user()->id,
             'country' => '中国',
             'province' => $validate['province'],
             'city' => $validate['city'],
@@ -43,7 +43,9 @@ class AddressController extends Controller
             'person_name' => $validate['person_name'],
             'person_phone_prefix' => $validate['person_phone_prefix'],
             'person_phone_number' => $validate['person_phone_number']
-        ]);
+        ];
+
+        Auth::guard('wechat')->user()->addresses()->createMany([$data]);
 
         $this->success();
     }

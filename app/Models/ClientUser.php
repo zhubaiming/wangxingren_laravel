@@ -112,6 +112,11 @@ class ClientUser extends Model implements AuthenticatableContract
         return $this->hasMany(ClientUserPet::class, 'user_id', 'id')->chaperone();
     }
 
+    public function addresses():HasMany
+    {
+        return $this->hasMany(ClientUserAddress::class, 'user_id', 'id')->chaperone();
+    }
+
     /**
      * 订单
      */

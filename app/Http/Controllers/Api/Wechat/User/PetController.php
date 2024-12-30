@@ -29,7 +29,28 @@ class PetController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = arrHumpToLine($request->post());
+
+        $data = [
+            'breed_id' => $validated['breed_id'],
+            'breed_title' => $validated['breed_title'],
+            'name' => $validated['name'],
+            'breed_type' => $validated['breed_type'],
+            'gender' => $validated['gender'],
+            'weight' => $validated['weight'],
+            'color' => $validated['color'] ?? null,
+            'avatar' => $validated['avatar'] ?? null,
+            'remark' => $validated['remark'] ?? null,
+            'is_sterilization' => $validated['is_sterilization'] ?? false,
+            'is_default' => $validated['is_default'] ?? false,
+            'birth' => $validated['birth'],
+            'age' => $validated['birth'],
+            'weight_id' => $validated['weight']
+        ];
+
+        Auth::guard('wechat')->user()->pets()->createMany([$data]);
+
+        return $this->success();
     }
 
     /**
