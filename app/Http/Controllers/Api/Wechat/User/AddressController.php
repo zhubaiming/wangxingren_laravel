@@ -29,7 +29,23 @@ class AddressController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validate = arrHumpToLine($request->input());
+
+        ClientUserAddress::create([
+            'user_id' => Auth::guard('wechat')->user()->id,
+            'country' => '中国',
+            'province' => $validate['province'],
+            'city' => $validate['city'],
+            'district' => $validate['district'],
+            'street' => $validate['street'] ?? null,
+            'address' => $validate['address'],
+            'is_default' => $validate['is_default'],
+            'person_name' => $validate['person_name'],
+            'person_phone_prefix' => $validate['person_phone_prefix'],
+            'person_phone_number' => $validate['person_phone_number']
+        ]);
+
+        $this->success();
     }
 
     /**

@@ -158,7 +158,7 @@ class OrderController extends Controller
                         $out_trade_no,
                         $order['real_total'],
                         Auth::guard('wechat')->user()->fresh()->loginInfo[0]->wechat_openid,
-                        "移动洗护服务-{$order_spu_info['title']}-{order_pet_info['name']}({order_pet_info['weight']}KG)"
+                        "移动洗护服务-{$order_spu_info['title']}-{$order_pet_info['name']}({$order_pet_info['weight']}KG)"
                     );
                     break;
             }

@@ -124,7 +124,7 @@ class MiniProgramPaymentService
      * @param string $openid
      * @return array
      */
-    public function requestPayment(string $out_trade_no, int $total, string $openid,string $description = '')
+    public function requestPayment(string $out_trade_no, int $total, string $openid, string $description = '')
     {
         try {
             $http_response = $this->instance->chain($this->url_path . 'jsapi')
@@ -213,14 +213,20 @@ class MiniProgramPaymentService
         $wechatpay_header_serial = $request->header('wechatpay-serial');               // 请求头部 - Wechatpay-Serial(请根据实际情况获取)
         $wechatpay_body = $request->post();                                                 // 请根据实际情况获取，例如: file_get_contents('php://input');
 
+        dd($wechatpay_body, json_encode($wechatpay_body));
+
         // 检查通知时间偏移量，允许5分钟之内的偏移
-        $timeOffsetStatus = app()->isLocal() ? true : 300 >= intval(abs(bcsub(Formatter::timestamp(), $wechatpay_header_timestamp, 0)));
+        $timeOffsetStatus = app()->isLocal() ? true : 300 >= intval(abs(bcsub(Formatter::timestamp(), (int)$wechatpay_header_timestamp, 0)));
         $verifiedStatus = Rsa::verify(
         // 构造验签名串
-            Formatter::joinedByLineFeed($wechatpay_header_timestamp, $wechatpay_header_nonce, json_encode($wechatpay_body, 320)),
+//            Formatter::joinedByLineFeed($wechatpay_header_timestamp, $wechatpay_header_nonce, json_encode($wechatpay_body, 320)),
+            Formatter::joinedByLineFeed($wechatpay_header_timestamp, $wechatpay_header_nonce, json_encode($wechatpay_body)),
+//            Formatter::joinedByLineFeed($wechatpay_header_timestamp, $wechatpay_header_nonce, json_encode($wechatpay_body, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)),
             $wechatpay_header_signature,
             $this->platformPublicKeyInstance
         );
+
+        dd($timeOffsetStatus, $verifiedStatus);
 
         if ($timeOffsetStatus && $verifiedStatus) {
             // 使用PHP7的数据解构语法，从Array中解构并赋值变量

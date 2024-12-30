@@ -28,8 +28,12 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->name('wechat.')
                 ->group(base_path('routes/wechat.php'));
 
-            Route::middleware('api')
-                ->prefix('wechat_notify')
+//            Route::middleware('api')
+//                ->prefix('wechat_notify')
+//                ->name('wechat_notify.')
+//                ->group(base_path('routes/wechat_notify.php'));
+
+            Route::prefix('wechat_notify')
                 ->name('wechat_notify.')
                 ->group(base_path('routes/wechat_notify.php'));
 
