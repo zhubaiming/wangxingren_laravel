@@ -330,7 +330,7 @@ class MiniProgramPaymentService
      * @param string $openid
      * @return array
      */
-    public function requestPayment1(string $out_trade_no, int $total, string $openid)
+    public function requestRefund(string $out_trade_no, int $total, string $openid)
     {
         try {
             $http_response = $this->instance->chain('v3/refund/domestic/refunds')
