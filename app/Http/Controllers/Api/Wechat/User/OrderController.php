@@ -109,7 +109,7 @@ class OrderController extends Controller
             'status' => OrderStatusEnum::paying,
             'user_id' => Auth::guard('wechat')->user()->id,
             'total' => $order_sku_info['price'],
-            'real_total' => $order_sku_info['price'],
+            'payer_total' => $order_sku_info['price'],
             'spu_id' => $order_spu_info['id'],
             'spu_json' => json_encode($order_spu_info, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
             'category_id' => $order_spu_info['category_id'],
@@ -135,15 +135,15 @@ class OrderController extends Controller
             if (0 === ClientUserCoupon::where('id', $order_coupon_info['id'])->where('user_id', Auth::guard('wechat')->user()->id)->where('status', true)->count('id')) {
                 throw new BusinessException(ResponseEnum::HTTP_ERROR, '订单创建非法');
             }
-            $real_total = intval(bcsub($order['total'], $order_coupon_info['amount'], 0));
+            $payer_total = intval(bcsub($order['total'], $order_coupon_info['amount'], 0));
             $order = array_merge($order, [
                 'coupon_id' => $order_coupon_info['id'],
                 'coupon_json' => json_encode($order_coupon_info, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
-                'real_total' => $real_total < 0 ? 0 : $real_total,
+                'payer_total' => $payer_total < 0 ? 0 : $payer_total,
                 'coupon_total' => $order_coupon_info['amount']
             ]);
 
-            if (0 === $order['real_total']) {
+            if (0 === $order['payer_total']) {
                 $order['status'] = OrderStatusEnum::finished;
             }
         }
@@ -151,12 +151,12 @@ class OrderController extends Controller
         ClientUserOrder::create($order);
 
         $payload = null;
-        if (0 !== $order['real_total']) {
+        if (0 !== $order['payer_total']) {
             switch ($pay_channel) {
                 case 1: // 微信支付
                     $payload = (new MiniProgramPaymentService())->requestPayment(
                         $out_trade_no,
-                        $order['real_total'],
+                        $order['payer_total'],
                         Auth::guard('wechat')->user()->fresh()->loginInfo[0]->wechat_openid,
                         "移动洗护服务-{$order_spu_info['title']}-{$order_pet_info['name']}({$order_pet_info['weight']}KG)"
                     );

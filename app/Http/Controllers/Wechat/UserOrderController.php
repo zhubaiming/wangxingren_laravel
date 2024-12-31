@@ -101,7 +101,7 @@ class UserOrderController extends Controller
                 'pet_id' => $orderPetInfo['id'],
                 'coupon_id' => $orderCouponInfo['id'] ?? null,
                 'total' => $sku->price,
-                'real_total' => $sku->price,
+                'payer_total' => $sku->price,
                 'coupon_total' => 0,
                 'trade_no' => $out_trade_no,
                 'status' => 0

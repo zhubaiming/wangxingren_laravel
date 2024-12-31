@@ -42,7 +42,7 @@ class ClientUserOrderResource extends CommentsResource
                     'cover' => 'https://crm.misswhite.com.cn/storage/topic/6459cc63daedf.jpg',
                     'trademark_title' => $this->trademark->title,
                     'product_title' => $this->spu->title,
-                    'real_total' => applyIntegerToFloatModifier($this->real_total),
+                    'payer_total' => applyIntegerToFloatModifier($this->payer_total),
                     'has_refund' => in_array($this->status, OrderStatusEnum::getRefundStatuses()),
                     'can_cancel' => $this->status === OrderStatusEnum::paying->value,
                     'can_refund' => in_array($this->status, OrderStatusEnum::getFinishStatuses()),

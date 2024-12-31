@@ -2,6 +2,9 @@
 
 namespace App\Services\Wechat;
 
+use App\Enums\OrderStatusEnum;
+use App\Models\ClientUserOrder;
+use Carbon\Carbon;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -204,7 +207,7 @@ class MiniProgramPaymentService
      * 支付通知
      *
      * @param Request $request
-     * @return bool
+     * @return \Illuminate\Http\JsonResponse
      */
     public function decryptNotify(Request $request)
     {
@@ -214,10 +217,6 @@ class MiniProgramPaymentService
         $wechatpay_header_serial = $request->header('wechatpay-serial');               // 请求头部 - Wechatpay-Serial(请根据实际情况获取)
 //        $wechatpay_body = $request->post();                                                 // 请根据实际情况获取，例如: file_get_contents('php://input');
         $wechatpay_body = file_get_contents('php://input');
-
-//        dd($wechatpay_header_timestamp, file_get_contents('php://input'));
-
-//        dd($wechatpay_body, json_encode($wechatpay_body, JSON_UNESCAPED_UNICODE));
 
         // 检查通知时间偏移量，允许5分钟之内的偏移
         $timeOffsetStatus = 300 >= intval(abs(bcsub(Formatter::timestamp(), (int)$wechatpay_header_timestamp, 0)));
@@ -231,8 +230,6 @@ class MiniProgramPaymentService
         $log = 'timeOffsetStatus: ' . ($timeOffsetStatus ? 'true' : 'false') . ', verifiedStatus: ' . ($verifiedStatus ? 'true' : 'false');
         Log::channel('test')->info($log);
 
-        dd($timeOffsetStatus, $verifiedStatus);
-
         if ($timeOffsetStatus && $verifiedStatus) {
             // 使用PHP7的数据解构语法，从Array中解构并赋值变量
             ['resource' => [
@@ -242,9 +239,22 @@ class MiniProgramPaymentService
             ]] = $wechatpay_body;
             // 加密文本消息解密
             $wechatpay_body_resource = AesGcm::decrypt($ciphertext, config('wechat.merchant.api_v3_key'), $nonce, $aad);
+            Log::channel('test')->info($wechatpay_body_resource);
             // 把解密后的文本转换为PHP Array数组
             $wechatpay_body_resource_array = json_decode($wechatpay_body_resource, true);
-            dd($wechatpay_body_resource_array);// 打印解密后的结果
+
+            if ('SUCCESS' === $wechatpay_body_resource_array['trade_state']) {
+                ClientUserOrder::where('pay_channel', 1)->where('trade_no', $wechatpay_body_resource_array['out_trade_no'])->update([
+                    'mchid' => $wechatpay_body_resource_array['mchid'],
+                    'transaction_id' => $wechatpay_body_resource_array['transaction_id'],
+                    'trade_type' => $wechatpay_body_resource_array['trade_type'],
+                    'bank_type' => $wechatpay_body_resource_array['bank_type'],
+                    'pay_success_at' => Carbon::parse($wechatpay_body_resource_array['success_time']),
+                    'currency' => $wechatpay_body_resource_array['currency'],
+                    'payer_currency' => $wechatpay_body_resource_array['payer_currency'],
+                    'status' => OrderStatusEnum::finished
+                ]);
+            }
             /*
              *  [
                     "mchid" => "1680836934"                            // 商户的商户号，由微信支付生成并下发
@@ -270,7 +280,7 @@ class MiniProgramPaymentService
              */
         }
 
-        return $timeOffsetStatus && $verifiedStatus;
+        return response()->json();
     }
 
     /**

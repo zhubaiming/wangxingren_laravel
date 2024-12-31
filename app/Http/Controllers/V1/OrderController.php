@@ -21,7 +21,7 @@ class OrderController extends Controller
     {
         $relations = ['spu'];
 
-        $fields = ['id', 'trade_no', 'total', 'real_total', 'coupon_total', 'created_at', 'status', 'pay_channel', 'goods_id'];
+        $fields = ['id', 'trade_no', 'total', 'payer_total', 'coupon_total', 'created_at', 'status', 'pay_channel', 'goods_id'];
 
         $payload = $this->service->getList(relations: $relations, fields: $fields, paginate: true);
 

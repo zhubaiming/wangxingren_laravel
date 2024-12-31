@@ -10,7 +10,7 @@ class OrderResource extends CommentsResource
             'id' => $this->id,
             'trade_no' => $this->trade_no,
             'total' => applyIntegerToFloatModifier($this->total),
-            'real_total' => applyIntegerToFloatModifier($this->real_total),
+            'payer_total' => applyIntegerToFloatModifier($this->payer_total),
             'coupon_total' => applyIntegerToFloatModifier($this->coupon_total),
             'created_at' => $this->created_at,
             'status_color' => $this->transformStatusColor($this->status),
