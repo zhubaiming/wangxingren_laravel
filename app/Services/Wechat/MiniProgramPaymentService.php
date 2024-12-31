@@ -4,6 +4,7 @@ namespace App\Services\Wechat;
 
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use WeChatPay\Builder;
 use WeChatPay\Crypto\AesGcm;
 use WeChatPay\Crypto\Rsa;
@@ -211,20 +212,24 @@ class MiniProgramPaymentService
         $wechatpay_header_nonce = $request->header('wechatpay-nonce');                 // 请求头部 - Wechatpay-Nonce(请根据实际情况获取)
         $wechatpay_header_timestamp = strval($request->header('wechatpay-timestamp')); // 请求头部 - Wechatpay-Timestamp(请根据实际情况获取)
         $wechatpay_header_serial = $request->header('wechatpay-serial');               // 请求头部 - Wechatpay-Serial(请根据实际情况获取)
-        $wechatpay_body = $request->post();                                                 // 请根据实际情况获取，例如: file_get_contents('php://input');
+//        $wechatpay_body = $request->post();                                                 // 请根据实际情况获取，例如: file_get_contents('php://input');
+        $wechatpay_body = file_get_contents('php://input');
 
-        dd($wechatpay_body, json_encode($wechatpay_body));
+//        dd($wechatpay_header_timestamp, file_get_contents('php://input'));
+
+//        dd($wechatpay_body, json_encode($wechatpay_body, JSON_UNESCAPED_UNICODE));
 
         // 检查通知时间偏移量，允许5分钟之内的偏移
-        $timeOffsetStatus = app()->isLocal() ? true : 300 >= intval(abs(bcsub(Formatter::timestamp(), (int)$wechatpay_header_timestamp, 0)));
+        $timeOffsetStatus = 300 >= intval(abs(bcsub(Formatter::timestamp(), (int)$wechatpay_header_timestamp, 0)));
         $verifiedStatus = Rsa::verify(
         // 构造验签名串
-//            Formatter::joinedByLineFeed($wechatpay_header_timestamp, $wechatpay_header_nonce, json_encode($wechatpay_body, 320)),
-            Formatter::joinedByLineFeed($wechatpay_header_timestamp, $wechatpay_header_nonce, json_encode($wechatpay_body)),
-//            Formatter::joinedByLineFeed($wechatpay_header_timestamp, $wechatpay_header_nonce, json_encode($wechatpay_body, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)),
+            Formatter::joinedByLineFeed($wechatpay_header_timestamp, $wechatpay_header_nonce, $wechatpay_body),
             $wechatpay_header_signature,
             $this->platformPublicKeyInstance
         );
+
+        $log = 'timeOffsetStatus: ' . ($timeOffsetStatus ? 'true' : 'false') . ', verifiedStatus: ' . ($verifiedStatus ? 'true' : 'false');
+        Log::channel('test')->info($log);
 
         dd($timeOffsetStatus, $verifiedStatus);
 
