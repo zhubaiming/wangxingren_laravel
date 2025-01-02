@@ -26,7 +26,7 @@ return [
     /**
      * 过期时间，秒
      */
-    'ttl' => env('JWT_TTL', 3600),
+    'ttl' => env('JWT_TTL', 36000),
 
 
     'admin' => [

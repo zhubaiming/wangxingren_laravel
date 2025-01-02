@@ -96,6 +96,11 @@ Route::prefix('v1')->group(function () {
     Route::apiResource('/tradeDate', V1\TradeDateController::class)->only(['index', 'update']);
     // 营业车辆 - 已完成
     Route::apiResource('/serviceCar', V1\ServiceCarController::class)->only(['index']);
+
+    Route::prefix('system')->group(function () {
+        Route::get('/app/index', [Admin\SystemController::class, 'appIndexShow']);
+        Route::put('/app/index', [Admin\SystemController::class, 'appIndexUpdate']);
+    });
     // 设置相关 - 已完成
     Route::prefix('setting')->group(function () {
         Route::apiResource('/company', V1\CompanyController::class)->only(['index', 'update']);
@@ -143,13 +148,18 @@ Route::prefix('v1')->group(function () {
 
 
     // 上传
-    Route::prefix('upload')->group(function () {
+    Route::prefix('upload')->withoutMiddleware('api')->group(function () {
+        // 富文本
+        Route::post('reach_text', [Controllers\UploadController::class, 'reachText']);
+        Route::prefix('app')->group(function () {
+            Route::post('banner', [Controllers\UploadController::class, 'appBanner']);
+        });
+
+
         // 公司信息
         Route::prefix('companyInfo')->group(function () {
             Route::post('info', [Controllers\UploadController::class, 'companyInfo']);
         });
-        // 富文本
-        Route::post('reach_text', [Controllers\UploadController::class, 'reachText']);
         // 用户
         Route::prefix('user')->group(function () {
             Route::post('avatar', [Controllers\UploadController::class, 'userAvatar']);
