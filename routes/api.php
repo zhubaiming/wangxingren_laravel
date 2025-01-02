@@ -149,9 +149,10 @@ Route::prefix('v1')->group(function () {
 
     // 上传
     Route::prefix('upload')->withoutMiddleware('api')->group(function () {
+        // 富文本
+        Route::post('reach_text', [Controllers\UploadController::class, 'reachText']);
         Route::prefix('app')->group(function () {
             Route::post('banner', [Controllers\UploadController::class, 'appBanner']);
-            Route::post('banner_video', [Controllers\UploadController::class, 'appBannerVideo']);
         });
 
 
@@ -159,8 +160,6 @@ Route::prefix('v1')->group(function () {
         Route::prefix('companyInfo')->group(function () {
             Route::post('info', [Controllers\UploadController::class, 'companyInfo']);
         });
-        // 富文本
-        Route::post('reach_text', [Controllers\UploadController::class, 'reachText']);
         // 用户
         Route::prefix('user')->group(function () {
             Route::post('avatar', [Controllers\UploadController::class, 'userAvatar']);
