@@ -24,7 +24,7 @@ class ApiAuthMiddleware
     {
         if ($request->is('api/*')) {
             if ($request->is('*/login')) {
-                if (!is_null($request->bearerToken())) {
+                if (!is_null($request->bearerToken())) { // 如果请求login，并且带有token
                     if (!Auth::guard('admin')->check()) {
                         throw new BusinessException(ResponseEnum::CLIENT_HTTP_UNAUTHORIZED);
                     } else {

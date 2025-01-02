@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ResponseEnum;
+use App\Exceptions\BusinessException;
 use App\Services\UploadFileService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -16,10 +18,61 @@ class UploadController extends Controller
             'driver' => 'local',
             'visibility' => 'public',
             'root' => storage_path('app/public'),
-            'url' => config('app.url') . DIRECTORY_SEPARATOR . 'storage'
+            'url' => config('app.url') . DIRECTORY_SEPARATOR . 'storage',
+            'permissions' => [
+                'file' => [
+                    'public' => 0644,
+                    'private' => 0600
+                ],
+                'dir' => [
+                    'public' => 0755,
+                    'private' => 0700
+                ]
+            ],
         ];
 
         $this->service = $service;
+    }
+
+    private function storageSave(\SplFileInfo $file): string
+    {
+        $disk = Storage::build($this->storageBuildConfig);
+
+        $fileName = md5_file($file->path()) . '.' . $file->extension();
+
+        return $this->service->uploadImage($file, $fileName, $disk);
+    }
+
+    public function appBanner(Request $request)
+    {
+        $file = $request->file('file');
+
+        if ($file->isValid()) {
+            $this->storageBuildConfig['root'] = $this->storageBuildConfig['root'] . DIRECTORY_SEPARATOR . 'App' . DIRECTORY_SEPARATOR . 'Banner' . DIRECTORY_SEPARATOR . 'Image';
+            $this->storageBuildConfig['url'] = $this->storageBuildConfig['url'] . DIRECTORY_SEPARATOR . 'App' . DIRECTORY_SEPARATOR . 'Banner' . DIRECTORY_SEPARATOR . 'Image';
+
+            $url = $this->storageSave($file);
+
+            return $this->success($url);
+        }
+
+        throw new BusinessException(ResponseEnum::HTTP_ERROR, '上传文件有误，请重新上传');
+    }
+
+    public function appBannerVideo(Request $request)
+    {
+        $file = $request->file('file');
+
+        if ($file->isValid()) {
+            $this->storageBuildConfig['root'] = $this->storageBuildConfig['root'] . DIRECTORY_SEPARATOR . 'App' . DIRECTORY_SEPARATOR . 'Banner' . DIRECTORY_SEPARATOR . 'Video';
+            $this->storageBuildConfig['url'] = $this->storageBuildConfig['url'] . DIRECTORY_SEPARATOR . 'App' . DIRECTORY_SEPARATOR . 'Banner' . DIRECTORY_SEPARATOR . 'Video';
+
+            $url = $this->storageSave($file);
+
+            return $this->success($url);
+        }
+
+        throw new BusinessException(ResponseEnum::HTTP_ERROR, '上传文件有误，请重新上传');
     }
 
     public function companyInfo(Request $request)

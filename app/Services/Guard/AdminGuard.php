@@ -53,7 +53,7 @@ class AdminGuard implements StatefulGuard
 
         $jwt = $this->app->request->bearerToken();
 
-        $id = ($payload = $this->validateJsonWebToken($jwt)) ? $payload['sub'] : null;
+        $id = ($payload = $this->validateJsonWebToken($jwt, !$this->app->request->is('*/logout'))) ? $payload['sub'] : null;
 
         if (Redis::connection($this->redis_connection)->hget('user_login', $id) === $jwt) {
 //            if (!is_null($id)) $this->user = $this->provider->retrieveByCredentials(['uid' => $id]);

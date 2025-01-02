@@ -90,7 +90,7 @@ trait ApiToken
         return sprintf('%s.%s.%s', $headerEncoded, $payloadEncoded, $signatureEncoded);
     }
 
-    public function validateJsonWebToken($jwt)
+    public function validateJsonWebToken(string $jwt, bool $checkExp = true)
     {
         // 拆分 JWT 为三部分
         $parts = explode('.', $jwt);
@@ -114,9 +114,11 @@ trait ApiToken
             return false; // 负载无效
         }
 
-        // 验证过期时间
-        if (isset($payload['exp']) && Carbon::createFromTimestamp($payload['exp'], config('app.timezone'))->lt(Carbon::now())) {
-            return false; // Token 已过期
+        if ($checkExp) {
+            // 验证过期时间
+            if (isset($payload['exp']) && Carbon::createFromTimestamp($payload['exp'], config('app.timezone'))->lt(Carbon::now())) {
+                return false; // Token 已过期
+            }
         }
 
         return $payload; // 返回解码后的有效负载
