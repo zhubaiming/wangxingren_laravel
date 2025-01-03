@@ -97,9 +97,12 @@ Route::prefix('v1')->group(function () {
     // 营业车辆 - 已完成
     Route::apiResource('/serviceCar', V1\ServiceCarController::class)->only(['index']);
 
+    // 系统相关设置
     Route::prefix('system')->group(function () {
         Route::get('/app/index', [Admin\SystemController::class, 'appIndexShow']);
         Route::put('/app/index', [Admin\SystemController::class, 'appIndexUpdate']);
+        Route::get('/app/poll', [Admin\SystemController::class, 'appPollIndex']);
+        Route::put('/app/poll', [Admin\SystemController::class, 'appPollUpdate']);
     });
     // 设置相关 - 已完成
     Route::prefix('setting')->group(function () {

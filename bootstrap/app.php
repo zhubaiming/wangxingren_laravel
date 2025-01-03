@@ -4,6 +4,7 @@ use App\Enums\ResponseEnum;
 use App\Exceptions\BusinessException;
 use App\Http\Middleware as CustomMiddleware;
 use Illuminate\Database\Eloquent\MassAssignmentException;
+use Illuminate\Database\Eloquent\RelationNotFoundException;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -108,6 +109,7 @@ return Application::configure(basePath: dirname(__DIR__))
                     throw new BusinessException(ResponseEnum::CLIENT_PARAMETER_ERROR, config('app.debug') ? $e->getMessage() : '');
                 case $e instanceof QueryException: // Sql错误异常抛出
                 case $e instanceof MassAssignmentException: // Sql错误异常抛出
+                case $e instanceof RelationNotFoundException: // 关联关系异常
                     throw new BusinessException(ResponseEnum::HTTP_ERROR, config('app.debug') ? $e->getMessage() : '');
                 case $e instanceof NotFoundHttpException:
                     throw new BusinessException(ResponseEnum::CLIENT_DELETED_ERROR, config('app.debug') ? $e->getMessage() : '');

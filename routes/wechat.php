@@ -22,60 +22,11 @@ Route::withoutMiddleware(['auth.wechat'])->group(function () {
         dd($app_type, $app_id, $openid);
     });
 
-    Route::get('/app_banners', function () {
-        return response()->json([
-            'code' => 200,
-            'message' => __('http_response.success'),
-            'payload' => [
-                [
-                    'tenantId' => '00ae459e842642f78b9ab0d8e7c027b4',
-                    'appId' => 6259662812989361028,
-                    'id' => 83,
-                    'place' => 10,
-                    'picUrl' => 'https://dp-live.oss-cn-beijing.aliyuncs.com/marketing/image/hlDebwlcgq.jpg',
-                    'sort' => 1,
-                    'soure' => null,
-                    'jumpType' => null,
-                    'jumpAddress' => null,
-                    'remark' => null,
-                    'groupId' => 261,
-                    'hasVideo' => true,
-                    'videoSrc' => 'http://wxsnsdy.tc.qq.com/105/20210/snsdyvideodownload?filekey=30280201010421301f0201690402534804102ca905ce620b1241b726bc41dcff44e00204012882540400&bizid=1023&hy=SH&fileparam=302c020101042530230204136ffd93020457e3c4ff02024ef202031e8d7f02030f42400204045a320a0201000400̰'
-                ],
-                [
-                    'tenantId' => '00ae459e842642f78b9ab0d8e7c027b4',
-                    'appId' => 6259662812989361028,
-                    'id' => 84,
-                    'place' => 10,
-                    'picUrl' => 'https://dp-live.oss-cn-beijing.aliyuncs.com/marketing/image/iDjKUTByaW.png',
-                    'sort' => 1,
-                    'soure' => 2,
-                    'jumpType' => 8,
-                    'jumpAddress' => '7IARD8A04RK58CQ1NZFFZ',
-                    'remark' => null,
-                    'groupId' => 263,
-                    'hasVideo' => false,
-                    'videoSrc' => null
-                ],
-                [
-                    'tenantId' => '00ae459e842642f78b9ab0d8e7c027b4',
-                    'appId' => 6259662812989361028,
-                    'id' => 87,
-                    'place' => 10,
-                    'picUrl' => 'https://dp-live.oss-cn-beijing.aliyuncs.com/marketing/image/iKQig9Zfk0.jpg',
-                    'sort' => 1,
-                    'soure' => 2,
-                    'jumpType' => 5,
-                    'jumpAddress' => 'https://mp.weixin.qq.com/s/bs4Qzeb2JAbAXv5aVtkiqQ',
-                    'remark' => null,
-                    'groupId' => 263,
-                    'hasVideo' => false,
-                    'videoSrc' => null
-                ]
-            ]
-        ]);
+    Route::prefix('system')->group(function () {
+        Route::get('/app/index', [Api\Wechat\SystemController::class, 'appIndexShow']);
+        Route::get('/app/poll', [Api\Wechat\SystemController::class, 'appPollIndex']);
+        Route::post('/app/poll', [Api\Wechat\SystemController::class, 'appPollStore']);
     });
-
 });
 
 /**
