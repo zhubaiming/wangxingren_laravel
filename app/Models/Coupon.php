@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Coupon extends Model
 {
@@ -17,7 +18,7 @@ class Coupon extends Model
     protected function amount(): Attribute
     {
         return Attribute::make(
-            get: fn(int $value) => applyIntegerToFloatModifier($value),
+//            get: fn(int $value) => applyIntegerToFloatModifier($value),
             set: fn(string $value) => applyFloatToIntegerModifier($value),
         );
     }
@@ -25,7 +26,7 @@ class Coupon extends Model
     protected function minTotal(): Attribute
     {
         return Attribute::make(
-            get: fn(int $value) => applyIntegerToFloatModifier($value),
+//            get: fn(int $value) => applyIntegerToFloatModifier($value),
             set: fn(string $value) => applyFloatToIntegerModifier($value),
         );
     }

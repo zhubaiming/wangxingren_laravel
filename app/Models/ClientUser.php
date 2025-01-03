@@ -112,16 +112,43 @@ class ClientUser extends Model implements AuthenticatableContract
         return $this->hasMany(ClientUserPet::class, 'user_id', 'id')->chaperone();
     }
 
-    public function addresses():HasMany
+    /**
+     * 服务地址列表
+     *
+     * @return HasMany
+     */
+    public function addresses(): HasMany
     {
         return $this->hasMany(ClientUserAddress::class, 'user_id', 'id')->chaperone();
     }
 
     /**
-     * 订单
+     * 优惠券列表
+     *
+     * @return HasMany
+     */
+    public function coupons(): HasMany
+    {
+        return $this->hasMany(ClientUserCoupon::class, 'user_id', 'id')->chaperone();
+    }
+
+    /**
+     * 订单列表
+     *
+     * @return HasMany
      */
     public function orders()
     {
         return $this->hasMany(ClientUserOrder::class, 'user_id', 'id');
+    }
+
+    /**
+     * 问卷调查
+     *
+     * @return HasOne
+     */
+    public function poll()
+    {
+        return $this->hasOne(ClientUserPoll::class, 'user_id', 'id');
     }
 }
