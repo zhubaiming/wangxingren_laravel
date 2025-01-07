@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Auth;
 
 class ClientUserCoupon extends Model
 {
@@ -20,6 +22,13 @@ class ClientUserCoupon extends Model
             'status' => 'boolean',
             'is_get' => 'boolean',
         ];
+    }
+
+    // ==============================  本地作用域  ==============================
+    public function scopeOwner(Builder $query): void
+    {
+//        $query->where('user_id' , Auth::guard('wechat')->user()->id);
+        $query->where('user_id' , 1);
     }
 
     public function user(): BelongsTo

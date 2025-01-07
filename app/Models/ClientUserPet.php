@@ -38,7 +38,8 @@ class ClientUserPet extends Model
     // ==============================  本地作用域  ==============================
     public function scopeOwner(Builder $query): void
     {
-        $query->where(['user_id' => Auth::guard('wechat')->user()->id]);
+//        $query->where('user_id' , Auth::guard('wechat')->user()->id);
+        $query->where('user_id' , 1);
     }
 
     public function scopeIsDefault(Builder $query): void

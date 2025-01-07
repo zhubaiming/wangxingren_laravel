@@ -9,6 +9,28 @@ use Illuminate\Http\Request;
 
 class SpuController extends Controller
 {
+    public function searchList(Request $request)
+    {
+        $validate = arrHumpToLine($request->input());
+
+        $title = $validate['title'] === 'null' || is_null($validate['title']) ? null : $validate['title'];
+
+        $titles = ProductSpu::where('trademark_id', 325403)->where('saleable', true)
+            ->when(isset($validate['category_id']), function ($query) use ($validate) {
+                return $query->where('category_id', $validate['category_id']);
+            })
+            ->when(!is_null($title), function ($query) use ($validate) {
+                return $query->where('title', 'like', '%' . $validate['title'] . '%');
+            })->pluck('title')->toArray();
+
+        $result = [];
+        foreach ($titles as $key => $value) {
+            $result[] = ['value' => $key, 'text' => $value];
+        }
+
+        return $this->success($result);
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -16,9 +38,14 @@ class SpuController extends Controller
     {
         $validate = arrHumpToLine($request->input());
 
+        $title = $validate['title'] === 'null' || is_null($validate['title']) ? null : $validate['title'];
+
         $payload = ProductSpu::where('trademark_id', 325403)->where('saleable', true)
             ->when(isset($validate['category_id']), function ($query) use ($validate) {
                 return $query->where('category_id', $validate['category_id']);
+            })
+            ->when(!is_null($title), function ($query) use ($validate) {
+                return $query->where('title', 'like', '%' . $validate['title'] . '%');
             })
             ->withMin('skus', 'price')
             ->withCount('order')

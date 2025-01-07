@@ -18,7 +18,10 @@ class SystemController extends Controller
 
         [$app_banner, $app_index] = $payload->toArray();
 
-        $app_banner['value'] = json_decode($app_banner['value'], true);
+        $app_banner['value'] = array_map(function ($value) {
+            $value['tabType'] = substr($value['type'], 0, strpos($value['type'], '/'));
+            return $value;
+        }, json_decode($app_banner['value'], true));
 
         return $this->success(arrLineToHump(compact('app_banner', 'app_index')));
     }
@@ -61,5 +64,19 @@ class SystemController extends Controller
         }
 
         return $this->success();
+    }
+
+    public function companyShow()
+    {
+        $payload = System::select('key', 'value')->where('key', 'COMPANY_BANNER')->orWhere('key', 'COMPANY_INDEX')->get();
+
+        [$company_banner, $company_index] = $payload->toArray();
+
+        $company_banner['value'] = array_map(function ($value) {
+            $value['tabType'] = substr($value['type'], 0, strpos($value['type'], '/'));
+            return $value;
+        }, json_decode($company_banner['value'], true));
+
+        return $this->success(arrLineToHump(compact('company_banner', 'company_index')));
     }
 }

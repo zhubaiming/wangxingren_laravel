@@ -24,9 +24,13 @@ Route::withoutMiddleware(['auth.wechat'])->group(function () {
 
     Route::prefix('system')->group(function () {
         Route::get('/app/index', [Api\Wechat\SystemController::class, 'appIndexShow']);
-        Route::get('/app/poll', [Api\Wechat\SystemController::class, 'appPollIndex']);
-        Route::post('/app/poll', [Api\Wechat\SystemController::class, 'appPollStore']);
+        Route::get('/company', [Api\Wechat\SystemController::class, 'companyShow']);
     });
+});
+
+Route::prefix('system')->group(function () {
+    Route::get('/app/poll', [Api\Wechat\SystemController::class, 'appPollIndex']);
+    Route::post('/app/poll', [Api\Wechat\SystemController::class, 'appPollStore']);
 });
 
 /**
@@ -47,6 +51,7 @@ Route::apiResource('/pet', Api\Wechat\User\PetController::class);
  */
 Route::prefix('product')->group(function () {
     Route::get('/spu', [Api\Wechat\Product\SpuController::class, 'index']);
+    Route::get('/spu/titles', [Api\Wechat\Product\SpuController::class, 'searchList']);
     Route::get('/spu/{spu_id}', [Api\Wechat\Product\SpuController::class, 'show']);
 //    Route::get('/category/{category_id}/spu',[])
     Route::get('/sku', [Api\Wechat\Product\SkuController::class, 'show']);

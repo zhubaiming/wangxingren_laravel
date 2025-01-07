@@ -17,7 +17,7 @@ class PetController extends Controller
         $validate = arrHumpToLine($request->input());
         $paginate = isset($validate['paginate']) ? isTrue($validate['paginate']) : true; // 是否分页
 
-        $query = ClientUserPet::where(['user_id' => Auth::guard('wechat')->user()->id])->orderBy('is_default', 'desc')->orderBy('created_at', 'asc');
+        $query = ClientUserPet::owner()->orderBy('is_default', 'desc')->orderBy('created_at', 'asc');
 
         $payload = $paginate ? $query->simplePaginate($request->get('pageSize') ?? $this->pageSize, ['*'], 'page', $request->get('page') ?? $this->page) : $query->get();
 
@@ -66,7 +66,21 @@ class PetController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $validated = arrHumpToLine($request->post());
+
+        $pet = ClientUserPet::owner()->findOrFail($id);
+
+        if ($validated['is_default']) {
+            ClientUserPet::owner()->where('is_default', true)->update(['is_default' => false]);
+        }
+
+        foreach ($validated as $key => $value) {
+            $pet->{$key} = $value;
+        }
+
+        $pet->save();
+
+        return $this->success();
     }
 
     /**
@@ -74,6 +88,10 @@ class PetController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $pet = ClientUserPet::owner()->findOrFail($id);
+
+        $pet->delete();
+
+        return $this->success();
     }
 }

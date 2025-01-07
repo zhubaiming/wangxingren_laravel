@@ -17,7 +17,7 @@ class AddressController extends Controller
         $validate = arrHumpToLine($request->input());
         $paginate = isset($validate['paginate']) ? isTrue($validate['paginate']) : true; // 是否分页
 
-        $query = ClientUserAddress::select('id', 'province', 'city', 'district', 'street', 'address', 'person_name', 'person_phone_prefix', 'person_phone_number', 'is_default')->where(['user_id' => Auth::guard('wechat')->user()->id])->orderBy('is_default', 'desc')->orderBy('created_at', 'asc');
+        $query = ClientUserAddress::select('id', 'province', 'city', 'district', 'street', 'address', 'person_name', 'person_phone_prefix', 'person_phone_number', 'is_default')->owner()->orderBy('is_default', 'desc')->orderBy('created_at', 'asc');
 
         $payload = $paginate ? $query->simplePaginate($request->get('pageSize') ?? $this->pageSize, ['*'], 'page', $request->get('page') ?? $this->page) : $query->get();
 
@@ -32,7 +32,6 @@ class AddressController extends Controller
         $validate = arrHumpToLine($request->input());
 
         $data = [
-//            'user_id' => Auth::guard('wechat')->user()->id,
             'country' => '中国',
             'province' => $validate['province'],
             'city' => $validate['city'],
@@ -63,7 +62,21 @@ class AddressController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $validated = arrHumpToLine($request->post());
+
+        $address = ClientUserAddress::owner()->findOrFail($id);
+
+        if ($validated['is_default']) {
+            ClientUserAddress::owner()->where('is_default', true)->update(['is_default' => false]);
+        }
+
+        foreach ($validated as $key => $value) {
+            $address->{$key} = $value;
+        }
+
+        $address->save();
+
+        return $this->success();
     }
 
     /**
@@ -71,6 +84,10 @@ class AddressController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $address = ClientUserAddress::owner()->findOrFail($id);
+
+        $address->delete();
+
+        return $this->success();
     }
 }

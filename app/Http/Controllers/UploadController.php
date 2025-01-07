@@ -83,6 +83,18 @@ class UploadController extends Controller
         return $this->success($url);
     }
 
+    public function spuImages(Request $request)
+    {
+        $file = $request->file('file');
+
+        $this->storageBuildConfig['root'] = $this->storageBuildConfig['root'] . DIRECTORY_SEPARATOR . 'Spu';
+        $this->storageBuildConfig['url'] = $this->storageBuildConfig['url'] . DIRECTORY_SEPARATOR . 'Spu';
+
+        $url = $this->storageSave($file);
+
+        return $this->success($url);
+    }
+
     public function companyInfo(Request $request)
     {
         $file = $request->file('file');

@@ -103,6 +103,8 @@ Route::prefix('v1')->group(function () {
         Route::put('/app/index', [Admin\SystemController::class, 'appIndexUpdate']);
         Route::get('/app/poll', [Admin\SystemController::class, 'appPollIndex']);
         Route::put('/app/poll', [Admin\SystemController::class, 'appPollUpdate']);
+        Route::get('/company', [Admin\SystemController::class, 'companyIndex']);
+        Route::put('/company', [Admin\SystemController::class, 'companyUpdate']);
     });
     // 设置相关 - 已完成
     Route::prefix('setting')->group(function () {
@@ -157,6 +159,7 @@ Route::prefix('v1')->group(function () {
         Route::prefix('app')->group(function () {
             Route::post('banner', [Controllers\UploadController::class, 'appBanner']);
         });
+        Route::post('spu', [Controllers\UploadController::class, 'spuImages']);
 
 
         // 公司信息

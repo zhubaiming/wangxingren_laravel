@@ -48,7 +48,7 @@ class SystemController extends Controller
 //            ['subject' => '您是否有过因为宠物美容服务不满的经历？如果有，请您简单描述', 'type' => 'textarea', 'sort' => 12, 'required' => false],
 //            ['subject' => '您对移动宠物美容车还有其他期待或建议吗', 'type' => 'textarea', 'sort' => 13, 'required' => false]
 //        ];
-//
+//        
 //        System::create([
 //            'key' => 'APP_POLL',
 //            'value' => json_encode($value, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
@@ -64,5 +64,28 @@ class SystemController extends Controller
     public function appPollUpdate()
     {
 
+    }
+
+    public function companyIndex()
+    {
+        $payload = System::select('key', 'value')->where('key', 'COMPANY_BANNER')->orWhere('key', 'COMPANY_INDEX')->get();
+
+        [$company_banner, $company_index] = $payload->toArray();
+
+        $company_banner['value'] = json_decode($company_banner['value'], true);
+
+        return $this->success(arrLineToHump(compact('company_banner', 'company_index')));
+    }
+
+    public function companyUpdate(Request $request)
+    {
+        $validate = arrHumpToLine($request->input());
+
+        ['banners' => $banners, 'index_reach' => $index_reach] = $validate;
+
+        System::where('key', 'COMPANY_BANNER')->update(['value' => json_encode($banners, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)]);
+        System::where('key', 'COMPANY_INDEX')->update(['value' => $index_reach]);
+
+        return $this->success();
     }
 }

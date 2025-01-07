@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
 
 class ClientUserAddress extends Model
 {
@@ -20,6 +22,13 @@ class ClientUserAddress extends Model
         return [
             'is_default' => 'boolean',
         ];
+    }
+
+    // ==============================  本地作用域  ==============================
+    public function scopeOwner(Builder $query): void
+    {
+//        $query->where('user_id' , Auth::guard('wechat')->user()->id);
+        $query->where('user_id' , 1);
     }
 
     public function user(): BelongsTo
