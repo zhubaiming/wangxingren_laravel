@@ -15,8 +15,8 @@ class UserAddressController extends Controller
      */
     public function index(Request $request)
     {
-        $validate = arrHumpToLine($request->input());
-        $paginate = isset($validate['paginate']) ? isTrue($validate['paginate']) : true; // 是否分页
+        $validated = arrHumpToLine($request->input());
+        $paginate = isset($validated['paginate']) ? isTrue($validated['paginate']) : true; // 是否分页
 
         $query = ClientUserAddress::select('id', 'province', 'city', 'district', 'street', 'address', 'person_name', 'person_phone_prefix', 'person_phone_number', 'is_default')->where('user_id', Auth::guard('wechat')->user()->id)->orderBy('is_default', 'desc')->orderBy('created_at', 'asc');
 
@@ -30,15 +30,15 @@ class UserAddressController extends Controller
      */
     public function store(Request $request)
     {
-        $validate = arrHumpToLine($request->post());
+        $validated = arrHumpToLine($request->post());
 
-        $validate['user_id'] = Auth::guard('wechat')->user()->id;
+        $validated['user_id'] = Auth::guard('wechat')->user()->id;
 
-        if ($validate['is_default']) {
+        if ($validated['is_default']) {
             ClientUserAddress::where(['user_id' => Auth::guard('wechat')->user()->id, 'is_default' => true])->update(['is_default' => false]);
         }
 
-        ClientUserAddress::create($validate);
+        ClientUserAddress::create($validated);
 
         return $this->success();
     }
@@ -71,16 +71,16 @@ class UserAddressController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $validate = arrHumpToLine($request->post());
+        $validated = arrHumpToLine($request->post());
 
         try {
             $address = ClientUserAddress::where(['id' => $id, 'user_id' => Auth::guard('wechat')->user()->id])->firstOrFail();
 
-            if (isset($validate['is_default'])) {
+            if (isset($validated['is_default'])) {
                 ClientUserAddress::where(['user_id' => Auth::guard('wechat')->user()->id, 'is_default' => true])->update(['is_default' => false]);
             }
 
-            foreach ($validate as $field => $value) {
+            foreach ($validated as $field => $value) {
                 $address->{$field} = $value;
             }
 

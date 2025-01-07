@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Wechat\User;
 
 use App\Http\Controllers\Controller;
+use App\Models\ClientUser;
 use App\Models\ClientUserAddress;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,8 +15,8 @@ class AddressController extends Controller
      */
     public function index(Request $request)
     {
-        $validate = arrHumpToLine($request->input());
-        $paginate = isset($validate['paginate']) ? isTrue($validate['paginate']) : true; // 是否分页
+        $validated = arrHumpToLine($request->input());
+        $paginate = isset($validated['paginate']) ? isTrue($validated['paginate']) : true; // 是否分页
 
         $query = ClientUserAddress::select('id', 'province', 'city', 'district', 'street', 'address', 'person_name', 'person_phone_prefix', 'person_phone_number', 'is_default')->owner()->orderBy('is_default', 'desc')->orderBy('created_at', 'asc');
 
@@ -29,24 +30,28 @@ class AddressController extends Controller
      */
     public function store(Request $request)
     {
-        $validate = arrHumpToLine($request->input());
+        $validated = arrHumpToLine($request->input());
+
+        if ($validated['is_default']) {
+            ClientUserAddress::owner()->where('is_default', true)->update(['is_default' => false]);
+        }
 
         $data = [
             'country' => '中国',
-            'province' => $validate['province'],
-            'city' => $validate['city'],
-            'district' => $validate['district'],
-            'street' => $validate['street'] ?? null,
-            'address' => $validate['address'],
-            'is_default' => $validate['is_default'],
-            'person_name' => $validate['person_name'],
-            'person_phone_prefix' => $validate['person_phone_prefix'],
-            'person_phone_number' => $validate['person_phone_number']
+            'province' => $validated['province'],
+            'city' => $validated['city'],
+            'district' => $validated['district'],
+            'street' => $validated['street'] ?? null,
+            'address' => $validated['address'],
+            'is_default' => $validated['is_default'],
+            'person_name' => $validated['person_name'],
+            'person_phone_prefix' => $validated['person_phone_prefix'],
+            'person_phone_number' => $validated['person_phone_number']
         ];
 
         Auth::guard('wechat')->user()->addresses()->createMany([$data]);
 
-        $this->success();
+        return $this->success();
     }
 
     /**

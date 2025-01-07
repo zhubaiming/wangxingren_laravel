@@ -23,34 +23,34 @@ class ProductSpuController extends Controller
      */
     public function index(Request $request)
     {
-        $validate = arrHumpToLine($request->input());
-        $paginate = isset($validate['paginate']) ? isTrue($validate['paginate']) : true; // 是否分页
+        $validated = arrHumpToLine($request->input());
+        $paginate = isset($validated['paginate']) ? isTrue($validated['paginate']) : true; // 是否分页
 
         $query = ProductSpu::with(['category', 'trademark'])->withCount(['order' => function ($order) {
             $order->where('status', OrderStatusEnum::finished);
         }])->orderBy('created_at', 'desc');
 
-        $payload = $query->paginate($validate['page_size'] ?? $this->pageSize, ['*'], 'page', $validate['page'] ?? $this->page);
+        $payload = $query->paginate($validated['page_size'] ?? $this->pageSize, ['*'], 'page', $validated['page'] ?? $this->page);
 
         return $this->returnIndex($payload, 'ProductSpuResource', __FUNCTION__, true);
 
 
-//        $query = isset($validate['title']) ? $query->where('title', 'like', "%{$validate['title']}%") : $query;
-//        $query = isset($validate['trademark_id']) ? $query->where('trademark_id', $validate['trademark_id']) : $query;
-//        $query = isset($validate['category_id']) ? $query->where('category_id', $validate['category_id']) : $query;
-//        $query = isset($validate['saleable']) ? $query->where('saleable', $validate['saleable']) : $query;
+//        $query = isset($validated['title']) ? $query->where('title', 'like', "%{$validated['title']}%") : $query;
+//        $query = isset($validated['trademark_id']) ? $query->where('trademark_id', $validated['trademark_id']) : $query;
+//        $query = isset($validated['category_id']) ? $query->where('category_id', $validated['category_id']) : $query;
+//        $query = isset($validated['saleable']) ? $query->where('saleable', $validated['saleable']) : $query;
 //
 //
 //        $conditions = [];
 //
-//        if (isset($validate['title'])) $conditions[] = ['title', 'like', "%{$validate['title']}%"];
-//        if (isset($validate['category_id'])) $conditions['category_id'] = $validate['category_id'];
-//        if (isset($validate['trademark_id'])) $conditions['trademark_id'] = $validate['trademark_id'];
-//        if (isset($validate['saleable'])) $conditions['saleable'] = $validate['saleable'];
+//        if (isset($validated['title'])) $conditions[] = ['title', 'like', "%{$validated['title']}%"];
+//        if (isset($validated['category_id'])) $conditions['category_id'] = $validated['category_id'];
+//        if (isset($validated['trademark_id'])) $conditions['trademark_id'] = $validated['trademark_id'];
+//        if (isset($validated['saleable'])) $conditions['saleable'] = $validated['saleable'];
 //
 //        $relations = ['category', 'trademark'];
 //
-//        $payload = $this->service->getList($conditions, relations: $relations, paginate: true, page: $validate['page'] ?? $this->page, per_page: $validate['page_size']);
+//        $payload = $this->service->getList($conditions, relations: $relations, paginate: true, page: $validated['page'] ?? $this->page, per_page: $validated['page_size']);
 
 //        return (new BaseCollection($payload))->additional(['resource' => 'App\Http\Resources\ProductSpuResource', 'format' => __FUNCTION__]);
     }
@@ -60,34 +60,34 @@ class ProductSpuController extends Controller
      */
     public function store(Request $request)
     {
-        $validate = arrHumpToLine($request->post());
+        $validated = arrHumpToLine($request->post());
 
         $spuData = [
-            'title' => $validate['title'],
-            'sub_title' => $validate['sub_title'] ?? null,
-            'trademark_id' => $validate['trademark_id'],
-            'category_id' => $validate['category_id'],
-//            'duration' => $validate['duration'],
-            'saleable' => $validate['saleable'],
-            'description' => $validate['description'] ?? null,
-            'images' => $validate['images'] ?? [],
-            'packing_list' => $validate['packing_list'] ?? null,
-            'after_service' => $validate['after_service'] ?? null
+            'title' => $validated['title'],
+            'sub_title' => $validated['sub_title'] ?? null,
+            'trademark_id' => $validated['trademark_id'],
+            'category_id' => $validated['category_id'],
+//            'duration' => $validated['duration'],
+            'saleable' => $validated['saleable'],
+            'description' => $validated['description'] ?? null,
+            'images' => $validated['images'] ?? [],
+            'packing_list' => $validated['packing_list'] ?? null,
+            'after_service' => $validated['after_service'] ?? null
         ];
 
         $spu = ProductSpu::create($spuData);
 
 //        $detail = [
 //            'spu_id' => $spu->id,
-//            'description' => $validate['description'],
-//            'images' => $validate['images'],
-//            'packing_list' => $validate['packing_list'],
-//            'after_service' => $validate['after_service']
+//            'description' => $validated['description'],
+//            'images' => $validated['images'],
+//            'packing_list' => $validated['packing_list'],
+//            'after_service' => $validated['after_service']
 //        ];
 //
 //        ProductSpuDetail::create($detail);
 
-//        $specGroupIds = ProductSpecGroup::select('id')->where(['category_id' => $validate['category_id']])->withoutGlobalScopes()->distinct()->pluck('id')->toArray();
+//        $specGroupIds = ProductSpecGroup::select('id')->where(['category_id' => $validated['category_id']])->withoutGlobalScopes()->distinct()->pluck('id')->toArray();
 //
 //        $pivot_product_spec_group_spu = [];
 //        foreach ($specGroupIds as $id) {
@@ -96,20 +96,20 @@ class ProductSpuController extends Controller
 //        DB::table('sys_pivot_product_spec_group_spu')->insert($pivot_product_spec_group_spu);
 
 
-        if (!empty($validate['pet_breeds'])) {
+        if (!empty($validated['pet_breeds'])) {
             $spu->spu_breed()->detach();
 
-            $spu->spu_breed()->attach($validate['pet_breeds']);
+            $spu->spu_breed()->attach($validated['pet_breeds']);
 
 
-//            $breedSpecGroupIds = DB::table('sys_pivot_product_spec_group_value')->select('spec_group_id')->whereIn('spec_value_id', $validate['pet_breeds'])->distinct()->pluck('spec_group_id')->toArray();
+//            $breedSpecGroupIds = DB::table('sys_pivot_product_spec_group_value')->select('spec_group_id')->whereIn('spec_value_id', $validated['pet_breeds'])->distinct()->pluck('spec_group_id')->toArray();
 //
 //            $intersectionIds = array_intersect($specGroupIds, $breedSpecGroupIds);
 //
 //            $pivot_product_spu_value = [];
 //
 //            foreach ($intersectionIds as $spec_group_id) {
-//                foreach ($validate['pet_breeds'] as $breed) {
+//                foreach ($validated['pet_breeds'] as $breed) {
 //                    $pivot_product_spu_value[] = [
 //                        'spu_id' => $spu->id,
 //                        'spec_group_id' => $spec_group_id,
@@ -144,28 +144,28 @@ class ProductSpuController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $validate = arrHumpToLine($request->post());
+        $validated = arrHumpToLine($request->post());
 
         try {
             $spu = ProductSpu::findOrFail($id);
 
-            if ($validate['category_id'] !== $spu->category_id) {
-//                $specGroupIds = ProductSpecGroup::select('id')->where(['category_id' => $validate['category_id']])->withoutGlobalScopes()->distinct()->pluck('id')->toArray();
+            if ($validated['category_id'] !== $spu->category_id) {
+//                $specGroupIds = ProductSpecGroup::select('id')->where(['category_id' => $validated['category_id']])->withoutGlobalScopes()->distinct()->pluck('id')->toArray();
                 $spu->spu_breed()->detach();
-                $spu->spu_breed()->attach($validate['pet_breeds']);
+                $spu->spu_breed()->attach($validated['pet_breeds']);
 
                 $spu->skus()->delete();
             }
 
-            $spu->title = $validate['title'];
-            $spu->sub_title = $validate['sub_title'] ?? $spu->sub_title;
-            $spu->trademark_id = $validate['trademark_id'];
-            $spu->category_id = $validate['category_id'];
-            $spu->saleable = $validate['saleable'];
-            $spu->description = $validate['description'] ?? $spu->description;
-            $spu->images = $validate['images'] ?? $spu->images;
-            $spu->packing_list = $validate['packing_list'] ?? $spu->packing_list;
-            $spu->after_service = $validate['after_service'] ?? $spu->after_service;
+            $spu->title = $validated['title'];
+            $spu->sub_title = $validated['sub_title'] ?? $spu->sub_title;
+            $spu->trademark_id = $validated['trademark_id'];
+            $spu->category_id = $validated['category_id'];
+            $spu->saleable = $validated['saleable'];
+            $spu->description = $validated['description'] ?? $spu->description;
+            $spu->images = $validated['images'] ?? $spu->images;
+            $spu->packing_list = $validated['packing_list'] ?? $spu->packing_list;
+            $spu->after_service = $validated['after_service'] ?? $spu->after_service;
 
             $spu->save();
 

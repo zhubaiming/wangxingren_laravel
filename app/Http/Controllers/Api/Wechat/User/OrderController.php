@@ -48,10 +48,10 @@ class OrderController extends Controller
      */
     public function index(Request $request)
     {
-        $validate = arrHumpToLine($request->input());
-        $paginate = isset($validate['paginate']) ? isTrue($validate['paginate']) : true; // 是否分页
+        $validated = arrHumpToLine($request->input());
+        $paginate = isset($validated['paginate']) ? isTrue($validated['paginate']) : true; // 是否分页
 
-        if (!isset($validate['status'])) {
+        if (!isset($validated['status'])) {
             throw new BusinessException(ResponseEnum::HTTP_ERROR, '无效的查询');
         }
 
@@ -73,8 +73,8 @@ class OrderController extends Controller
      */
     public function store(Request $request, MiniProgramPaymentService $paymentService)
     {
-        $validate = arrHumpToLine($request->input());
-//        dd($validate);
+        $validated = arrHumpToLine($request->input());
+//        dd($validated);
 
         [
             'order_spu_info' => $order_spu_info,
@@ -85,7 +85,7 @@ class OrderController extends Controller
             'order_coupon_info' => $order_coupon_info,
             'pay_channel' => $pay_channel,
             'order_remark' => $order_remark,
-        ] = $validate;
+        ] = $validated;
 
         if (
             0 === ProductSpu::where('id', $order_spu_info['id'])->count('id') ||

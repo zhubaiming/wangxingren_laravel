@@ -13,9 +13,9 @@ class TradeDateController extends Controller
      */
     public function index(Request $request)
     {
-        $validate = arrHumpToLine($request->input());
+        $validated = arrHumpToLine($request->input());
 
-        ['startDay' => $startDay, 'endDay' => $endDay] = $this->getStartDay($validate['year'], $validate['month']);
+        ['startDay' => $startDay, 'endDay' => $endDay] = $this->getStartDay($validated['year'], $validated['month']);
 
         $payload = SysTradeDate::whereBetween('date', [$startDay, $endDay])->orderBy('date', 'asc')->get();
 

@@ -17,8 +17,8 @@ class UserPermissionController extends Controller
      */
     public function index(Request $request)
     {
-        $validate = arrHumpToLine($request->input());
-        $paginate = isset($validate['paginate']) ? isTrue($validate['paginate']) : true; // 是否分页
+        $validated = arrHumpToLine($request->input());
+        $paginate = isset($validated['paginate']) ? isTrue($validated['paginate']) : true; // 是否分页
 
         $payload = UserPermission::where(['level' => 1])->with(['childrenRecursive'])->orderBy('sort', 'asc')->get();
 
@@ -30,18 +30,18 @@ class UserPermissionController extends Controller
      */
     public function store(Request $request)
     {
-        $validate = arrHumpToLine($request->post());
+        $validated = arrHumpToLine($request->post());
 
-        $parentPermission = UserPermission::select('level', 'type')->findOrFail($validate['id']);
+        $parentPermission = UserPermission::select('level', 'type')->findOrFail($validated['id']);
 
         $userPermission = UserPermission::create([
-            'title' => $validate['title'],
+            'title' => $validated['title'],
             'level' => intval(bcadd($parentPermission->level, '1', 0)),
-            'parent_id' => $validate['id'],
-            'code' => $validate['code'],
+            'parent_id' => $validated['id'],
+            'code' => $validated['code'],
             'type' => 3 === $parentPermission->level ? 2 : 1,
             'select' => true,
-            'sort' => $validate['sort']
+            'sort' => $validated['sort']
         ]);
 
         $userPermission->roles()->attach(1);
@@ -64,13 +64,13 @@ class UserPermissionController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $validate = arrHumpToLine($request->post());
+        $validated = arrHumpToLine($request->post());
 
         $userPermission = UserPermission::findOrFail($id);
 
-        $userPermission->title = $validate['title'];
-        $userPermission->code = $validate['code'];
-        $userPermission->sort = $validate['sort'];
+        $userPermission->title = $validated['title'];
+        $userPermission->code = $validated['code'];
+        $userPermission->sort = $validated['sort'];
 
         $userPermission->save();
 

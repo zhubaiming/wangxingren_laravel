@@ -15,14 +15,14 @@ class SkuController extends Controller
      */
     public function show(Request $request)
     {
-        $validate = arrHumpToLine($request->input());
+        $validated = arrHumpToLine($request->input());
 
-        $payload = ProductSku::where('trademark_id', $validate['trademark_id'])
-            ->where('category_id', $validate['category_id'])
-            ->where('spu_id', $validate['spu_id'])
-            ->where('breed_id', $validate['breed_id'])
-            ->where('weight_min', '<=', applyFloatToIntegerModifier($validate['weight']))
-            ->where('weight_max', '>=', applyFloatToIntegerModifier($validate['weight']))
+        $payload = ProductSku::where('trademark_id', $validated['trademark_id'])
+            ->where('category_id', $validated['category_id'])
+            ->where('spu_id', $validated['spu_id'])
+            ->where('breed_id', $validated['breed_id'])
+            ->where('weight_min', '<=', applyFloatToIntegerModifier($validated['weight']))
+            ->where('weight_max', '>=', applyFloatToIntegerModifier($validated['weight']))
             ->firstOrFail();
 
         return $this->success((new ProductSkuResource($payload))->additional(['format' => __FUNCTION__]));

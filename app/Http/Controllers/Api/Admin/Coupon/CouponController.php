@@ -16,8 +16,8 @@ class CouponController extends Controller
      */
     public function index(Request $request)
     {
-        $validate = arrHumpToLine($request->input());
-        $paginate = isset($validate['paginate']) ? isTrue($validate['paginate']) : true; // 是否分页
+        $validated = arrHumpToLine($request->input());
+        $paginate = isset($validated['paginate']) ? isTrue($validated['paginate']) : true; // 是否分页
 
         $query = Coupon::orderBy('id', 'asc');
 
@@ -31,17 +31,17 @@ class CouponController extends Controller
      */
     public function store(Request $request)
     {
-        $validate = arrHumpToLine($request->post());
+        $validated = arrHumpToLine($request->post());
 
-        if (0 === Coupon::where('title', $validate['title'])->count('id')) {
+        if (0 === Coupon::where('title', $validated['title'])->count('id')) {
 
             $data = [
-                'title' => $validate['title'],
-                'amount' => $validate['amount'],
-                'min_total' => $validate['min_total'],
-                'expiration_at' => isset($validate['expiration_at']) ? Carbon::createFromTimestamp(intval($validate['expiration_at'] / 1000), config('app.timezone')) : null,
-                'description' => $validate['description'] ?: null,
-                'related_action' => $validate['related_action'] ?: null,
+                'title' => $validated['title'],
+                'amount' => $validated['amount'],
+                'min_total' => $validated['min_total'],
+                'expiration_at' => isset($validated['expiration_at']) ? Carbon::createFromTimestamp(intval($validated['expiration_at'] / 1000), config('app.timezone')) : null,
+                'description' => $validated['description'] ?: null,
+                'related_action' => $validated['related_action'] ?: null,
                 'updated_by' => $request->input('user'),
             ];
 

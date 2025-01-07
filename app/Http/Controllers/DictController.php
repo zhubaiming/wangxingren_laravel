@@ -12,13 +12,13 @@ class DictController extends Controller
      */
     public function index(Request $request)
     {
-        $validate = arrHumpToLine($request->input());
-        $paginate = isset($validate['paginate']) ? isTrue($validate['paginate']) : true; // 是否分页
+        $validated = arrHumpToLine($request->input());
+        $paginate = isset($validated['paginate']) ? isTrue($validated['paginate']) : true; // 是否分页
 
         $query = Dict::select('id', 'label', 'value', 'name', 'enum_name')->orderBy('sort', 'asc')->orderBy('updated_at', 'desc');
 
-        if (isset($validate['code'])) {
-            $query = $query->where('code', $validate['code']);
+        if (isset($validated['code'])) {
+            $query = $query->where('code', $validated['code']);
         }
 
         $payload = $paginate ? $query->paginate($request->get('pageSize') ?? $this->pageSize, ['*'], 'page', $request->get('page') ?? $this->page) : $query->get();

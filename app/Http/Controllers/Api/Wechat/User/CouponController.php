@@ -16,17 +16,17 @@ class CouponController extends Controller
      */
     public function index(Request $request)
     {
-        $validate = arrHumpToLine($request->input());
-        $paginate = isset($validate['paginate']) ? isTrue($validate['paginate']) : true; // 是否分页
+        $validated = arrHumpToLine($request->input());
+        $paginate = isset($validated['paginate']) ? isTrue($validated['paginate']) : true; // 是否分页
 
-        $status = isset($validate['status']) ? isTrue($validate['status']) : true; // 是否分页
+        $status = isset($validated['status']) ? isTrue($validated['status']) : true; // 是否分页
 
         $query = ClientUserCoupon::owner()
-            ->when(isset($validate['status']), function ($when) use ($status) {
+            ->when(isset($validated['status']), function ($when) use ($status) {
                 $when->where('status', $status);
             })
-            ->when(isset($validate['is_get']), function ($when) use ($validate) {
-                $when->where('is_get', isTrue($validate['is_get']));
+            ->when(isset($validated['is_get']), function ($when) use ($validated) {
+                $when->where('is_get', isTrue($validated['is_get']));
             })
             ->when(!$paginate, function ($when) {
                 $when->where('expiration_at', '>=', Carbon::now());

@@ -18,13 +18,13 @@ class PetBreedController extends Controller
 
     public function index(Request $request)
     {
-        $validate = arrHumpToLine($request->input());
-        $paginate = isset($validate['paginate']) ? isTrue($validate['paginate']) : true; // 是否分页
+        $validated = arrHumpToLine($request->input());
+        $paginate = isset($validated['paginate']) ? isTrue($validated['paginate']) : true; // 是否分页
 
         $query = SysPetBreed::orderBy('letter', 'asc')->orderBy('id', 'asc');
 
-        if (isset($validate['type'])) {
-            $query = $query->where('type', $validate['type']);
+        if (isset($validated['type'])) {
+            $query = $query->where('type', $validated['type']);
         }
 
         $payload = $paginate ? $query->paginate($request->get('pageSize') ?? $this->pageSize, ['*'], 'page', $request->get('page') ?? $this->page) : $query->get();
@@ -37,22 +37,22 @@ class PetBreedController extends Controller
      */
     public function store(Request $request)
     {
-        $validate = arrHumpToLine($request->post());
+        $validated = arrHumpToLine($request->post());
 
-        if (0 === SysPetBreed::where(['title' => $validate['title']])->count('id')) {
+        if (0 === SysPetBreed::where(['title' => $validated['title']])->count('id')) {
 
             $data = [
-                'type' => $validate['type'],
-                'title' => $validate['title'],
-                'letter' => strtoupper($validate['letter']),
-                'product_trademark_id' => strtoupper($validate['product_trademark_id']),
-                'product_category_id' => strtoupper($validate['product_category_id']),
-//                'is_sync_attr' => $validate['is_sync_attr']
+                'type' => $validated['type'],
+                'title' => $validated['title'],
+                'letter' => strtoupper($validated['letter']),
+                'product_trademark_id' => strtoupper($validated['product_trademark_id']),
+                'product_category_id' => strtoupper($validated['product_category_id']),
+//                'is_sync_attr' => $validated['is_sync_attr']
             ];
 
-//            if (isTrue($validate['is_sync_attr'])) {
-//                $data['sync_product_trademark_id'] = $validate['sync_product_trademark_id'];
-//                $data['sync_product_category_id'] = $validate['sync_product_category_id'];
+//            if (isTrue($validated['is_sync_attr'])) {
+//                $data['sync_product_trademark_id'] = $validated['sync_product_trademark_id'];
+//                $data['sync_product_category_id'] = $validated['sync_product_category_id'];
 //            }
 
             $breed = SysPetBreed::create($data);
@@ -61,8 +61,8 @@ class PetBreedController extends Controller
                 return $this->failed('品种创建失败');
             }
 
-//            if (isTrue($validate['is_sync_attr'])) {
-//                $breed->attrs()->attach($validate['sync_product_attr_id']);
+//            if (isTrue($validated['is_sync_attr'])) {
+//                $breed->attrs()->attach($validated['sync_product_attr_id']);
 //            }
 
 
@@ -88,30 +88,30 @@ class PetBreedController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $validate = arrHumpToLine($request->post());
+        $validated = arrHumpToLine($request->post());
 
-        if (0 === SysPetBreed::where(['title' => $validate['title']])->whereNot('id', $id)->count('id')) {
+        if (0 === SysPetBreed::where(['title' => $validated['title']])->whereNot('id', $id)->count('id')) {
 
             try {
                 $breed = SysPetBreed::findOrFail($id);
 
-                $breed->type = $validate['type'];
-                $breed->title = $validate['title'];
-                $breed->letter = strtoupper($validate['letter']);
-                $breed->product_trademark_id = $validate['product_trademark_id'];
-                $breed->product_category_id = $validate['product_category_id'];
+                $breed->type = $validated['type'];
+                $breed->title = $validated['title'];
+                $breed->letter = strtoupper($validated['letter']);
+                $breed->product_trademark_id = $validated['product_trademark_id'];
+                $breed->product_category_id = $validated['product_category_id'];
 
-//                $breed->is_sync_attr = $validate['is_sync_attr'];
+//                $breed->is_sync_attr = $validated['is_sync_attr'];
 //                $breed->sync_product_trademark_id = null;
 //                $breed->sync_product_category_id = null;
 //
 //                $breed->attrs()->detach();
 //
-//                if (isTrue($validate['is_sync_attr'])) {
-//                    $breed->attrs()->attach($validate['sync_product_attr_id']);
+//                if (isTrue($validated['is_sync_attr'])) {
+//                    $breed->attrs()->attach($validated['sync_product_attr_id']);
 //
-//                    $breed->sync_product_trademark_id = $validate['sync_product_trademark_id'];
-//                    $breed->sync_product_category_id = $validate['sync_product_category_id'];
+//                    $breed->sync_product_trademark_id = $validated['sync_product_trademark_id'];
+//                    $breed->sync_product_category_id = $validated['sync_product_category_id'];
 //                }
 
                 $breed->save();

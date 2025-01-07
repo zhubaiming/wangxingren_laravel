@@ -95,6 +95,18 @@ class UploadController extends Controller
         return $this->success($url);
     }
 
+    public function userAvatar(Request $request)
+    {
+        $file = $request->file('file');
+
+        $this->storageBuildConfig['root'] = $this->storageBuildConfig['root'] . DIRECTORY_SEPARATOR . 'User' . DIRECTORY_SEPARATOR . 'Admin' . DIRECTORY_SEPARATOR . 'Avatar';
+        $this->storageBuildConfig['url'] = $this->storageBuildConfig['url'] . DIRECTORY_SEPARATOR . 'User' . DIRECTORY_SEPARATOR . 'Admin' . DIRECTORY_SEPARATOR . 'Avatar';
+
+        $url = $this->storageSave($file);
+
+        return $this->success($url);
+    }
+
     public function companyInfo(Request $request)
     {
         $file = $request->file('file');
@@ -107,18 +119,15 @@ class UploadController extends Controller
         return $this->success($url);
     }
 
-
-    public function userAvatar(Request $request)
+    public function clientUserPetAvatar(Request $request)
     {
         $file = $request->file('file');
 
-        $this->storageBuildConfig['root'] = $this->storageBuildConfig['root'] . DIRECTORY_SEPARATOR . 'Admin' . DIRECTORY_SEPARATOR . 'User' . DIRECTORY_SEPARATOR . 'Avatar';
-        $this->storageBuildConfig['url'] = $this->storageBuildConfig['url'] . DIRECTORY_SEPARATOR . 'Admin' . DIRECTORY_SEPARATOR . 'User' . DIRECTORY_SEPARATOR . 'Avatar';
+        $this->storageBuildConfig['root'] = $this->storageBuildConfig['root'] . DIRECTORY_SEPARATOR . 'ClientUser' . DIRECTORY_SEPARATOR . 'Pet' . DIRECTORY_SEPARATOR . 'Avatar';
+        $this->storageBuildConfig['url'] = $this->storageBuildConfig['url'] . DIRECTORY_SEPARATOR . 'ClientUser' . DIRECTORY_SEPARATOR . 'Pet' . DIRECTORY_SEPARATOR . 'Avatar';
 
         $url = $this->storageSave($file);
 
         return $this->success($url);
     }
-
-
 }

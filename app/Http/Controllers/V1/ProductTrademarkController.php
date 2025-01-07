@@ -18,16 +18,16 @@ class ProductTrademarkController extends Controller
 
     public function index(Request $request)
     {
-        $validate = arrHumpToLine($request->input());
-        $paginate = isset($validate['paginate']) ? isTrue($validate['paginate']) : true; // 是否分页
+        $validated = arrHumpToLine($request->input());
+        $paginate = isset($validated['paginate']) ? isTrue($validated['paginate']) : true; // 是否分页
 
         $query = ProductTrademark::orderBy('letter', 'asc');
 
-        if (isset($validate['title'])) {
-            $query = $query->where('title', 'like', "%{$validate['title']}%");
+        if (isset($validated['title'])) {
+            $query = $query->where('title', 'like', "%{$validated['title']}%");
         }
 
-        $payload = $paginate ? $query->paginate($validate['page_size'] ?? $this->pageSize, ['*'], 'page', $validate['page'] ?? $this->page) : $query->get();
+        $payload = $paginate ? $query->paginate($validated['page_size'] ?? $this->pageSize, ['*'], 'page', $validated['page'] ?? $this->page) : $query->get();
 
         return $this->returnIndex($payload, 'ProductTrademarkResource', __FUNCTION__, $paginate);
     }
@@ -37,11 +37,11 @@ class ProductTrademarkController extends Controller
      */
     public function store(Request $request)
     {
-        $validate = arrHumpToLine($request->post());
+        $validated = arrHumpToLine($request->post());
 
-        if (0 === ProductTrademark::where(['title' => $validate['title']])->count('id')) {
+        if (0 === ProductTrademark::where(['title' => $validated['title']])->count('id')) {
 
-            $trademark = ProductTrademark::create(['title' => $validate['title'], 'letter' => isset($validate['letter']) ? strtolower($validate['letter']) : null, 'image' => $validate['image'] ?? null, 'description' => $validate['description'] ?? null]);
+            $trademark = ProductTrademark::create(['title' => $validated['title'], 'letter' => isset($validated['letter']) ? strtolower($validated['letter']) : null, 'image' => $validated['image'] ?? null, 'description' => $validated['description'] ?? null]);
 
             if (!$trademark) {
                 return $this->failed('品牌创建失败');
@@ -72,14 +72,14 @@ class ProductTrademarkController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $validate = arrHumpToLine($request->post());
+        $validated = arrHumpToLine($request->post());
 
-        if (0 === ProductTrademark::where(['title' => $validate['title']])->whereNot('id', $id)->count('id')) {
+        if (0 === ProductTrademark::where(['title' => $validated['title']])->whereNot('id', $id)->count('id')) {
 
             try {
                 $trademark = ProductTrademark::findOrFail($id);
 
-                foreach ($validate as $field => $value) {
+                foreach ($validated as $field => $value) {
                     if ($field !== 'id') {
                         $trademark->setAttribute($field, $value);
                     }

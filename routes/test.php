@@ -43,7 +43,7 @@ Route::any('/test_attr', function (Request $request) {
     /**
      * 插入，已完成
      */
-//    $validate = arrHumpToLine($request->input());
+//    $validated = arrHumpToLine($request->input());
 //
 //    $attrs = \App\Models\ProductAttr::get();
 //    $pets = \App\Models\SysPetBreed::select('id')->get()->pluck('id')->toArray();
@@ -52,7 +52,7 @@ Route::any('/test_attr', function (Request $request) {
 //        $attr->pivotValues($related)->attach($pets);
 //    }
 
-//    dd($validate, $pets);
+//    dd($validated, $pets);
 
     /**
      * 输出

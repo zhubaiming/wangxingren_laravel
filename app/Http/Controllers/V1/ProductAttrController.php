@@ -13,16 +13,16 @@ class ProductAttrController extends Controller
      */
     public function index(Request $request)
     {
-        $validate = arrHumpToLine($request->input());
-        $paginate = isset($validate['paginate']) ? isTrue($validate['paginate']) : true; // 是否分页
+        $validated = arrHumpToLine($request->input());
+        $paginate = isset($validated['paginate']) ? isTrue($validated['paginate']) : true; // 是否分页
 
         $query = ProductAttr::with('category')->orderBy('id', 'asc');
 
-        if (isset($validate['category_id'])) {
-            $query = $query->where('category_id', $validate['category_id']);
+        if (isset($validated['category_id'])) {
+            $query = $query->where('category_id', $validated['category_id']);
         }
 
-        $payload = $paginate ? $query->paginate($validate['page_size'] ?? $this->pageSize, ['*'], 'page', $validate['page'] ?? $this->page) : $query->get();
+        $payload = $paginate ? $query->paginate($validated['page_size'] ?? $this->pageSize, ['*'], 'page', $validated['page'] ?? $this->page) : $query->get();
 
         return $this->returnIndex($payload, 'ProductAttrResource', __FUNCTION__, $paginate);
     }

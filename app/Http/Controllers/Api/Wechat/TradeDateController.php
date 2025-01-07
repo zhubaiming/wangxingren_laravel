@@ -14,13 +14,13 @@ class TradeDateController extends Controller
 {
     public function getReservation(Request $request)
     {
-        $validate = arrHumpToLine($request->input());
+        $validated = arrHumpToLine($request->input());
 
-        if (Carbon::parse($validate['date'])->lt(Carbon::today())) {
+        if (Carbon::parse($validated['date'])->lt(Carbon::today())) {
             throw new BusinessException(ResponseEnum::HTTP_ERROR, '所选日期不允许预约');
         }
 
-        if (0 === SysTradeDate::where('date', $validate['date'])->where('status', true)->count('id')) {
+        if (0 === SysTradeDate::where('date', $validated['date'])->where('status', true)->count('id')) {
             throw new BusinessException(ResponseEnum::HTTP_ERROR, '所选日期未营业，请重新选择');
         }
 
@@ -29,10 +29,10 @@ class TradeDateController extends Controller
 
             $times = [];
             for ($i = 0; $i < 2; $i++) {
-                $times[$i] = ['car_number' => $i + 1, 'car_title' => ($i + 1) . ' 号车', 'times' => $this->getAvailableTimeRanges($fullRange, [], $validate['duration'])];
+                $times[$i] = ['car_number' => $i + 1, 'car_title' => ($i + 1) . ' 号车', 'times' => $this->getAvailableTimeRanges($fullRange, [], $validated['duration'])];
             }
 
-//            ClientUserOrder::where('reservation_date', Carbon::parse($validate['date']))->latest('reservation_time_end')->firstOrFail();
+//            ClientUserOrder::where('reservation_date', Carbon::parse($validated['date']))->latest('reservation_time_end')->firstOrFail();
         } catch (ModelNotFoundException) {
 
         }

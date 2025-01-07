@@ -160,40 +160,11 @@ Route::prefix('v1')->group(function () {
             Route::post('banner', [Controllers\UploadController::class, 'appBanner']);
         });
         Route::post('spu', [Controllers\UploadController::class, 'spuImages']);
-
-
-        // 公司信息
-        Route::prefix('companyInfo')->group(function () {
-            Route::post('info', [Controllers\UploadController::class, 'companyInfo']);
-        });
-        // 用户
         Route::prefix('user')->group(function () {
             Route::post('avatar', [Controllers\UploadController::class, 'userAvatar']);
         });
-
-
-        Route::post('spu', function (Request $request) {
-            return response()->json([
-                'code' => 200,
-                'message' => __('http_response.success'),
-                'payload' => (new \App\Services\UploadFileService())->spuImage($request->file('file'))
-            ]);
-        });
-        Route::post('co', function (Request $request) {
-            return response()->json([
-                'code' => 200,
-                'message' => __('http_response.success'),
-                'payload' => (new \App\Services\UploadFileService())->spuImage($request->file('file'))
-            ]);
+        Route::prefix('company')->group(function () {
+            Route::post('info', [Controllers\UploadController::class, 'companyInfo']);
         });
     });
-
-
-//    Route::prefix('sreviceTime')->group(function () {
-//        Route::get('/', [V1\ServiceTimeController::class, 'index']);
-//
-//        Route::get('date', [V1\ServiceTimeController::class, 'dateList']);
-//        Route::post('checkDate', [V1\ServiceTimeController::class, 'checkDate']);
-//        Route::post('/', [V1\ServiceTimeController::class, 'store']);
-//    });
 });

@@ -21,9 +21,9 @@ class SystemController extends Controller
 
     public function appIndexUpdate(Request $request)
     {
-        $validate = arrHumpToLine($request->input());
+        $validated = arrHumpToLine($request->input());
 
-        ['banners' => $banners, 'index_reach' => $index_reach] = $validate;
+        ['banners' => $banners, 'index_reach' => $index_reach] = $validated;
 
         System::where('key', 'APP_BANNER')->update(['value' => json_encode($banners, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)]);
         System::where('key', 'APP_INDEX')->update(['value' => $index_reach]);
@@ -79,9 +79,9 @@ class SystemController extends Controller
 
     public function companyUpdate(Request $request)
     {
-        $validate = arrHumpToLine($request->input());
+        $validated = arrHumpToLine($request->input());
 
-        ['banners' => $banners, 'index_reach' => $index_reach] = $validate;
+        ['banners' => $banners, 'index_reach' => $index_reach] = $validated;
 
         System::where('key', 'COMPANY_BANNER')->update(['value' => json_encode($banners, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)]);
         System::where('key', 'COMPANY_INDEX')->update(['value' => $index_reach]);

@@ -14,12 +14,12 @@ class ProductSkuController extends Controller
      */
     public function index(Request $request)
     {
-        $validate = arrHumpToLine($request->input());
+        $validated = arrHumpToLine($request->input());
 
-        $payload = SysPetBreed::whereHas('spu', function ($spu) use ($validate) {
-            $spu->where('id', $validate['spu_id']);
-        })->with('sku', function ($sku) use ($validate) {
-            $sku->where('spu_id', $validate['spu_id']);
+        $payload = SysPetBreed::whereHas('spu', function ($spu) use ($validated) {
+            $spu->where('id', $validated['spu_id']);
+        })->with('sku', function ($sku) use ($validated) {
+            $sku->where('spu_id', $validated['spu_id']);
         })->get();
 
 //        dd($payload->toArray());
@@ -32,12 +32,12 @@ class ProductSkuController extends Controller
      */
     public function store(Request $request)
     {
-        $validate = arrHumpToLine($request->input());
+        $validated = arrHumpToLine($request->input());
 
         $insert = [];
-        foreach ($validate['sku_list'] as $sku) {
+        foreach ($validated['sku_list'] as $sku) {
             $insert[] = [
-                'spu_id' => $validate['spu_id'],
+                'spu_id' => $validated['spu_id'],
                 'breed_id' => $sku['breed_id'],
                 'weight_min' => applyFloatToIntegerModifier($sku['weight_min']),
                 'weight_max' => applyFloatToIntegerModifier($sku['weight_max']),
@@ -47,7 +47,7 @@ class ProductSkuController extends Controller
             ];
         }
 
-        ProductSku::where('spu_id', $validate['spu_id'])->delete();
+        ProductSku::where('spu_id', $validated['spu_id'])->delete();
         ProductSku::insert($insert);
 
         return $this->success('success');

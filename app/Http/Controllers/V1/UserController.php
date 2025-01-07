@@ -14,9 +14,9 @@ class UserController extends Controller
 {
     public function login(Request $request)
     {
-        $validate = arrHumpToLine($request->post());
+        $validated = arrHumpToLine($request->post());
         try {
-            $user = User::where(['account' => $validate['account'], 'password' => $validate['password']])->firstOrFail();
+            $user = User::where(['account' => $validated['account'], 'password' => $validated['password']])->firstOrFail();
 
             if (!$user->status) {
                 return $this->failed('该账户无法登录，请联系管理员核实后再登录');
@@ -41,12 +41,12 @@ class UserController extends Controller
 
     public function updateSelf(Request $request)
     {
-        $validate = arrHumpToLine($request->post());
+        $validated = arrHumpToLine($request->post());
 
         try {
             $user = User::findOrFail(1);
 
-            foreach ($validate as $key => $value) {
+            foreach ($validated as $key => $value) {
                 if ($key !== 'reentered_password') {
                     $user->{$key} = $value;
                 }
@@ -67,15 +67,15 @@ class UserController extends Controller
 
     public function index(Request $request)
     {
-        $validate = arrHumpToLine($request->input());
+        $validated = arrHumpToLine($request->input());
 
         $query = User::with(['role']);
 
-        if (isset($validate['name'])) {
+        if (isset($validated['name'])) {
             $query = $query->where('name', 'like', "%{$request->get('name')}%");
         }
 
-        $payload = $query->paginate($validate['page_size'] ?? $this->pageSize, ['*'], 'page', $validate['page'] ?? $this->page);
+        $payload = $query->paginate($validated['page_size'] ?? $this->pageSize, ['*'], 'page', $validated['page'] ?? $this->page);
 
         return $this->returnIndex($payload, 'UserResource', __FUNCTION__);
     }

@@ -98,7 +98,7 @@ Route::prefix('goods_category')->group(function () {
  * 上传
  */
 Route::prefix('/upload')->group(function () {
-    Route::post('petAvatar', [Wechat\UserPetController::class, 'upload']);
+    Route::post('petAvatar', [\App\Http\Controllers\UploadController::class, 'clientUserPetAvatar']);
 });
 
 /**

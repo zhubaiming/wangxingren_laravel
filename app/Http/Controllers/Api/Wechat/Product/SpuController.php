@@ -11,16 +11,16 @@ class SpuController extends Controller
 {
     public function searchList(Request $request)
     {
-        $validate = arrHumpToLine($request->input());
+        $validated = arrHumpToLine($request->input());
 
-        $title = $validate['title'] === 'null' || is_null($validate['title']) ? null : $validate['title'];
+        $title = $validated['title'] === 'null' || is_null($validated['title']) ? null : $validated['title'];
 
         $titles = ProductSpu::where('trademark_id', 325403)->where('saleable', true)
-            ->when(isset($validate['category_id']), function ($query) use ($validate) {
-                return $query->where('category_id', $validate['category_id']);
+            ->when(isset($validated['category_id']), function ($query) use ($validated) {
+                return $query->where('category_id', $validated['category_id']);
             })
-            ->when(!is_null($title), function ($query) use ($validate) {
-                return $query->where('title', 'like', '%' . $validate['title'] . '%');
+            ->when(!is_null($title), function ($query) use ($validated) {
+                return $query->where('title', 'like', '%' . $validated['title'] . '%');
             })->pluck('title')->toArray();
 
         $result = [];
@@ -36,21 +36,21 @@ class SpuController extends Controller
      */
     public function index(Request $request)
     {
-        $validate = arrHumpToLine($request->input());
+        $validated = arrHumpToLine($request->input());
 
-        $title = $validate['title'] === 'null' || is_null($validate['title']) ? null : $validate['title'];
+        $title = $validated['title'] === 'null' || is_null($validated['title']) ? null : $validated['title'];
 
         $payload = ProductSpu::where('trademark_id', 325403)->where('saleable', true)
-            ->when(isset($validate['category_id']), function ($query) use ($validate) {
-                return $query->where('category_id', $validate['category_id']);
+            ->when(isset($validated['category_id']), function ($query) use ($validated) {
+                return $query->where('category_id', $validated['category_id']);
             })
-            ->when(!is_null($title), function ($query) use ($validate) {
-                return $query->where('title', 'like', '%' . $validate['title'] . '%');
+            ->when(!is_null($title), function ($query) use ($validated) {
+                return $query->where('title', 'like', '%' . $validated['title'] . '%');
             })
             ->withMin('skus', 'price')
             ->withCount('order')
             ->orderBy('created_at', 'desc')
-            ->simplePaginate($this->pageSize, ['*'], 'page', $validate['page'] ?? $this->page);
+            ->simplePaginate($this->pageSize, ['*'], 'page', $validated['page'] ?? $this->page);
 
         return $this->returnIndex($payload, 'Wechat\ProductSpuResource', __FUNCTION__, true);
     }
@@ -60,11 +60,11 @@ class SpuController extends Controller
      */
     public function show(string $id, Request $request)
     {
-        $validate = arrHumpToLine($request->post());
+        $validated = arrHumpToLine($request->post());
 
         $payload = ProductSpu::where('trademark_id', 325403)->where('saleable', true)
-            ->when(isset($validate['category_id']), function ($query) use ($validate) {
-                return $query->where('category_id', $validate['category_id']);
+            ->when(isset($validated['category_id']), function ($query) use ($validated) {
+                return $query->where('category_id', $validated['category_id']);
             })
             ->with('spu_breed')
             ->withMin('skus', 'price')

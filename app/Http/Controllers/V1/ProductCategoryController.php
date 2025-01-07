@@ -19,22 +19,22 @@ class ProductCategoryController extends Controller
 
     public function index(Request $request)
     {
-        $validate = arrHumpToLine($request->input());
-        $paginate = isset($validate['paginate']) ? isTrue($validate['paginate']) : true; // 是否分页
-        $cascader = isset($validate['cascader']) ? isTrue($validate['cascader']) : false; // 级联选择
+        $validated = arrHumpToLine($request->input());
+        $paginate = isset($validated['paginate']) ? isTrue($validated['paginate']) : true; // 是否分页
+        $cascader = isset($validated['cascader']) ? isTrue($validated['cascader']) : false; // 级联选择
 
         $query = ProductCategory::orderBy('sort', 'asc');
 
-        if (isset($validate['trademark_id'])) {
-            $query = $query->whereHas('trademarks', function (Builder $q) use ($validate) {
-                $q->where(['id' => $validate['trademark_id']]);
+        if (isset($validated['trademark_id'])) {
+            $query = $query->whereHas('trademarks', function (Builder $q) use ($validated) {
+                $q->where(['id' => $validated['trademark_id']]);
             });
         }
 
-        if (($validate['parent_id'] ?? 0) === 0) {
+        if (($validated['parent_id'] ?? 0) === 0) {
             $query = $query->root();
         } else {
-            $query = $query->where(['parent_id' => $validate['parent_id']]);
+            $query = $query->where(['parent_id' => $validated['parent_id']]);
         }
 
         if ($paginate && $cascader) {
@@ -46,7 +46,7 @@ class ProductCategoryController extends Controller
         }
 
 
-        $payload = $paginate ? $query->paginate($validate['page_size'] ?? $this->pageSize, ['*'], 'page', $validate['page'] ?? $this->page) : $query->get();
+        $payload = $paginate ? $query->paginate($validated['page_size'] ?? $this->pageSize, ['*'], 'page', $validated['page'] ?? $this->page) : $query->get();
 
         return $this->returnIndex($payload, 'ProductCategoryResource', __FUNCTION__, $paginate);
     }
@@ -71,29 +71,29 @@ class ProductCategoryController extends Controller
      */
     public function store(Request $request)
     {
-        $validate = arrHumpToLine($request->post());
+        $validated = arrHumpToLine($request->post());
 
-        if (0 !== intval($validate['id'])) {
-            if (0 === ProductCategory::where(['id' => $validate['id']])->count('id')) {
+        if (0 !== intval($validated['id'])) {
+            if (0 === ProductCategory::where(['id' => $validated['id']])->count('id')) {
                 return $this->failed('非法分类，无法创建');
             }
 
-            if (0 !== ProductCategory::where(['title' => $validate['title'], 'parent_id' => $validate['id']])->count('id')) {
+            if (0 !== ProductCategory::where(['title' => $validated['title'], 'parent_id' => $validated['id']])->count('id')) {
                 return $this->failed('当前分类已存在，请重新建立');
             }
         }
 
         $category = new ProductCategory();
 
-        $category->title = $validate['title'];
-        $category->sort = $validate['sort'] ?? 99;
-        $category->description = $validate['description'] ?? null;
-        $category->parent_id = $validate['id'];
-        $category->is_parent = $validate['id'] === 0;
+        $category->title = $validated['title'];
+        $category->sort = $validated['sort'] ?? 99;
+        $category->description = $validated['description'] ?? null;
+        $category->parent_id = $validated['id'];
+        $category->is_parent = $validated['id'] === 0;
 
         $category->save();
 
-        foreach ($validate['trademarks'] as $trademark) {
+        foreach ($validated['trademarks'] as $trademark) {
             $category->trademarks()->attach($trademark);
         }
 
@@ -106,21 +106,21 @@ class ProductCategoryController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $validate = arrHumpToLine($request->post());
+        $validated = arrHumpToLine($request->post());
 
         try {
             $category = ProductCategory::with(['trademarks'])->findOrFail($id);
 
-            if (0 === ProductCategory::where(['title' => $validate['title'], 'id' => $category->parent_id])->count('id')) {
-                $category->title = $validate['title'];
-                $category->sort = $validate['sort'] ?? 99;
-                $category->description = $validate['description'] ?? null;
+            if (0 === ProductCategory::where(['title' => $validated['title'], 'id' => $category->parent_id])->count('id')) {
+                $category->title = $validated['title'];
+                $category->sort = $validated['sort'] ?? 99;
+                $category->description = $validated['description'] ?? null;
 
                 $category->save();
 
                 $category->trademarks()->detach($category->trademarks->pluck('id')->toArray());
 
-                foreach ($validate['trademarks'] as $trademark) {
+                foreach ($validated['trademarks'] as $trademark) {
                     $category->trademarks()->attach($trademark);
                 }
 

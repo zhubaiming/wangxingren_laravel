@@ -15,7 +15,7 @@ class AuthController extends Controller
 {
     public function registered(Request $request): \Illuminate\Http\JsonResponse
     {
-        $validate = $request->validate([
+        $validated = $request->validate([
             'account' => ['bail', 'required', 'alpha_num'],
             'role_id' => ['bail', 'required', 'integer'],
             'name' => ['bail', 'required', 'string'],
@@ -25,11 +25,11 @@ class AuthController extends Controller
             'avatar' => ['bail', 'sometimes', 'url'],
         ]);
 
-        if (0 !== User::where('account', $validate['account'])->orWhere('phone_number', $validate['phone_number'])->count('id')) {
+        if (0 !== User::where('account', $validated['account'])->orWhere('phone_number', $validated['phone_number'])->count('id')) {
             throw new BusinessException(ResponseEnum::USER_ACCOUNT_REGISTERED);
         }
 
-        User::create(array_merge($validate, [
+        User::create(array_merge($validated, [
             'uid' => strval(Str::ulid()),
             'password' => Hash::make('Dcba@1234'),
             'status' => true,
@@ -43,7 +43,7 @@ class AuthController extends Controller
 
     public function login(Request $request): \Illuminate\Http\JsonResponse
     {
-        $validate = $request->validate([
+        $validated = $request->validate([
             'account' => ['required', 'alpha_num'],
             'password' => ['required'],
             'captcha' => ['required', 'alpha_num']
@@ -55,11 +55,11 @@ class AuthController extends Controller
 //            'password' => Hash::make('Dcba@1234')
 //        ]);
 
-        unset($validate['captcha']);
+        unset($validated['captcha']);
 
         $auth = Auth::guard('admin');
 
-        if ($auth->validate($validate)) {
+        if ($auth->validate($validated)) {
             if (!$auth->getLastAttempted()->status) {
                 throw new BusinessException(ResponseEnum::USER_SERVICE_LOGIN_STATUS_ERROR);
             }
