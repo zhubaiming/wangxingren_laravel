@@ -49,12 +49,6 @@ class AuthController extends Controller
             'captcha' => ['required', 'alpha_num']
         ]);
 
-        // todo: 校验验证码
-//        User::where('account', '15840132829')->update([
-////            'uid' => strval(Str::ulid()),
-//            'password' => Hash::make('Dcba@1234')
-//        ]);
-
         unset($validated['captcha']);
 
         $auth = Auth::guard('admin');
@@ -86,5 +80,27 @@ class AuthController extends Controller
         } else {
             throw new BusinessException(ResponseEnum::CLIENT_HTTP_UNAUTHORIZED);
         }
+    }
+
+    public function updateSelf(Request $request)
+    {
+        $validated = arrHumpToLine($request->post());
+
+        $user = Auth::guard('admin')->user();
+
+        foreach ($validated as $key => $value) {
+            if ($key !== 'reentered_password') {
+                $user->{$key} = $value;
+            }
+            if ($key === 'password') {
+                $user->{$key} = Hash::make($value);
+            }
+        }
+
+        unset($user->user);
+
+        $user->save();
+
+        return $this->success();
     }
 }

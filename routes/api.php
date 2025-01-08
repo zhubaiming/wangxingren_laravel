@@ -89,7 +89,8 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('permission', V1\UserPermissionController::class);
     });
     Route::apiResource('/user', V1\UserController::class);
-    Route::put('/user', [V1\UserController::class, 'updateSelf']);
+//    Route::put('/user', [V1\UserController::class, 'updateSelf']);
+    Route::put('/user', [Admin\AuthController::class, 'updateSelf']);
 
 
     // 营业日期 - 已完成
