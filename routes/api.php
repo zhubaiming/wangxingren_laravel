@@ -97,7 +97,7 @@ Route::prefix('v1')->group(function () {
     // 营业车辆 - 已完成
     Route::apiResource('/serviceCar', V1\ServiceCarController::class)->only(['index']);
 
-    // 系统相关设置
+    // 系统相关设置 - 完成
     Route::prefix('system')->group(function () {
         Route::get('/app/index', [Admin\SystemController::class, 'appIndexShow']);
         Route::put('/app/index', [Admin\SystemController::class, 'appIndexUpdate']);
@@ -106,14 +106,15 @@ Route::prefix('v1')->group(function () {
         Route::get('/company', [Admin\SystemController::class, 'companyIndex']);
         Route::put('/company', [Admin\SystemController::class, 'companyUpdate']);
     });
-    // 设置相关 - 已完成
-    Route::prefix('setting')->group(function () {
-        Route::apiResource('/company', V1\CompanyController::class)->only(['index', 'update']);
-    });
+
+    Route::post('/coupon/{id}/user', [Admin\Coupon\CouponController::class,'issueCouponToUser'])->withoutMiddleware('api');
+    Route::apiResource('/coupon', Admin\Coupon\CouponController::class);
+    Route::apiResource('/clientUser', Admin\ClientUser\UserController::class);
+
 
 
     Route::get('/home', [V1\HomeController::class, 'info']);
-    Route::apiResource('/clientUser', V1\ClientUserController::class);
+//    Route::apiResource('/clientUser', V1\ClientUserController::class);
     Route::apiResource('/order', V1\OrderController::class);
     // 商品
     Route::prefix('product')->group(function () {
@@ -134,9 +135,10 @@ Route::prefix('v1')->group(function () {
 
         // spu - 已完成
         Route::get('/spu/{spu_id}/pet_breed', [V1\PetBreedController::class, 'spu_breed']);
-        Route::put('/spu', [V1\ProductSpuController::class, 'batchUpdate']);
-        Route::delete('/spu', [V1\ProductSpuController::class, 'batchDestroy']);
-        Route::apiResource('/spu', V1\ProductSpuController::class);
+        Route::put('/spu', [Admin\Product\SpuController::class, 'batchUpdate']);
+        Route::delete('/spu', [Admin\Product\SpuController::class, 'batchDestroy']);
+        Route::apiResource('/spu', Admin\Product\SpuController::class);
+
 
         // sku
         Route::apiResource('/sku', V1\ProductSkuController::class);
@@ -148,8 +150,6 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('weight', V1\PetWeightController::class);
     });
 
-    Route::apiResource('coupon/category', Admin\Coupon\CategoryController::class);
-    Route::apiResource('coupon', Admin\Coupon\CouponController::class);
 
 
     // 上传

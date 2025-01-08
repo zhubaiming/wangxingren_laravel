@@ -5,10 +5,10 @@ namespace App\Http\Controllers\V1;
 use App\Enums\OrderStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ProductSpuResource;
-use App\Models\ProductSpecGroup;
+//use App\Models\ProductSpecGroup;
 use App\Models\ProductSpu;
-use App\Services\ProductSpuService;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+//use App\Services\ProductSpuService;
+//use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 
 class ProductSpuController extends Controller

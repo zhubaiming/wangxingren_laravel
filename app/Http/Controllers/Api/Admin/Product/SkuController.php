@@ -1,26 +1,18 @@
 <?php
 
-namespace App\Http\Controllers\Api\Admin\Coupon;
+namespace App\Http\Controllers\Api\Admin\Product;
 
 use App\Http\Controllers\Controller;
-use App\Models\CouponCategory;
 use Illuminate\Http\Request;
 
-class CategoryController extends Controller
+class SkuController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index()
     {
-        $validated = arrHumpToLine($request->input());
-        $paginate = isset($validated['paginate']) ? isTrue($validated['paginate']) : true; // 是否分页
-
-        $query = CouponCategory::orderBy('id', 'asc');
-
-        $payload = $paginate ? $query->paginate($request->get('pageSize') ?? $this->pageSize, ['*'], 'page', $request->get('page') ?? $this->page) : $query->get();
-
-        return $this->returnIndex($payload, 'CouponCategoryResource', __FUNCTION__, $paginate);
+        //
     }
 
     /**

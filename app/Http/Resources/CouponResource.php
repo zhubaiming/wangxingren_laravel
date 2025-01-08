@@ -13,9 +13,13 @@ class CouponResource extends CommentsResource
             true => match ($format) {
                 'index' => [
                     'id' => $this->id,
+                    'code' => $this->code,
                     'title' => $this->title,
                     'amount' => $this->amount,
+                    'amount_conv' => applyIntegerToFloatModifier($this->amount),
                     'min_total' => $this->min_total,
+                    'min_total_conv' => applyIntegerToFloatModifier($this->min_total),
+                    'related_action' => $this->related_action,
                     'expiration_at' => $this->expiration_at,
                     'updated_by' => $this->updated_by
                 ],

@@ -1,22 +1,18 @@
 <?php
 
-namespace App\Http\Controllers\V1;
+namespace App\Http\Controllers\Api\Admin\Product;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\CompanyInfoResource;
-use App\Models\CompanyInfo;
 use Illuminate\Http\Request;
 
-class CompanyController extends Controller
+class TrademarkController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $payload = CompanyInfo::find(1);
-
-        return $this->success(new CompanyInfoResource($payload));
+        //
     }
 
     /**
@@ -40,11 +36,7 @@ class CompanyController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $data = arrHumpToLine($request->post());
-
-        CompanyInfo::updateOrCreate(['id' => $id], $data);
-
-        return $this->success();
+        //
     }
 
     /**
