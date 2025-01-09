@@ -20,39 +20,42 @@ class ProductSpu extends CommentsModel
     }
 
     // ==============================  关联  ==============================
-    /*
-     * 品牌 - 一对一
-     */
-    public function detail()
-    {
-        return $this->hasOne(ProductSpuDetail::class, 'spu_id', 'id');
-    }
 
+    /**
+     * 品牌 - 多对一
+     */
     public function trademark()
     {
         return $this->belongsTo(ProductTrademark::class, 'trademark_id', 'id');
     }
 
+    /**
+     * 分类 - 多对一
+     */
     public function category()
     {
         return $this->belongsTo(ProductCategory::class, 'category_id', 'id');
     }
 
-    public function attr()
-    {
-        return $this->belongsToMany(ProductAttr::class, 'pivot_product_spu_attr', 'spu_id', 'attr_id', 'id', 'id');
-    }
-
+    /**
+     * 订单 - 一对多
+     */
     public function order()
     {
         return $this->hasMany(ClientUserOrder::class, 'spu_id', 'id');
     }
 
+    /**
+     * 品种 - 多对多
+     */
     public function spu_breed()
     {
         return $this->belongsToMany(SysPetBreed::class, 'pivot_product_spu_breed', 'spu_id', 'breed_id', 'id', 'id');
     }
 
+    /**
+     * sku - 一对多
+     */
     public function skus()
     {
         return $this->hasMany(ProductSku::class, 'spu_id', 'id');

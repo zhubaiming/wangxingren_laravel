@@ -75,13 +75,26 @@ class SpuController extends Controller
     {
         $validated = arrHumpToLine($request->post());
 
-        $spu = ProductSpu::findOrFail($id);
+        $spu = ProductSpu::with('spu_breed')->findOrFail($id);
 
-        if ($validated['category_id'] !== $spu->category_id) {
+        if ($validated['category_id'] !== $spu->category_id) { // 如果spu切换分类
             $spu->spu_breed()->detach();
             $spu->spu_breed()->attach($validated['pet_breeds']);
 
             $spu->skus()->delete();
+        } else {
+            $newBreeds = array_unique($validated['pet_breeds']);
+            $origanBreeds = $spu->spu_breed->pluck('id')->toArray();
+
+            $insertBreeds = array_diff($newBreeds, $origanBreeds);
+            $deleteBreeds = array_diff($origanBreeds, $newBreeds);
+
+            $spu->spu_breed()->detach($deleteBreeds);
+            $spu->spu_breed()->attach($insertBreeds);
+
+            if (!empty($deleteBreeds)) {
+                $spu->skus()->whereIn('breed_id', $deleteBreeds)->delete();
+            }
         }
 
         $spu->title = $validated['title'];
