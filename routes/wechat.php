@@ -8,20 +8,6 @@ use Illuminate\Support\Facades\Route;
 Route::withoutMiddleware(['auth.wechat'])->group(function () {
     Route::post('/silentLogin', [Wechat\UserController::class, 'silentLogin']);
 
-    Route::any('/test', function (Request $request, \App\Services\Wechat\MiniAppServerSideService $service) {
-//    return response()->json([
-//        'ip' => $request->ip(),
-//        'client_ip' => $request->getClientIp(),
-//        'user'=>\Illuminate\Support\Facades\Auth::guard('wechat')->user(),
-//    ]);
-//    return $service->code2session('aaaaa');
-//        dd(\App\Enums\GenderEnum::man, \App\Enums\GenderEnum::from(1));
-
-        dd([$app_type, $app_id, $openid] = explode('.', \Illuminate\Support\Facades\Crypt::decryptString('eyJpdiI6ImxKeWhkeEtrMGRrcE9UT05JdkliOXc9PSIsInZhbHVlIjoibngzTmlET0F3cmlxOUZuYy9VajlEcEs4S0RBM2FJcUZZMGlaYU0vVzZybWZQSmVPQ0hJVGtydTBlT0EvWnUrdU9VeHVWSURpTXZlL09xMGVTMkcyZmJtL0ZiUWlSTk1XYWRqZE9IcUpUelU9IiwibWFjIjoiNDViN2Q2ZTMzMTg1MDY0NjFhMTc0YjZmMzA3MjNmOTA2ZjBkN2M0MmMwOWZiZjRlNDQ5ZTQxMTM4NWI1M2I5MyIsInRhZyI6IiJ9')));
-
-        dd($app_type, $app_id, $openid);
-    });
-
     Route::prefix('system')->group(function () {
         Route::get('/app/index', [Api\Wechat\SystemController::class, 'appIndexShow']);
         Route::get('/company', [Api\Wechat\SystemController::class, 'companyShow']);
@@ -40,7 +26,7 @@ Route::post('/registerLogin', [Wechat\UserController::class, 'registerLogin']);
 Route::get('/userInfo', [Wechat\UserController::class, 'info']);
 
 /**
- * 宠物
+ * 宠物 -- 完成
  */
 Route::get('/pet_breed/{id}', [Api\Wechat\User\PetController::class,'breedIndex'])->where(['id' => '^[1-9]\d*']);
 Route::apiResource('/pet', Api\Wechat\User\PetController::class);
@@ -52,7 +38,6 @@ Route::prefix('product')->group(function () {
     Route::get('/spu', [Api\Wechat\Product\SpuController::class, 'index']);
     Route::get('/spu/titles', [Api\Wechat\Product\SpuController::class, 'searchList']);
     Route::get('/spu/{spu_id}', [Api\Wechat\Product\SpuController::class, 'show']);
-//    Route::get('/category/{category_id}/spu',[])
     Route::get('/sku', [Api\Wechat\Product\SkuController::class, 'show']);
 });
 
@@ -60,7 +45,6 @@ Route::prefix('product')->group(function () {
 /**
  * 服务/收货 地址
  */
-//Route::apiResource('/address', Wechat\UserAddressController::class);
 Route::apiResource('/address', Api\Wechat\User\AddressController::class);
 
 
@@ -71,26 +55,16 @@ Route::get('/trade_date/reservation', [Api\Wechat\TradeDateController::class, 'g
 
 
 /**
- * 优惠卷
+ * 优惠卷 -- 完成
  */
-//Route::apiResource('/coupon', Wechat\UserCouponController::class);
 Route::apiResource('/coupon', Api\Wechat\User\CouponController::class);
 
 /**
  * 订单
  */
-//Route::get('/order/total', [Wechat\UserOrderController::class, 'total']);
-//Route::apiResource('/order', Wechat\UserOrderController::class);
 Route::get('/order/total', [Api\Wechat\User\OrderController::class, 'total']);
 Route::apiResource('/order', Api\Wechat\User\OrderController::class);
 
-
-Route::prefix('goods_category')->group(function () {
-    Route::get('/{parent_id?}', [Wechat\GoodCategoryController::class, 'index'])->where(['parent_id' => '^[1-9]\d*'])->withoutMiddleware(['auth.wechat']); // 如果传递了 parent_id，则从 parent_id 开始获取分类树；否则从顶级开始获取分类树
-    Route::apiResource('/{cid}/goods', Wechat\GoodsSpuController::class)->only(['index', 'show'])->where(['cid' => '^[1-9]\d*', 'good' => '^[1-9]\d*'])->withoutMiddleware(['auth.wechat']);  // 列出某个指定分类的所有商品
-    Route::get('/{cid}/goods/{gid}/sku', [Wechat\GoodsSkuController::class, 'show'])->where(['cid' => '^[1-9]\d*', 'gid' => '^[1-9]\d*']);  // 查询具体sku
-    Route::get('/{cid}/goods/{gid}/service_times', [Wechat\GoodsServieTimeController::class, 'index'])->where(['cid' => '^[1-9]\d*', 'gid' => '^[1-9]\d*']);  // 查询具体sku
-});
 
 
 /**

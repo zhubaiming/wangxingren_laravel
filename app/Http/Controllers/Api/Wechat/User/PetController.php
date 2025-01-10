@@ -51,11 +51,8 @@ class PetController extends Controller
             'is_sterilization' => isTrue($validated['is_sterilization']) ?? false,
             'is_default' => isTrue($validated['is_default']) ?? false,
             'birth' => $validated['birth'],
-            'age' => $validated['birth'],
-//            'weight_id' => $validated['weight']
         ];
 
-        Auth::guard('wechat')->setUser(ClientUser::find(1));
         Auth::guard('wechat')->user()->pets()->createMany([$data]);
 
         return $this->success();
@@ -112,7 +109,6 @@ class PetController extends Controller
         $payload = [];
         foreach ($breeds as $breed) {
             $letter = $breed->letter;
-            $item = ['id' => $breed->id, 'name' => $breed->title];
 
             if (!isset($payload[$letter])) {
                 $payload[$letter] = ['alpha' => $letter, 'sub_items' => []];

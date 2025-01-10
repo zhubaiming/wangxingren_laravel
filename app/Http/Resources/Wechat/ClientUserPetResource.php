@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Wechat;
 
+use App\Enums\GenderEnum;
 use App\Enums\PetCategoryEnum;
 use App\Http\Resources\CommentsResource;
 
@@ -22,15 +23,15 @@ class ClientUserPetResource extends CommentsResource
                     'breed_type' => $this->breed_type,
                     'breed_type_conv' => strtoupper(PetCategoryEnum::from($this->breed_type)->name),
                     'gender' => $this->gender,
-                    'gender_conv' => $this->gender_conv,
+                    'gender_conv' => GenderEnum::from($this->gender)->name('animal'),
                     'weight' => $this->weight,
                     'birth' => $this->birth,
-                    'age' => $this->age,
+                    'age' => calculateAge($this->birth, 'Y-m'),
                     'color' => $this->color,
                     'avatar' => $this->avatar,
                     'remark' => $this->remark,
                     'is_sterilization' => $this->is_sterilization,
-                    'is_default' => $this->is_default,
+                    'is_default' => $this->is_default
                 ],
                 'show' => [
                     'id' => $this->id,
