@@ -2,6 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
 class ProductSpu extends CommentsModel
 {
     protected $table = 'sys_product_spu';
@@ -24,7 +28,7 @@ class ProductSpu extends CommentsModel
     /**
      * 品牌 - 多对一
      */
-    public function trademark()
+    public function trademark(): BelongsTo
     {
         return $this->belongsTo(ProductTrademark::class, 'trademark_id', 'id');
     }
@@ -32,7 +36,7 @@ class ProductSpu extends CommentsModel
     /**
      * 分类 - 多对一
      */
-    public function category()
+    public function category(): BelongsTo
     {
         return $this->belongsTo(ProductCategory::class, 'category_id', 'id');
     }
@@ -40,7 +44,7 @@ class ProductSpu extends CommentsModel
     /**
      * 订单 - 一对多
      */
-    public function order()
+    public function order(): HasMany
     {
         return $this->hasMany(ClientUserOrder::class, 'spu_id', 'id');
     }
@@ -48,7 +52,7 @@ class ProductSpu extends CommentsModel
     /**
      * 品种 - 多对多
      */
-    public function spu_breed()
+    public function spu_breed(): BelongsToMany
     {
         return $this->belongsToMany(SysPetBreed::class, 'pivot_product_spu_breed', 'spu_id', 'breed_id', 'id', 'id');
     }
@@ -56,7 +60,7 @@ class ProductSpu extends CommentsModel
     /**
      * sku - 一对多
      */
-    public function skus()
+    public function skus(): HasMany
     {
         return $this->hasMany(ProductSku::class, 'spu_id', 'id');
     }

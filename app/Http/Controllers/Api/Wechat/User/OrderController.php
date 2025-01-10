@@ -74,7 +74,6 @@ class OrderController extends Controller
     public function store(Request $request, MiniProgramPaymentService $paymentService)
     {
         $validated = arrHumpToLine($request->input());
-//        dd($validated);
 
         [
             'order_spu_info' => $order_spu_info,
@@ -101,8 +100,6 @@ class OrderController extends Controller
         $out_trade_no = date('Ymd') . $now->getPreciseTimestamp(3) . str_pad(1, 4, '0', STR_PAD_LEFT) . random_int(100000, 999999);
 
         $out_trade_no .= generateLuhnCheckDigit($out_trade_no);
-
-//        dd($out_trade_no, $checkDigit);
 
         $order = [
             'trade_no' => $out_trade_no,

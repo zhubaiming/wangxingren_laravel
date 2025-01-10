@@ -30,18 +30,10 @@ class DatabaseSeeder extends Seeder
             // 货物参数组与货物SPU的关联表
             SysSlotGoodsSpecGroupSpuSeeder::class,
 //            SysGoodsSpecParamSeeder::class,
-            // 服务时间表
-            SysGoodsServiceTimeSeeder::class,
-            // 服务时间表与货物SPU的关联表
-            SysSlotGoodsServiceTimeSpuSeeder::class,
             // 宠物品种表
             SysPetBreedSeeder::class,
-            // 宠物品种体重表
-            SysPetBreedWeightSeeder::class,
             // 货物SKU
             SysGoodsSkuSeeder::class,
-            // 货物参数组与货物SKU的关联表
-            SysSlotGoodsSkuSpecGroupSeeder::class,
         ]);
     }
 }

@@ -36,7 +36,6 @@ class ProductSkuResource extends CommentsResource
                     'images' => $this->images,
                     'packing_list' => $this->packing_list,
                     'after_service' => $this->after_service,
-//                    'attrs' => (new BaseCollection($this->attr))->additional(['resource' => 'App\Http\Resources\ProductAttrResource', 'paginate' => false]),
                     'pet_breeds' => $this->spu_breed->pluck('id'),
 //                'description' => $this->detail->description,
 //                'images' => $this->detail->images,

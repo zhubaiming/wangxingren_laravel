@@ -93,16 +93,6 @@ class ClientUser extends Model implements AuthenticatableContract
     }
 
     /**
-     * 历史 openid 列表
-     *
-     * @return HasMany
-     */
-    public function openIds(): HasMany
-    {
-        return $this->hasMany(ClientUserOpenInfos::class, 'user_id', 'id')->chaperone();
-    }
-
-    /**
      * 宠物列表
      *
      * @return HasMany
