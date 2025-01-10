@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\Api\Wechat\User;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Wechat\ClientUserPetResource;
+use App\Models\ClientUser;
 use App\Models\ClientUserPet;
+use App\Models\SysPetBreed;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -31,6 +34,10 @@ class PetController extends Controller
     {
         $validated = arrHumpToLine($request->post());
 
+        if (isset($validated['is_default']) && isTrue($validated['is_default'])) {
+            ClientUserPet::owner()->where('is_default', true)->update(['is_default' => false]);
+        }
+
         $data = [
             'breed_id' => $validated['breed_id'],
             'breed_title' => $validated['breed_title'],
@@ -41,13 +48,14 @@ class PetController extends Controller
             'color' => $validated['color'] ?? null,
             'avatar' => $validated['avatar'] ?? null,
             'remark' => $validated['remark'] ?? null,
-            'is_sterilization' => $validated['is_sterilization'] ?? false,
-            'is_default' => $validated['is_default'] ?? false,
+            'is_sterilization' => isTrue($validated['is_sterilization']) ?? false,
+            'is_default' => isTrue($validated['is_default']) ?? false,
             'birth' => $validated['birth'],
             'age' => $validated['birth'],
-            'weight_id' => $validated['weight']
+//            'weight_id' => $validated['weight']
         ];
 
+        Auth::guard('wechat')->setUser(ClientUser::find(1));
         Auth::guard('wechat')->user()->pets()->createMany([$data]);
 
         return $this->success();
@@ -58,7 +66,9 @@ class PetController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $payload = ClientUserPet::owner()->findOrFail($id);
+
+        return $this->success((new ClientUserPetResource($payload))->additional(['format' => __FUNCTION__]));
     }
 
     /**
@@ -70,7 +80,7 @@ class PetController extends Controller
 
         $pet = ClientUserPet::owner()->findOrFail($id);
 
-        if ($validated['is_default']) {
+        if (isTrue($validated['is_default'])) {
             ClientUserPet::owner()->where('is_default', true)->update(['is_default' => false]);
         }
 
@@ -93,5 +103,30 @@ class PetController extends Controller
         $pet->delete();
 
         return $this->success();
+    }
+
+    public function breedIndex(string $id)
+    {
+        $breeds = SysPetBreed::select('id', 'title', 'letter')->where('type', $id)->get();
+
+        $payload = [];
+        foreach ($breeds as $breed) {
+            $letter = $breed->letter;
+            $item = ['id' => $breed->id, 'name' => $breed->title];
+
+            if (!isset($payload[$letter])) {
+                $payload[$letter] = ['alpha' => $letter, 'sub_items' => []];
+            }
+
+            $payload[$letter]['sub_items'][] = ['id' => $breed->id, 'name' => $breed->title];
+        }
+
+        usort($payload, function ($a, $b) {
+            return strcmp($a['alpha'], $b['alpha']);
+        });
+
+        $payload = array_values($payload);
+
+        return $this->success(arrLineToHump($payload));
     }
 }

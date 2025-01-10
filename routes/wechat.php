@@ -42,8 +42,7 @@ Route::get('/userInfo', [Wechat\UserController::class, 'info']);
 /**
  * 宠物
  */
-Route::get('/pet_category/{id}', [Wechat\UserPetController::class, 'category'])->where(['id' => '^[1-9]\d*']);
-//Route::apiResource('pet', Wechat\UserPetController::class);
+Route::get('/pet_breed/{id}', [Api\Wechat\User\PetController::class,'breedIndex'])->where(['id' => '^[1-9]\d*']);
 Route::apiResource('/pet', Api\Wechat\User\PetController::class);
 
 /**

@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Auth;
 
 class ClientUserPet extends Model
 {
@@ -24,12 +23,14 @@ class ClientUserPet extends Model
 
     protected $guarded = ['deleted_at'];
 
-    protected $appends = ['gender_conv', 'breed_type_conv', 'weight_type_conv'];
+//    protected $appends = ['gender_conv', 'breed_type_conv', 'weight_type_conv'];
+    protected $appends = ['gender_conv'];
 
     // ==============================  属性类型转换  ==============================
     protected function casts(): array
     {
         return [
+            'avatar' => 'array',
             'is_sterilization' => 'boolean',
             'is_default' => 'boolean',
         ];
@@ -39,7 +40,7 @@ class ClientUserPet extends Model
     public function scopeOwner(Builder $query): void
     {
 //        $query->where('user_id' , Auth::guard('wechat')->user()->id);
-        $query->where('user_id' , 1);
+        $query->where('user_id', 1);
     }
 
     public function scopeIsDefault(Builder $query): void
@@ -85,12 +86,12 @@ class ClientUserPet extends Model
         );
     }
 
-    protected function weightId(): Attribute
-    {
-        return Attribute::make(
-            set: fn(float|null $value, array $attributes) => is_null($attributes['weight']) ? null : SysPetBreedWeight::where(['breed_id' => $attributes['breed_id'], ['min', '<=', $attributes['weight']], ['max', '>', $attributes['weight']]])->value('id')
-        );
-    }
+//    protected function weightId(): Attribute
+//    {
+//        return Attribute::make(
+//            set: fn(float|null $value, array $attributes) => is_null($attributes['weight']) ? null : SysPetBreedWeight::where(['breed_id' => $attributes['breed_id'], ['min', '<=', $attributes['weight']], ['max', '>', $attributes['weight']]])->value('id')
+//        );
+//    }
 
     protected function age(): Attribute
     {
@@ -99,46 +100,46 @@ class ClientUserPet extends Model
         );
     }
 
-    protected function weightType(): Attribute
-    {
-        return Attribute::make(
-            set: function (mixed $value, array $attributes) {
-                if ($attributes['category'] === 1) {
-                    switch (true) {
-                        case $attributes['weight'] > 1000: // big
-                            return 3;
-                        case $attributes['weight'] > 500: // middle
-                            return 2;
-                        case $attributes['weight'] > 0: // small
-                        default:
-                            return 1;
-                    }
-                } elseif ($attributes['category'] === 2) {
-                    switch (true) {
-                        case $attributes['weight'] > 1500:
-                            return 3;
-                        case $attributes['weight'] > 1000:
-                            return 2;
-                        case $attributes['weight'] > 0:
-                        default:
-                            return 1;
-                    }
-                }
-            }
-        );
-    }
+//    protected function weightType(): Attribute
+//    {
+//        return Attribute::make(
+//            set: function (mixed $value, array $attributes) {
+//                if ($attributes['category'] === 1) {
+//                    switch (true) {
+//                        case $attributes['weight'] > 1000: // big
+//                            return 3;
+//                        case $attributes['weight'] > 500: // middle
+//                            return 2;
+//                        case $attributes['weight'] > 0: // small
+//                        default:
+//                            return 1;
+//                    }
+//                } elseif ($attributes['category'] === 2) {
+//                    switch (true) {
+//                        case $attributes['weight'] > 1500:
+//                            return 3;
+//                        case $attributes['weight'] > 1000:
+//                            return 2;
+//                        case $attributes['weight'] > 0:
+//                        default:
+//                            return 1;
+//                    }
+//                }
+//            }
+//        );
+//    }
 
-    protected function weightTypeConv(): Attribute
-    {
-        return Attribute::make(
-            get: function (mixed $value, array $attributes) {
-                return match ($attributes['weight_type']) {
-                    1 => 'small',
-                    2 => 'middle',
-                    3 => 'big',
-                    default => 'all'
-                };
-            }
-        );
-    }
+//    protected function weightTypeConv(): Attribute
+//    {
+//        return Attribute::make(
+//            get: function (mixed $value, array $attributes) {
+//                return match ($attributes['weight_type']) {
+//                    1 => 'small',
+//                    2 => 'middle',
+//                    3 => 'big',
+//                    default => 'all'
+//                };
+//            }
+//        );
+//    }
 }

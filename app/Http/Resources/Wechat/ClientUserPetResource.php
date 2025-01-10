@@ -34,9 +34,18 @@ class ClientUserPetResource extends CommentsResource
                 ],
                 'show' => [
                     'id' => $this->id,
-                    'title' => $this->title,
-                    'permissions' => $this->permissions->pluck('id'),
-                    'menus' => $this->menus->pluck('id')
+                    'breed_id' => $this->breed_id,
+                    'breed_title' => $this->breed_title,
+                    'name' => $this->name,
+                    'breed_type' => $this->breed_type,
+                    'gender' => $this->gender,
+                    'weight' => $this->weight,
+                    'birth' => $this->birth,
+                    'color' => $this->color,
+                    'avatar' => $this->avatar,
+                    'remark' => $this->remark,
+                    'is_sterilization' => $this->is_sterilization,
+                    'is_default' => $this->is_default,
                 ],
                 'default' => []
             },
