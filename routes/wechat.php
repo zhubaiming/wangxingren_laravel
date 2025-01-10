@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::withoutMiddleware(['auth.wechat'])->group(function () {
-    Route::post('/silentLogin', [Wechat\UserController::class, 'silentLogin']);
+    Route::post('/silentLogin', [Api\Wechat\AuthController::class, 'silentLogin']);
 
     Route::prefix('system')->group(function () {
         Route::get('/app/index', [Api\Wechat\SystemController::class, 'appIndexShow']);
@@ -22,7 +22,7 @@ Route::prefix('system')->group(function () {
 /**
  * 用户
  */
-Route::post('/registerLogin', [Wechat\UserController::class, 'registerLogin']);
+Route::post('/registerLogin', [Api\Wechat\AuthController::class, 'registerLogin']);
 Route::get('/userInfo', [Wechat\UserController::class, 'info']);
 
 /**

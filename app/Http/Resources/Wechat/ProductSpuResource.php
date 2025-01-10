@@ -39,7 +39,10 @@ class ProductSpuResource extends CommentsResource
                     'score' => 5,
                     'is_new' => !Carbon::parse($this->created_at)->lt(Carbon::now()->subHours(12)),
                     'description' => $this->description,
-                    'images' => $this->images,
+                    'images' => array_map(function ($value) {
+                        $value['tabType'] = substr($value['type'], 0, strpos($value['type'], '/'));
+                        return $value;
+                    }, $this->images),
                     'packing_list' => $this->packing_list,
                     'after_service' => $this->after_service,
                     'pet_breeds' => $this->spu_breed->pluck('id'),

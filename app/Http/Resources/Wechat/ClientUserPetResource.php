@@ -53,20 +53,12 @@ class ClientUserPetResource extends CommentsResource
             false => [
                 'id' => $this->id,
                 'breed_id' => $this->breed_id,
-                'breed_title' => $this->breed_title,
                 'name' => $this->name,
-                'breed_type' => $this->breed_type,
-                'breed_type_conv' => $this->breed_type_conv,
-                'gender' => $this->gender,
-                'gender_conv' => $this->gender_conv,
+                'breed_type_conv' => strtoupper(PetCategoryEnum::from($this->breed_type)->name),
+                'gender_conv' => GenderEnum::from($this->gender)->name('animal'),
                 'weight' => $this->weight,
-                'birth' => $this->birth,
-                'age' => $this->age,
-                'color' => $this->color,
+                'age' => calculateAge($this->birth, 'Y-m'),
                 'avatar' => $this->avatar,
-                'remark' => $this->remark,
-                'is_sterilization' => $this->is_sterilization,
-                'is_default' => $this->is_default,
             ]
         };
     }
