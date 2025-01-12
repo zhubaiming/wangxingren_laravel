@@ -17,9 +17,15 @@ class SkuController extends Controller
     {
         $validated = arrHumpToLine($request->input());
 
-        $payload = ProductSku::where('trademark_id', $validated['trademark_id'])
-            ->where('category_id', $validated['category_id'])
-            ->where('spu_id', $validated['spu_id'])
+//        $payload = ProductSku::where('trademark_id', $validated['trademark_id'])
+//            ->where('category_id', $validated['category_id'])
+//            ->where('spu_id', $validated['spu_id'])
+//            ->where('breed_id', $validated['breed_id'])
+//            ->where('weight_min', '<=', applyFloatToIntegerModifier($validated['weight']))
+//            ->where('weight_max', '>=', applyFloatToIntegerModifier($validated['weight']))
+//            ->firstOrFail();
+
+        $payload = ProductSku::where('spu_id', $validated['spu_id'])
             ->where('breed_id', $validated['breed_id'])
             ->where('weight_min', '<=', applyFloatToIntegerModifier($validated['weight']))
             ->where('weight_max', '>=', applyFloatToIntegerModifier($validated['weight']))

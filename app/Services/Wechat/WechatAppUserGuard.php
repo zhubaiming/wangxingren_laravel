@@ -2,15 +2,17 @@
 
 namespace App\Services\Wechat;
 
-use App\Models\ClientUserDeviceInfo;
 use App\Models\ClientUserLoginInfo;
+use App\Support\Traits\ApiToken;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\GuardHelpers;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Contracts\Auth\UserProvider;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Redis;
 
 /**
  * 自定义守卫
@@ -19,11 +21,19 @@ use Illuminate\Support\Str;
  *
  * 传递给 extend 方法的回调函数应该返回 Illuminate\Contracts\Auth\Guard
  */
-class WechatAppUserGuard
+class WechatAppUserGuard implements StatefulGuard
 {
-    use GuardHelpers;
+    use GuardHelpers, ApiToken;
+
+    public readonly string $name;
+
+    public readonly string $redis_connection;
 
     private $app;
+
+    protected $lastAttempted;
+
+//    private $app;
 
     private $redis;
 
@@ -36,6 +46,8 @@ class WechatAppUserGuard
     private $token;
 
     private $login_info;
+
+//    protected $lastAttempted;
 
     /*
      * Illuminate\Auth\GuardHelpers
@@ -58,6 +70,10 @@ class WechatAppUserGuard
 
     public function __construct($app, UserProvider $provider)
     {
+        $this->name = 'user:uid:';
+
+        $this->redis_connection = 'wechat_user';
+
         $this->app = $app;
 
         $this->redis = $app['redis']->connection('wechat_user');
@@ -67,12 +83,60 @@ class WechatAppUserGuard
         $this->provider = $provider;
     }
 
+    /**
+     * 使用给定的用户进行登录
+     *
+     */
+//    public function login($user)
+    public function login(Authenticatable $user, $remember = false): string
+    {
+        $token = $this->updateToken($user->getAuthIdentifier());
+
+        $this->setUser($user);
+
+        return $token;
+    }
+
+    /**
+     * 根据当前需要登录的用户生成单一设备登录对应关系，同时存储用户信息，并生成登录用户的 token
+     *
+     */
+    protected function updateToken($primaryKey): string
+    {
+        $token = $this->generateJsonWebToken([
+            'sub' => $primaryKey
+        ]);
+
+        Redis::connection($this->redis_connection)->hset('user_login', $primaryKey, $token);
+
+        return $token;
+    }
+
+    public function setUser(Authenticatable $user): WechatAppUserGuard|static
+    {
+        $this->user = $user;
+
+        if (0 === Redis::connection($this->redis_connection)->exists($this->name . $user->getAuthIdentifier())) {
+            Redis::connection($this->redis_connection)->hmset($this->name . $user->getAuthIdentifier(), [
+                'laravel_ORM' => serialize($user),
+                'json' => $user->toJson(JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+            ]);
+        } else {
+            Redis::connection($this->redis_connection)->hset($this->name . $user->getAuthIdentifier(), [
+                'laravel_ORM' => serialize($user)
+            ]);
+        }
+
+        return $this;
+    }
+
 //    public function setUser(Authenticatable|array $user): static
 //    {
 //        $this->user = $user;
 //
 //        return $this;
 //    }
+
 
     /**
      * 静默登录
@@ -267,8 +331,15 @@ class WechatAppUserGuard
      * @param array $credentials
      * @return mixed
      */
-    public function attempt(array $credentials = [], string $silent_token = null)
+//    public function attempt(array $credentials = [], string $silent_token = null)
+    public function attempt(array $credentials = [], $remember = false)
     {
+        $this->validate($credentials);
+
+        $user = $this->lastAttempted;
+
+        return $user->is_register ? $this->login($user) : ['is_register' => false, 'token' => null, 'info' => []];
+
         /**
          * [
          *   'phoneNumber' => '13811111111',
@@ -341,35 +412,6 @@ class WechatAppUserGuard
         return $user;
     }
 
-    /**
-     * 检查账号是否被冻结
-     *
-     * @param $user
-     * @return bool
-     */
-    protected function hasValidCredentials($user)
-    {
-        return $user->is_freeze;
-    }
-
-    /**
-     * 使用给定的用户进行登录
-     *
-     * @param $user
-     * @return void
-     */
-    public function login($user)
-    {
-        $this->associateUserLoginInfoToUser($user);
-
-        $user = $user->fresh();
-
-        $this->fireLoginEvent($user);
-
-        $this->setUser($user);
-
-        $this->updateToken();
-    }
 
     /**
      * 关联用户登录信息到注册用户
@@ -385,27 +427,6 @@ class WechatAppUserGuard
         $this->login_info->save();
     }
 
-    /**
-     * 根据当前需要登录的用户生成单一设备登录对应关系，同时存储用户信息，并生成登录用户的 token
-     *
-     * @return void
-     */
-    protected function updateToken()
-    {
-        $this->token = Str::uuid()->toString();
-
-        $this->redis->hset('login_user_token', $this->user->phone_number, $this->token);
-        $this->redis->hset('login_user_log', $this->token, $this->user->phone_number);
-
-        // database 和 Eloquent 均支持
-//        $this->redis->set($this->getName(), base64_encode(gzcompress(serialize($this->user))));
-//        dd(unserialize(gzuncompress(base64_decode($this->redis->get($this->getName())))));
-
-        $this->redis->setex($this->getName(), config('auth.password_timeout'), serialize($this->user));
-
-        // database 不支持 Eloquent 支持
-//        $this->redis->set($this->getName(), json_encode($this->user));
-    }
 
     /**
      * 获取 redis 登录用户存储唯一标识符
@@ -441,9 +462,22 @@ class WechatAppUserGuard
             return $this->user;
         }
 
-        $recaller = $this->recaller();
+        $jwt = $this->app->request->bearerToken();
 
-        $this->user = $this->userFromRecaller($recaller);
+        $id = ($payload = $this->validateJsonWebToken($jwt)) ? $payload['sub'] : null;
+
+        if (Redis::connection($this->redis_connection)->hget('user_login', $id) === $jwt) {
+//            if (!is_null($id)) $this->user = $this->provider->retrieveByCredentials(['uid' => $id]);
+            $user = Redis::connection($this->redis_connection)->hget($this->name . $id, 'laravel_ORM');
+
+            if (!is_null($id)) $this->user = $user ? unserialize($user) : null;
+        } else {
+            return null;
+        }
+
+//        $recaller = $this->recaller();
+//
+//        $this->user = $this->userFromRecaller($recaller);
 
         return $this->user;
     }
@@ -521,5 +555,95 @@ class WechatAppUserGuard
     public function getRecallerName()
     {
         return 'wxr_session_id';
+    }
+
+    public function validate(array $credentials = []): void
+    {
+        $retrieveCredentials = array_filter($credentials, fn($key) => in_array($key, ['openid', 'purePhoneNumber']), ARRAY_FILTER_USE_KEY);
+
+        $user = null;
+
+        if (isset($retrieveCredentials['purePhoneNumber'])) {
+            $this->validatePhoneNumber($retrieveCredentials['purePhoneNumber']);
+        } else {
+            $user = $this->validateOpenId($retrieveCredentials['openid']);
+        }
+
+        if (!$this->hasValidCredentials($user)) {
+            $user = $this->createUser($credentials);
+        }
+
+//        $this->lastAttempted = $user = $this->provider->retrieveByCredentials($retrieveCredentials);
+        $this->lastAttempted = $user;
+    }
+
+    protected function validateOpenId($openId): ?Authenticatable
+    {
+//        $credentials = ['open_ids->wechat_miniprogram' => function ($query) use ($openId) {
+//            $query->whereJsonContains('open_ids->wechat_miniprogram', $openId);
+//        }];
+
+        $credentials = ['app_type' => 'wechat_miniprogram', 'appid' => config('wechat.miniprogram.app_id'), 'wechat_openid' => $openId];
+
+        return $this->provider->setModel(ClientUserLoginInfo::class)->retrieveByCredentials($credentials);
+    }
+
+    protected function validatePhoneNumber($phoneNumber): ?Authenticatable
+    {
+        $credentials = ['phone_number' => $phoneNumber];
+
+        return $this->provider->retrieveByCredentials($credentials);
+    }
+
+    /**
+     * 检查账号是否被冻结
+     *
+     * @param $user
+     * @return bool
+     */
+    protected function hasValidCredentials($user): bool
+    {
+        return !is_null($user);
+    }
+
+    protected function createUser($credentials)
+    {
+        return ClientUserLoginInfo::create([
+            'app_type' => 'wechat_miniprogram',
+            'appid' => config('wechat.miniprogram.app_id'),
+            'wechat_openid' => $credentials['openid'],
+            'is_register' => false
+        ]);
+    }
+
+
+    public function once(array $credentials = [])
+    {
+        // TODO: Implement once() method.
+    }
+
+    public function loginUsingId($id, $remember = false)
+    {
+        // TODO: Implement loginUsingId() method.
+    }
+
+    public function onceUsingId($id)
+    {
+        // TODO: Implement onceUsingId() method.
+    }
+
+    public function viaRemember()
+    {
+        // TODO: Implement viaRemember() method.
+    }
+
+    public function logout()
+    {
+        // TODO: Implement logout() method.
+    }
+
+    public function getLastAttempted()
+    {
+        return $this->lastAttempted;
     }
 }

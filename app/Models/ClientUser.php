@@ -50,6 +50,11 @@ class ClientUser extends Model implements AuthenticatableContract
      */
     protected $with = ['loginInfo'];
 
+    public function getAuthIdentifierName(): string
+    {
+        return 'uid';
+    }
+
     // ==============================  闭包事件  ==============================
     protected static function booted(): void
     {

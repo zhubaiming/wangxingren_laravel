@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api\Wechat;
 use App\Enums\ResponseEnum;
 use App\Exceptions\BusinessException;
 use App\Http\Controllers\Controller;
+use App\Models\ServiceCar;
+use App\Models\System;
 use App\Models\SysTradeDate;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -25,10 +27,10 @@ class TradeDateController extends Controller
         }
 
         try {
-            $fullRange = ['start' => '09:00', 'end' => '19:00'];
+            $fullRange = json_decode(System::where('key', 'COMPANY_TRADE_TIMES')->first()->value, true);
 
             $times = [];
-            for ($i = 0; $i < 2; $i++) {
+            for ($i = 0; $i < ServiceCar::count('id'); $i++) {
                 $times[$i] = ['car_number' => $i + 1, 'car_title' => ($i + 1) . ' 号车', 'times' => $this->getAvailableTimeRanges($fullRange, [], $validated['duration'])];
             }
 
@@ -58,8 +60,8 @@ class TradeDateController extends Controller
     {
         // 将开始时间和结束时转为分钟形式
         $fullRangeMinutes = [
-            'start' => $this->timeToMinutes($fullRange['start']),
-            'end' => $this->timeToMinutes($fullRange['end'])
+            'start' => $this->timeToMinutes($fullRange['time_start']),
+            'end' => $this->timeToMinutes($fullRange['time_end'])
         ];
 
         // 转换移除的时间段为分钟形式

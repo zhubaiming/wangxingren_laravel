@@ -63,7 +63,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         // 中间件别名
         $middleware->alias([
-            'auth.wechat' => CustomMiddleware\AuthenticateWechat::class
+            'auth.wechat' => CustomMiddleware\WechatAuthMiddleware::class
         ]);
         /*
          * 配置可信代理

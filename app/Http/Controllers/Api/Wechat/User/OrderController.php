@@ -40,7 +40,7 @@ class OrderController extends Controller
         }
 
 
-        return $this->success($result);
+        return $this->success(arrLineToHump($result));
     }
 
     /**
@@ -145,7 +145,10 @@ class OrderController extends Controller
             }
         }
 
-        ClientUserOrder::create($order);
+//        dd( $out_trade_no,
+//            $order['payer_total'],
+//            Auth::guard('wechat')->user()->loginInfo[0]->openid,
+//            "移动洗护服务-{$order_spu_info['title']}-{$order_pet_info['name']}({$order_pet_info['weight']}KG)");
 
         $payload = null;
         if (0 !== $order['payer_total']) {
@@ -154,8 +157,8 @@ class OrderController extends Controller
                     $payload = (new MiniProgramPaymentService())->requestPayment(
                         $out_trade_no,
                         $order['payer_total'],
-                        Auth::guard('wechat')->user()->fresh()->loginInfo[0]->wechat_openid,
-                        "移动洗护服务-{$order_spu_info['title']}-{$order_pet_info['name']}({$order_pet_info['weight']}KG)"
+                        Auth::guard('wechat')->user()->loginInfo[0]->openid,
+                        "移动洗护服务-{$order_pet_info['name']}({$order_pet_info['weight']}KG)"
                     );
                     break;
             }

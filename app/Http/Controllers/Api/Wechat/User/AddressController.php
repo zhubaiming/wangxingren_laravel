@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\Wechat\User;
 
 use App\Http\Controllers\Controller;
-use App\Models\ClientUser;
 use App\Models\ClientUserAddress;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -49,6 +48,8 @@ class AddressController extends Controller
             'person_phone_number' => $validated['person_phone_number']
         ];
 
+        $data['full_address'] = $data['country'] . $data['province'] . $data['city'] . $data['district'] . $data['street'] . $data['address'];
+
         Auth::guard('wechat')->user()->addresses()->createMany([$data]);
 
         return $this->success();
@@ -78,6 +79,8 @@ class AddressController extends Controller
         foreach ($validated as $key => $value) {
             $address->{$key} = $value;
         }
+
+        $address->full_address = $validated['country'] . $validated['province'] . $validated['city'] . $validated['district'] . $validated['street'] . $validated['address'];
 
         $address->save();
 

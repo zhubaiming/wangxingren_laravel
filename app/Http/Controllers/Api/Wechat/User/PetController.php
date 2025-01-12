@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api\Wechat\User;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Wechat\ClientUserPetResource;
-use App\Models\ClientUser;
 use App\Models\ClientUserPet;
 use App\Models\SysPetBreed;
 use Illuminate\Http\Request;
@@ -20,7 +19,13 @@ class PetController extends Controller
         $validated = arrHumpToLine($request->input());
         $paginate = isset($validated['paginate']) ? isTrue($validated['paginate']) : true; // 是否分页
 
-        $query = ClientUserPet::owner()->orderBy('is_default', 'desc')->orderBy('created_at', 'asc');
+        $ids = isset($validated['ids']) ? explode(',', $validated['ids']) : [];
+
+        $query = ClientUserPet::owner()
+            ->when(!empty($ids), function ($query) use ($ids) {
+                return $query->whereIn('id', $ids);
+            })
+            ->orderBy('is_default', 'desc')->orderBy('created_at', 'asc');
 
         $payload = $paginate ? $query->simplePaginate($request->get('pageSize') ?? $this->pageSize, ['*'], 'page', $request->get('page') ?? $this->page) : $query->get();
 

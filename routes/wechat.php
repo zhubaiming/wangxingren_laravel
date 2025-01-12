@@ -2,11 +2,11 @@
 
 use App\Http\Controllers\Api;
 use App\Http\Controllers\Wechat;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::withoutMiddleware(['auth.wechat'])->group(function () {
     Route::post('/silentLogin', [Api\Wechat\AuthController::class, 'silentLogin']);
+    Route::post('/registerLogin', [Api\Wechat\AuthController::class, 'registerLogin']);
 
     Route::prefix('system')->group(function () {
         Route::get('/app/index', [Api\Wechat\SystemController::class, 'appIndexShow']);
@@ -22,13 +22,12 @@ Route::prefix('system')->group(function () {
 /**
  * 用户
  */
-Route::post('/registerLogin', [Api\Wechat\AuthController::class, 'registerLogin']);
 Route::get('/userInfo', [Wechat\UserController::class, 'info']);
 
 /**
  * 宠物 -- 完成
  */
-Route::get('/pet_breed/{id}', [Api\Wechat\User\PetController::class,'breedIndex'])->where(['id' => '^[1-9]\d*']);
+Route::get('/pet_breed/{id}', [Api\Wechat\User\PetController::class, 'breedIndex'])->where(['id' => '^[1-9]\d*']);
 Route::apiResource('/pet', Api\Wechat\User\PetController::class);
 
 /**
@@ -64,7 +63,6 @@ Route::apiResource('/coupon', Api\Wechat\User\CouponController::class);
  */
 Route::get('/order/total', [Api\Wechat\User\OrderController::class, 'total']);
 Route::apiResource('/order', Api\Wechat\User\OrderController::class);
-
 
 
 /**

@@ -2,18 +2,28 @@
 
 namespace App\Http\Resources\Wechat;
 
-use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
+use App\Http\Resources\CommentsResource;
 
-class ClientUserResource extends JsonResource
+class ClientUserResource extends CommentsResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
-    public function toArray(Request $request): array
+    protected function resourceData(): array
     {
-        return parent::toArray($request);
+        $format = $this->additional['format'] ?? 'default';
+
+        return match ($format) {
+            'silentLogin' => [
+                'nick_name' => $this->user->nick_name,
+                'avatar' => $this->user->avatar,
+                'created_at' => $this->user->created_at
+            ],
+            'registerLogin' => [
+                'nick_name' => $this->nick_name,
+                'avatar' => $this->avatar,
+                'created_at' => $this->created_at
+            ],
+            'default' => [
+
+            ]
+        };
     }
 }
