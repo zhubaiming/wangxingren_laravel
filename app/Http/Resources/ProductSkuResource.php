@@ -20,7 +20,7 @@ class ProductSkuResource extends CommentsResource
                     'weight_max' => $this->weight_max,
                     'duration' => $this->duration,
                     'stock' => $this->stock,
-                    'price' => $this->price,
+                    'price' => $this->price
                 ],
                 'show' => [
                     'id' => $this->id,
@@ -52,7 +52,7 @@ class ProductSkuResource extends CommentsResource
                 'weight_max' => $this->weight_max,
                 'duration' => $this->duration,
                 'stock' => $this->stock,
-                'price' => $this->price
+                'price' => applyIntegerToFloatModifier($this->price),
             ]
         };
 
