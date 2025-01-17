@@ -77,35 +77,38 @@ class SpuController extends Controller
 
         $spu = ProductSpu::with('spu_breed')->findOrFail($id);
 
-        if ($validated['category_id'] !== $spu->category_id) { // 如果spu切换分类
-            $spu->spu_breed()->detach();
-            $spu->spu_breed()->attach($validated['pet_breeds']);
+        if (isset($validated['category_id'])) {
+            if ($validated['category_id'] !== $spu->category_id) { // 如果spu切换分类
+                $spu->spu_breed()->detach();
+                $spu->spu_breed()->attach($validated['pet_breeds']);
 
-            $spu->skus()->delete();
-        } else {
-            $newBreeds = array_unique($validated['pet_breeds']);
-            $origanBreeds = $spu->spu_breed->pluck('id')->toArray();
+                $spu->skus()->delete();
+            } else {
+                $newBreeds = array_unique($validated['pet_breeds']);
+                $origanBreeds = $spu->spu_breed->pluck('id')->toArray();
 
-            $insertBreeds = array_diff($newBreeds, $origanBreeds);
-            $deleteBreeds = array_diff($origanBreeds, $newBreeds);
+                $insertBreeds = array_diff($newBreeds, $origanBreeds);
+                $deleteBreeds = array_diff($origanBreeds, $newBreeds);
 
-            $spu->spu_breed()->detach($deleteBreeds);
-            $spu->spu_breed()->attach($insertBreeds);
+                $spu->spu_breed()->detach($deleteBreeds);
+                $spu->spu_breed()->attach($insertBreeds);
 
-            if (!empty($deleteBreeds)) {
-                $spu->skus()->whereIn('breed_id', $deleteBreeds)->delete();
+                if (!empty($deleteBreeds)) {
+                    $spu->skus()->whereIn('breed_id', $deleteBreeds)->delete();
+                }
             }
+
+            $spu->title = $validated['title'];
+            $spu->sub_title = $validated['sub_title'] ?? $spu->sub_title;
+            $spu->trademark_id = $validated['trademark_id'];
+            $spu->category_id = $validated['category_id'];
+            $spu->description = $validated['description'] ?? $spu->description;
+            $spu->images = $validated['images'] ?? $spu->images;
+            $spu->packing_list = $validated['packing_list'] ?? $spu->packing_list;
+            $spu->after_service = $validated['after_service'] ?? $spu->after_service;
         }
 
-        $spu->title = $validated['title'];
-        $spu->sub_title = $validated['sub_title'] ?? $spu->sub_title;
-        $spu->trademark_id = $validated['trademark_id'];
-        $spu->category_id = $validated['category_id'];
         $spu->saleable = $validated['saleable'];
-        $spu->description = $validated['description'] ?? $spu->description;
-        $spu->images = $validated['images'] ?? $spu->images;
-        $spu->packing_list = $validated['packing_list'] ?? $spu->packing_list;
-        $spu->after_service = $validated['after_service'] ?? $spu->after_service;
 
         $spu->save();
 
