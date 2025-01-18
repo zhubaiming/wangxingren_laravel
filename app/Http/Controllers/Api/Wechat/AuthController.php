@@ -72,6 +72,8 @@ class AuthController extends Controller
         $user = ClientUser::where('phone_number', $phone_info['purePhoneNumber'])
             ->where('phone_prefix', $phone_info['countryCode'])->first();
 
+//        dd($user);
+
         if (is_null($user)) {
             $user = ClientUser::create([
                 'uid' => strval(Str::ulid()),
@@ -87,7 +89,7 @@ class AuthController extends Controller
                 })->update(['user_id' => $user->id]);
         }
 
-        $user->with('loginInfo')->fresh();
+        $user->refresh()->load('loginInfo');
 
         $token = Auth::guard('wechat')->login($user);
 
