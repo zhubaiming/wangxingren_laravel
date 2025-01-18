@@ -25,6 +25,7 @@ class WechatAuthMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
+//        dd($request->bearerToken());
         if (is_null($request->bearerToken())) {
             dd(1);
         }

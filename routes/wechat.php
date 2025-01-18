@@ -12,6 +12,15 @@ Route::withoutMiddleware(['auth.wechat'])->group(function () {
         Route::get('/app/index', [Api\Wechat\SystemController::class, 'appIndexShow']);
         Route::get('/company', [Api\Wechat\SystemController::class, 'companyShow']);
     });
+
+    /**
+     * 商品 -- 完成
+     */
+    Route::prefix('product')->group(function () {
+        Route::get('/spu', [Api\Wechat\Product\SpuController::class, 'index']);
+        Route::get('/spu/titles', [Api\Wechat\Product\SpuController::class, 'searchList']);
+        Route::get('/spu/{spu_id}', [Api\Wechat\Product\SpuController::class, 'show']);
+    });
 });
 
 Route::prefix('system')->group(function () {
@@ -34,9 +43,9 @@ Route::apiResource('/pet', Api\Wechat\User\PetController::class);
  * 商品 -- 完成
  */
 Route::prefix('product')->group(function () {
-    Route::get('/spu', [Api\Wechat\Product\SpuController::class, 'index']);
-    Route::get('/spu/titles', [Api\Wechat\Product\SpuController::class, 'searchList']);
-    Route::get('/spu/{spu_id}', [Api\Wechat\Product\SpuController::class, 'show']);
+//    Route::get('/spu', [Api\Wechat\Product\SpuController::class, 'index']);
+//    Route::get('/spu/titles', [Api\Wechat\Product\SpuController::class, 'searchList']);
+//    Route::get('/spu/{spu_id}', [Api\Wechat\Product\SpuController::class, 'show']);
     Route::get('/sku', [Api\Wechat\Product\SkuController::class, 'show']);
 });
 
