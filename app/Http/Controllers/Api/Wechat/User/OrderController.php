@@ -71,7 +71,7 @@ class OrderController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request, MiniProgramPaymentService $paymentService)
+    public function store(Request $request)
     {
         $validated = arrHumpToLine($request->input());
 
@@ -104,7 +104,7 @@ class OrderController extends Controller
         $order = [
             'trade_no' => $out_trade_no,
             'status' => OrderStatusEnum::paying,
-            'user_id' => Auth::guard('wechat')->user()->id,
+//            'user_id' => Auth::guard('wechat')->user()->id,
             'total' => $order_sku_info['price'],
             'payer_total' => $order_sku_info['price'],
             'spu_id' => $order_spu_info['id'],
@@ -145,11 +145,6 @@ class OrderController extends Controller
             }
         }
 
-//        dd( $out_trade_no,
-//            $order['payer_total'],
-//            Auth::guard('wechat')->user()->loginInfo[0]->openid,
-//            "移动洗护服务-{$order_spu_info['title']}-{$order_pet_info['name']}({$order_pet_info['weight']}KG)");
-
         $payload = null;
         if (0 !== $order['payer_total']) {
             switch ($pay_channel) {
@@ -163,6 +158,8 @@ class OrderController extends Controller
                     break;
             }
         }
+
+        Auth::guard('wechat')->user()->orders()->create($order);
 
         return $this->success($payload);
     }
