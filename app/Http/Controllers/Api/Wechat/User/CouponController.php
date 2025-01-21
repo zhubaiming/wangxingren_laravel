@@ -29,7 +29,7 @@ class CouponController extends Controller
                 $when->where('is_get', isTrue($validated['is_get']));
             })
             ->when(!$paginate, function ($when) {
-                $when->where('expiration_at', '>=', Carbon::now());
+                $when->where('expiration_at', '>=', Carbon::now())->orWhereNull('expiration_at');
             });
 
         $payload = $paginate ? $query->simplePaginate($request->get('pageSize') ?? $this->pageSize, ['*'], 'page', $request->get('page') ?? $this->page) : $query->get();
