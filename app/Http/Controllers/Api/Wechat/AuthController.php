@@ -72,22 +72,20 @@ class AuthController extends Controller
         $user = ClientUser::where('phone_number', $phone_info['purePhoneNumber'])
             ->where('phone_prefix', $phone_info['countryCode'])->first();
 
-//        dd($user);
-
         if (is_null($user)) {
             $user = ClientUser::create([
                 'uid' => strval(Str::ulid()),
                 'phone_number' => $phone_info['purePhoneNumber'],
                 'phone_prefix' => $phone_info['countryCode']
             ]);
-
-            ClientUserLoginInfo::where('app_type', 'wechat_miniprogram')
-                ->where('appid', config('wechat.miniprogram.app_id'))
-                ->where('openid', $code_session['openid'])
-                ->when(isset($code_session['unionid']), function ($query) use ($code_session) {
-                    return $query->where('unionid', $code_session['unionid']);
-                })->update(['user_id' => $user->id]);
         }
+
+        ClientUserLoginInfo::where('app_type', 'wechat_miniprogram')
+            ->where('appid', config('wechat.miniprogram.app_id'))
+            ->where('openid', $code_session['openid'])
+            ->when(isset($code_session['unionid']), function ($query) use ($code_session) {
+                return $query->where('unionid', $code_session['unionid']);
+            })->update(['user_id' => $user->id]);
 
         $user->refresh()->load('loginInfo');
 
