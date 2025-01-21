@@ -49,7 +49,7 @@ class AuthController extends Controller
                 'app_type' => 'wechat_miniprogram',
                 'appid' => config('wechat.miniprogram.app_id'),
                 'openid' => $code_session['openid'],
-                'unionid' => $code_session['unionid'],
+                'unionid' => $code_session['unionid'] ?? null,
                 'is_register' => false
             ]);
         } else {
