@@ -17,7 +17,7 @@ class AddressController extends Controller
         $validated = arrHumpToLine($request->input());
         $paginate = isset($validated['paginate']) ? isTrue($validated['paginate']) : true; // 是否分页
 
-        $query = ClientUserAddress::select('id', 'province', 'city', 'district', 'street', 'address', 'person_name', 'person_phone_prefix', 'person_phone_number', 'is_default')->owner()->orderBy('is_default', 'desc')->orderBy('created_at', 'asc');
+        $query = ClientUserAddress::select('id', 'province', 'city', 'district', 'street', 'address', 'full_address', 'person_name', 'person_phone_prefix', 'person_phone_number', 'is_default')->owner()->orderBy('is_default', 'desc')->orderBy('created_at', 'asc');
 
         $payload = $paginate ? $query->simplePaginate($request->get('pageSize') ?? $this->pageSize, ['*'], 'page', $request->get('page') ?? $this->page) : $query->get();
 

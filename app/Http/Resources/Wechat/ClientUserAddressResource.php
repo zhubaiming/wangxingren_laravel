@@ -20,6 +20,7 @@ class ClientUserAddressResource extends CommentsResource
                     'district' => $this->district,
                     'street' => $this->street,
                     'address' => $this->address,
+                    'full_address' => $this->full_address,
                     'person_name' => $this->person_name,
                     'person_phone_prefix' => $this->person_phone_prefix,
                     'person_phone_number' => $this->person_phone_number,

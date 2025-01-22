@@ -21,8 +21,8 @@ class ClientUserOrderResource extends CommentsResource
                     'status' => OrderStatusEnum::from($this->status)->name(),
                     'status_color' => $this->transformStatusColor($this->status),
                     'coupon_total' => applyIntegerToFloatModifier($this->coupon_total),
-                    'spu_title' => $this->spu_json->title,
-                    'address' => $this->address_json->full_address,
+                    'spu_title' => $this->spu_json['title'],
+                    'address' => $this->address_json['full_address'],
                     'reservation_date' => $this->reservation_date,
                     'reservation_car' => $this->reservation_car,
                     'reservation_time_start' => $this->reservation_time_start,
@@ -53,31 +53,6 @@ class ClientUserOrderResource extends CommentsResource
         };
 
         return $result;
-
-
-        return [
-
-        ];
-    }
-
-    private function transformStatus($status)
-    {
-        switch ($status) {
-            case 0:
-                return '待付款';
-            case 1:
-                return '已付款';
-            case 2:
-                return '已完成';
-            case 3:
-                return '已取消';
-            case 4:
-                return '申请退款';
-            case 5:
-                return '已退款';
-            default:
-                return '状态错误';
-        }
     }
 
     private function transformStatusColor($status)

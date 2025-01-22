@@ -13,6 +13,17 @@ class ClientUserOrder extends Model
 
     protected $guarded = [];
 
+    // ==============================  属性类型转换  ==============================
+    protected function casts(): array
+    {
+        return [
+            'spu_json' => 'array',
+            'sku_json' => 'array',
+            'address_json' => 'array',
+            'pet_json' => 'array',
+        ];
+    }
+
     // ==============================  本地作用域  ==============================
     public function scopeOwner(Builder $query): void
     {
