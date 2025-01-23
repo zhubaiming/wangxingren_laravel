@@ -136,7 +136,8 @@ class MiniProgramPaymentService
                     'appid' => config('wechat.miniprogram.app_id'), // 公众号ID
                     'mchid' => $this->merchantId, // 直连商户号
                     'description' => $description, // 商品描述
-                    'out_trade_no' => app()->isLocal() ? 'test_payment_' . rand(100000, 999999) : $out_trade_no, // 商户系统内部订单号，只能是数字、大小写字母_-*且在同一个商户号下唯一
+//                    'out_trade_no' => app()->isLocal() ? 'test_payment_' . rand(100000, 999999) : $out_trade_no, // 商户系统内部订单号，只能是数字、大小写字母_-*且在同一个商户号下唯一
+                    'out_trade_no' => $out_trade_no, // 商户系统内部订单号，只能是数字、大小写字母_-*且在同一个商户号下唯一
 //                'time_expire' => '', // 订单失效时间(非必填)，格式为yyyy-MM-DDTHH:mm:ss+TIMEZONE，yyyy-MM-DD表示年月日，T出现在字符串中，表示time元素的开头，HH:mm:ss表示时分秒，TIMEZONE表示时区（+08:00表示东八区时间，领先UTC8小时，即北京时间）。例如：2015-05-20T13:29:35+08:00表示，北京时间2015年5月20日13点29分35秒
 //                'attach' => 'attach_test_123456789', // 附加数据(非必填)，在查询API和支付通知中原样返回，可作为自定义参数使用，实际情况下只有支付完成状态才会返回该字段
                     'notify_url' => 'https://wangxingren.fun/wechat_notify/payment/jsapi', // 异步接收微信支付结果通知的回调地址，通知URL必须为外网可访问的URL，不能携带参数。 公网域名必须为HTTPS，如果是走专线接入，使用专线NAT IP或者私有回调域名可使用HTTP
@@ -217,7 +218,7 @@ class MiniProgramPaymentService
         $wechatpay_header_serial = $request->header('wechatpay-serial');               // 请求头部 - Wechatpay-Serial(请根据实际情况获取)
 //        $wechatpay_body = $request->post();                                                 // 请根据实际情况获取，例如: file_get_contents('php://input');
         $wechatpay_body = file_get_contents('php://input');
-        
+
         // 检查通知时间偏移量，允许5分钟之内的偏移
         $timeOffsetStatus = 300 >= intval(abs(bcsub(Formatter::timestamp(), (int)$wechatpay_header_timestamp, 0)));
         $verifiedStatus = Rsa::verify(
@@ -230,20 +231,17 @@ class MiniProgramPaymentService
         $log = 'timeOffsetStatus: ' . ($timeOffsetStatus ? 'true' : 'false') . ', verifiedStatus: ' . ($verifiedStatus ? 'true' : 'false');
         Log::channel('test')->info($log);
 
-        dd($timeOffsetStatus, $verifiedStatus);
-
         if ($timeOffsetStatus && $verifiedStatus) {
             // 使用PHP7的数据解构语法，从Array中解构并赋值变量
             ['resource' => [
                 'ciphertext' => $ciphertext,
                 'nonce' => $nonce,
                 'associated_data' => $aad
-            ]] = $wechatpay_body;
+            ]] = json_decode($wechatpay_body, true);
             // 加密文本消息解密
             $wechatpay_body_resource = AesGcm::decrypt($ciphertext, config('wechat.merchant.api_v3_key'), $nonce, $aad);
             Log::channel('test')->info($wechatpay_body_resource);
             // 把解密后的文本转换为PHP Array数组
-            Log::channel('test')->info($wechatpay_body_resource_array);
             $wechatpay_body_resource_array = json_decode($wechatpay_body_resource, true);
 
             if ('SUCCESS' === $wechatpay_body_resource_array['trade_state']) {
@@ -258,29 +256,6 @@ class MiniProgramPaymentService
                     'status' => OrderStatusEnum::finished
                 ]);
             }
-            /*
-             *  [
-                    "mchid" => "1680836934"                            // 商户的商户号，由微信支付生成并下发
-                    "appid" => "wxd8bcfa43ca3fb256"                    // 直连商户申请的公众号或移动应用AppID
-                    "out_trade_no" => "test_payment_497783"            // 商户系统内部订单号，可以是数字、大小写字母_-*的任意组合且在同一个商户号下唯一
-                    "transaction_id" => "4200002387202410098296855473" // 微信支付系统生成的订单号
-                    "trade_type" => "JSAPI"                            // 交易类型，枚举值：JSAPI：公众号支付，NATIVE：扫码支付，App：App支付，MICROPAY：付款码支付，MWEB：H5支付，FACEPAY：刷脸支付
-                    "trade_state" => "SUCCESS"                         // 交易状态，枚举值：SUCCESS：支付成功，REFUND：转入退款，NOTPAY：未支付，CLOSED：已关闭，REVOKED：已撤销（付款码支付），USERPAYING：用户支付中（付款码支付），PAYERROR：支付失败(其他原因，如银行返回失败)
-                    "trade_state_desc" => "支付成功"                    // 交易状态描述
-                    "bank_type" => "OTHERS"                            // 银行类型，采用字符串类型的银行标识。银行标识请参考：https://pay.weixin.qq.com/docs/merchant/development/chart/bank-type.html
-                    "attach" => ""                                     // 附加数据(选填)，在查询API和支付通知中原样返回，可作为自定义参数使用，实际情况下只有支付完成状态才会返回该字段
-                    "success_time" => "2024-10-09T21:33:59+08:00"      // 支付完成时间，格式为yyyy-MM-DDTHH:mm:ss+TIMEZONE
-                    "payer" => [                                       // 支付者信息
-                        "openid" => "oaQAW7UWF6z-jH6YljVJi4uvtdI4"     // 用户在直连商户AppID下的唯一标识
-                    ]
-                    "amount" => [                                      // 订单金额信息
-                        "total" => 1                                   // 订单总金额，单位为分
-                        "payer_total" => 1                             // 用户支付金额，单位为分
-                        "currency" => "CNY"                            // CNY：人民币，境内商户号仅支持人民币
-                        "payer_currency" => "CNY"                      // 用户支付币种
-                    ]
-                ]
-             */
         }
 
         return response()->json();
