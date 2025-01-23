@@ -29,9 +29,12 @@ class ClientUserOrderResource extends CommentsResource
                 ],
                 'show' => [
                     'id' => $this->id,
-                    'title' => $this->title,
-                    'permissions' => $this->permissions->pluck('id'),
-                    'menus' => $this->menus->pluck('id')
+                    'no' => $this->trade_no,
+                    'cover' => 'https://crm.misswhite.com.cn/storage/topic/6459cc63daedf.jpg',
+                    'trademark_title' => $this->trademark->title,
+                    'product_title' => $this->spu->title,
+                    'product_sub_title' => $this->spu->sub_title,
+                    'payer_total' => applyIntegerToFloatModifier($this->payer_total)
                 ],
                 'default' => []
             },
