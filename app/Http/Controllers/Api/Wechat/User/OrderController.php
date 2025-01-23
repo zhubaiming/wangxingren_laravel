@@ -145,22 +145,25 @@ class OrderController extends Controller
             ]);
 
             if (0 === $order['payer_total']) {
-                $order['status'] = OrderStatusEnum::finished;
+                $order['status'] = OrderStatusEnum::finishing;
             }
         }
 
         $payload = null;
         if (0 !== $order['payer_total']) {
-            switch ($pay_channel) {
-                case 1: // 微信支付
-                    $payload = (new MiniProgramPaymentService())->requestPayment(
-                        $out_trade_no,
-                        $order['payer_total'],
-                        Auth::guard('wechat')->user()->loginInfo[0]->openid,
-                        "移动洗护服务-{$order_pet_info['name']}({$order_pet_info['weight']}KG)"
-                    );
-                    break;
-            }
+            $payload = $this->payTransactionsWithChannel($pay_channel, $out_trade_no, $order['payer_total'], Auth::guard('wechat')->user()->loginInfo[0]->openid, "移动洗护服务-{$order_pet_info['name']}({$order_pet_info['weight']}KG)");
+
+
+//            switch ($pay_channel) {
+//                case 1: // 微信支付
+//                    $payload = (new MiniProgramPaymentService())->requestPayment(
+//                        $out_trade_no,
+//                        $order['payer_total'],
+//                        Auth::guard('wechat')->user()->loginInfo[0]->openid,
+//                        "移动洗护服务-{$order_pet_info['name']}({$order_pet_info['weight']}KG)"
+//                    );
+//                    break;
+//            }
         }
 
         Auth::guard('wechat')->user()->orders()->create($order);
@@ -181,7 +184,41 @@ class OrderController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $validated = arrHumpToLine($request->input());
+
+        $order = ClientUserOrder::where('trade_no', $id)->where('user_id', Auth::guard('wechat')->user()->id)->firstOrFail();
+
+        $orderState = null;
+        foreach (OrderStatusEnum::cases() as $case) {
+            // 输出枚举值名称和对应的中文名称
+//            echo "枚举值: {$case->name}, 数值: {$case->value}, 中文名称: {$case->name()}" . PHP_EOL;
+            if ($case->name === $validated['state']) {
+                $orderState = $case->value;
+            }
+        }
+
+        if (is_null($orderState)) {
+            throw new BusinessException(ResponseEnum::HTTP_ERROR, '当前操作无效');
+        }
+
+        $order->status = $orderState;
+
+        $payload = null;
+
+        if ($validated['state'] === 'paying') {
+            $now = Carbon::now();
+            $out_trade_no = date('Ymd') . $now->getPreciseTimestamp(3) . str_pad(1, 4, '0', STR_PAD_LEFT) . random_int(100000, 999999);
+
+            $out_trade_no .= generateLuhnCheckDigit($out_trade_no);
+
+            $order->trade_no = $out_trade_no;
+
+            $payload = $this->payTransactionsWithChannel($validated['pay_channel'], $out_trade_no, $order->payer_total, Auth::guard('wechat')->user()->loginInfo[0]->openid, "移动洗护服务-{$order->pet_json['name']}({$order->pet_json['weight']}KG)");
+        }
+
+        $order->save();
+
+        return $this->success($payload);
     }
 
     /**
@@ -190,5 +227,13 @@ class OrderController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    private function payTransactionsWithChannel($payChannel, $outTradeNo, $total, $payerId, $description = '')
+    {
+        switch ($payChannel) {
+            case 1: // 微信支付
+                return (new MiniProgramPaymentService())->requestPayment($outTradeNo, $total, $payerId, $description);
+        }
     }
 }
