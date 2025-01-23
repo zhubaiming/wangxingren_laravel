@@ -59,13 +59,13 @@ class ClientUserOrderResource extends CommentsResource
     {
         switch ($status) {
             case 0:
-                return ['type' => 'info', 'color' => []];
+                return ['type' => 'error', 'color' => []];
             case 1:
                 return ['type' => 'warning', 'color' => []];
             case 2:
                 return ['type' => 'success', 'color' => []];
             case 3:
-                return ['type' => 'error', 'color' => []];
+                return ['type' => 'info', 'color' => []];
             case 4:
                 return ['type' => '', 'color' => ['color' => '#FFF2E2']];
             case 5:
