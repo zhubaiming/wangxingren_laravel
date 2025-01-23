@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Auth;
 
 class ClientUserOrder extends Model
@@ -27,7 +28,7 @@ class ClientUserOrder extends Model
     // ==============================  本地作用域  ==============================
     public function scopeOwner(Builder $query): void
     {
-        $query->where(['user_id' => Auth::guard('wechat')->user()->id]);
+        $query->where('user_id', Auth::guard('wechat')->user()->id);
     }
 
     // ==============================  关联  ==============================
@@ -44,5 +45,10 @@ class ClientUserOrder extends Model
     public function trademark(): BelongsTo
     {
         return $this->belongsTo(ProductTrademark::class, 'trademark_id', 'id');
+    }
+
+    public function refund(): HasOne
+    {
+        return $this->hasOne(ClientUserOrderRefund::class, 'order_id', 'id');
     }
 }

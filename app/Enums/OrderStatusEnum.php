@@ -22,7 +22,7 @@ enum OrderStatusEnum: int implements CommonEnum
             self::finished => '已完成',
             self::refund => '已申请退款',
             self::refunding => '退款中',
-            self::refunded => '退款完成',
+            self::refunded => '退款完成'
         };
     }
 

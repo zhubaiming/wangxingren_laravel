@@ -6,9 +6,11 @@ use App\Enums\OrderStatusEnum;
 use App\Enums\ResponseEnum;
 use App\Exceptions\BusinessException;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Wechat\ClientUserOrderResource;
 use App\Models\ClientUserAddress;
 use App\Models\ClientUserCoupon;
 use App\Models\ClientUserOrder;
+use App\Models\ClientUserOrderRefund;
 use App\Models\ClientUserPet;
 use App\Models\ProductSku;
 use App\Models\ProductSpu;
@@ -176,7 +178,9 @@ class OrderController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $payload = ClientUserOrder::owner()->where('trade_no', $id)->firstOrFail();
+
+        return $this->success((new ClientUserOrderResource($payload))->additional(['format' => __FUNCTION__]));
     }
 
     /**
@@ -186,7 +190,7 @@ class OrderController extends Controller
     {
         $validated = arrHumpToLine($request->input());
 
-        $order = ClientUserOrder::where('trade_no', $id)->where('user_id', Auth::guard('wechat')->user()->id)->firstOrFail();
+        $order = ClientUserOrder::owner()->where('trade_no', $id)->firstOrFail();
 
         $orderState = null;
         foreach (OrderStatusEnum::cases() as $case) {
@@ -214,6 +218,19 @@ class OrderController extends Controller
             $order->trade_no = $out_trade_no;
 
             $payload = $this->payTransactionsWithChannel($validated['pay_channel'], $out_trade_no, $order->payer_total, Auth::guard('wechat')->user()->loginInfo[0]->openid, "移动洗护服务-{$order->pet_json['name']}({$order->pet_json['weight']}KG)");
+        }
+
+        if ($validated['state'] === 'refund') {
+            $now = Carbon::now();
+            $out_refund_no = date('Ymd') . $now->getPreciseTimestamp(3) . str_pad(1, 4, '1', STR_PAD_LEFT) . random_int(100000, 999999);
+
+            $out_refund_no .= generateLuhnCheckDigit($out_refund_no);
+
+            ClientUserOrderRefund::create([
+                'order_id' => $order->id,
+                'refund_no' => $out_refund_no,
+                'rationale' => $validated['rationale']
+            ]);
         }
 
         $order->save();
