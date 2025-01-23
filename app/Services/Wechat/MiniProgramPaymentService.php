@@ -303,58 +303,48 @@ class MiniProgramPaymentService
     /**
      * 退款申请
      *
-     * @param string $out_trade_no
+     * @param string $transaction_id
+     * @param string $out_refund_no
+     * @param int $amount
      * @param int $total
-     * @param string $openid
-     * @return array
+     * @param string|null $reason
+     * @return array|bool
      */
-    public function requestRefund(string $out_trade_no, int $total, string $openid)
+    public function requestRefund(string $transaction_id, string $out_refund_no, int $amount, int $total, string $reason = null)
     {
         try {
             $http_response = $this->instance->chain('v3/refund/domestic/refunds')
                 ->post(['json' => [
-                    'transaction_id' => '',
-                    'out_trade_no' => '',
-                    'out_refund_no' => '',
-                    'reason' => '',
+                    'transaction_id' => $transaction_id, // 微信支付订单号
+//                    'out_trade_no' => '',
+                    'out_refund_no' => $out_refund_no,
+                    'reason' => $reason, // 1、该退款原因参数的长度不得超过80个字节；2、当订单退款金额小于等于1元且为部分退款时，退款原因将不会在消息中体现
                     'notify_url' => 'https://wangxingren.fun/wechat_notify/domestic/refunds',
-                    'funds_account' => '',
+//                    'funds_account' => '',
                     'amount' => [
-                        'refund' => '',
-                        'from' => '',
-                        'total' => '',
-                        'currency' => 'CNY'
+                        'refund' => $amount, // 退款金额，币种的最小单位，只能为整数，不能超过原订单支付金额
+                        'from' => [
+                            'account' => 'UNAVAILABLE',
+                            'amount' => $amount
+                        ],
+                        'total' => $total, // 原支付交易的订单总金额，币种的最小单位，只能为整数
+                        'currency' => 'CNY' // 符合ISO 4217标准的三位字母代码，固定传：CNY，代表人民币
                     ],
-                    'goods_detail' => [
-                        [
-                            'merchant_goods_id' => '',
-                            'wechatpay_goods_id' => '',
-                            'goods_name' => '',
-                            'unit_price' => '',
-                            'refund_amount' => '',
-                            'refund_quantity' => ''
-                        ]
-                    ]
+//                    'goods_detail' => [
+//                        [
+//                            'merchant_goods_id' => '',
+//                            'wechatpay_goods_id' => '',
+//                            'goods_name' => '',
+//                            'unit_price' => '',
+//                            'refund_amount' => '',
+//                            'refund_quantity' => ''
+//                        ]
+//                    ]
                 ]]);
 
-//            // 预支付交易会话标识，用于后续接口调用中使用，该值有效期为2小时
-//            $prepay_id = (json_decode($http_response->getBody(), true))['prepay_id'];
-//
-//            $timeStamp = strval(Formatter::timestamp());
-//            $nonceStr = Formatter::nonce();
-//
-//            return [
-//                'timeStamp' => $timeStamp,
-//                'nonceStr' => $nonceStr,
-//                'package' => 'prepay_id=' . $prepay_id,
-//                'signType' => 'RSA',
-//                'paySign' => Rsa::sign(Formatter::joinedByLineFeed(...array_values([
-//                    'appId' => config('wechat.miniprogram.app_id'),
-//                    'timeStamp' => $timeStamp,
-//                    'nonceStr' => $nonceStr,
-//                    'package' => 'prepay_id=' . $prepay_id
-//                ])), $this->merchantPrivateKeyInstance)];
+            return json_decode($http_response->getBody(), true);
         } catch (RequestException $requestException) {
+            return false;
 //            $r = $requestException->getResponse();
 //
 //            return [
