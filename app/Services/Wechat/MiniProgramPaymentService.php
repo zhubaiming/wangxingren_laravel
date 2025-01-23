@@ -251,8 +251,8 @@ class MiniProgramPaymentService
                     'trade_type' => $wechatpay_body_resource_array['trade_type'],
                     'bank_type' => $wechatpay_body_resource_array['bank_type'],
                     'pay_success_at' => Carbon::parse($wechatpay_body_resource_array['success_time']),
-                    'currency' => $wechatpay_body_resource_array['currency'],
-                    'payer_currency' => $wechatpay_body_resource_array['payer_currency'],
+                    'currency' => $wechatpay_body_resource_array['amount']['currency'],
+                    'payer_currency' => $wechatpay_body_resource_array['amount']['payer_currency'],
                     'status' => OrderStatusEnum::finished
                 ]);
             }
