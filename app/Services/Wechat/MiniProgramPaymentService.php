@@ -217,7 +217,7 @@ class MiniProgramPaymentService
         $wechatpay_header_serial = $request->header('wechatpay-serial');               // 请求头部 - Wechatpay-Serial(请根据实际情况获取)
 //        $wechatpay_body = $request->post();                                                 // 请根据实际情况获取，例如: file_get_contents('php://input');
         $wechatpay_body = file_get_contents('php://input');
-
+        
         // 检查通知时间偏移量，允许5分钟之内的偏移
         $timeOffsetStatus = 300 >= intval(abs(bcsub(Formatter::timestamp(), (int)$wechatpay_header_timestamp, 0)));
         $verifiedStatus = Rsa::verify(
@@ -230,6 +230,8 @@ class MiniProgramPaymentService
         $log = 'timeOffsetStatus: ' . ($timeOffsetStatus ? 'true' : 'false') . ', verifiedStatus: ' . ($verifiedStatus ? 'true' : 'false');
         Log::channel('test')->info($log);
 
+        dd($timeOffsetStatus, $verifiedStatus);
+
         if ($timeOffsetStatus && $verifiedStatus) {
             // 使用PHP7的数据解构语法，从Array中解构并赋值变量
             ['resource' => [
@@ -241,6 +243,7 @@ class MiniProgramPaymentService
             $wechatpay_body_resource = AesGcm::decrypt($ciphertext, config('wechat.merchant.api_v3_key'), $nonce, $aad);
             Log::channel('test')->info($wechatpay_body_resource);
             // 把解密后的文本转换为PHP Array数组
+            Log::channel('test')->info($wechatpay_body_resource_array);
             $wechatpay_body_resource_array = json_decode($wechatpay_body_resource, true);
 
             if ('SUCCESS' === $wechatpay_body_resource_array['trade_state']) {
