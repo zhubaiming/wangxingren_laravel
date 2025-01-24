@@ -37,10 +37,10 @@ class ClientUserOrder extends Model
         return $this->belongsTo(ClientUser::class, 'id', 'user_id');
     }
 
-    public function spu(): BelongsTo
-    {
-        return $this->belongsTo(ProductSpu::class, 'spu_id', 'id');
-    }
+//    public function spu(): BelongsTo
+//    {
+//        return $this->belongsTo(ProductSpu::class, 'spu_id', 'id');
+//    }
 
     public function trademark(): BelongsTo
     {

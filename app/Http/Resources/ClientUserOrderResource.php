@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Enums\OrderStatusEnum;
+use App\Enums\PayChannelEnum;
 
 class ClientUserOrderResource extends CommentsResource
 {
@@ -27,7 +28,7 @@ class ClientUserOrderResource extends CommentsResource
                     'reservation_car' => $this->reservation_car,
                     'reservation_time_start' => $this->reservation_time_start,
                     'reservation_time_end' => $this->reservation_time_end,
-                    'pay_channel' => $this->transformPayChannel($this->pay_channel),
+                    'pay_channel' => PayChannelEnum::from($this->pay_channel)->name(),
                 ],
                 'show' => [
                     'id' => $this->id,
@@ -72,22 +73,6 @@ class ClientUserOrderResource extends CommentsResource
                 return ['type' => '', 'color' => ['color' => '#CCE8CF']];
             default:
                 return ['type' => '', 'color' => ['color' => '#EAEAEF']];
-        }
-    }
-
-    private function transformPayChannel($channel)
-    {
-        switch ($channel) {
-            case 1:
-                return '微信支付';
-            case 2:
-                return '支付宝支付';
-            case 3:
-                return '会员卡消费';
-            case 4:
-                return '线下支付';
-            default:
-                return '未知';
         }
     }
 }

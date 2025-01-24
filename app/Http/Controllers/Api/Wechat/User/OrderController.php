@@ -24,9 +24,7 @@ class OrderController extends Controller
     public function total()
     {
         $orderTotal = ClientUserOrder::withoutGlobalScopes()->selectRaw('COUNT(id) as count, status')
-            ->where('user_id', Auth::guard('wechat')->user()->id)
-            ->groupBy('status')
-            ->get()->toArray();
+            ->owner()->groupBy('status')->get()->toArray();
 
         foreach (OrderStatusEnum::cases() as $case) {
             // 输出枚举值名称和对应的中文名称
@@ -57,14 +55,14 @@ class OrderController extends Controller
             throw new BusinessException(ResponseEnum::HTTP_ERROR, '无效的查询');
         }
 
-        $query = ClientUserOrder::where('user_id', Auth::guard('wechat')->user()->id);
+        $query = ClientUserOrder::owner();
 
         if ('all' !== $request->get('status')) {
             $query = $query->where('status', intval($request->get('status')));
         }
 
         $payload = $query->orderBy('created_at', 'desc')
-            ->with(['spu', 'trademark'])
+            ->with('trademark')
             ->simplePaginate($request->get('pageSize') ?? $this->pageSize, ['*'], 'page', $request->get('page') ?? $this->page); // 必须分页
 
         return $this->returnIndex($payload, 'Wechat\ClientUserOrderResource', __FUNCTION__);
@@ -154,18 +152,6 @@ class OrderController extends Controller
         $payload = null;
         if (0 !== $order['payer_total']) {
             $payload = $this->payTransactionsWithChannel($pay_channel, $out_trade_no, $order['payer_total'], Auth::guard('wechat')->user()->loginInfo[0]->openid, "移动洗护服务-{$order_pet_info['name']}({$order_pet_info['weight']}KG)");
-
-
-//            switch ($pay_channel) {
-//                case 1: // 微信支付
-//                    $payload = (new MiniProgramPaymentService())->requestPayment(
-//                        $out_trade_no,
-//                        $order['payer_total'],
-//                        Auth::guard('wechat')->user()->loginInfo[0]->openid,
-//                        "移动洗护服务-{$order_pet_info['name']}({$order_pet_info['weight']}KG)"
-//                    );
-//                    break;
-//            }
         }
 
         Auth::guard('wechat')->user()->orders()->create($order);
@@ -178,7 +164,7 @@ class OrderController extends Controller
      */
     public function show(string $id)
     {
-        $payload = ClientUserOrder::owner()->where('trade_no', $id)->firstOrFail();
+        $payload = ClientUserOrder::owner()->where('trade_no', $id)->with('refund')->firstOrFail();
 
         return $this->success((new ClientUserOrderResource($payload))->additional(['format' => __FUNCTION__]));
     }
@@ -229,7 +215,8 @@ class OrderController extends Controller
             ClientUserOrderRefund::create([
                 'order_id' => $order->id,
                 'refund_no' => $out_refund_no,
-                'rationale' => $validated['rationale']
+                'rationale' => $validated['rationale'],
+                'status' => 0,
             ]);
         }
 
