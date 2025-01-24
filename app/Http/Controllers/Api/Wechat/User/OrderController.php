@@ -126,7 +126,8 @@ class OrderController extends Controller
             'remark' => $order_remark,
             'pay_channel' => $pay_channel,
             'reservation_date' => $order_time_info['reservation_date'],
-            'reservation_car' => $order_time_info['car_number'] . ' 号车',
+//            'reservation_car' => $order_time_info['car_number'] . ' 号车',
+            'reservation_car' => $order_time_info['car_number'],
             'reservation_time_start' => $order_time_info['start_time'],
             'reservation_time_end' => $order_time_info['end_time'],
             'expected_at' => $now->addMinutes(15)->toDateTimeString()
@@ -164,7 +165,7 @@ class OrderController extends Controller
      */
     public function show(string $id)
     {
-        $payload = ClientUserOrder::owner()->where('trade_no', $id)->with('refund')->firstOrFail();
+        $payload = ClientUserOrder::owner()->where('trade_no', $id)->with('refund','car')->firstOrFail();
 
         return $this->success((new ClientUserOrderResource($payload))->additional(['format' => __FUNCTION__]));
     }

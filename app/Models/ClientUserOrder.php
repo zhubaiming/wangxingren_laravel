@@ -51,4 +51,9 @@ class ClientUserOrder extends Model
     {
         return $this->hasOne(ClientUserOrderRefund::class, 'order_id', 'id');
     }
+
+    public function car()
+    {
+        return $this->belongsTo(ServiceCar::class, 'reservation_car', 'id');
+    }
 }

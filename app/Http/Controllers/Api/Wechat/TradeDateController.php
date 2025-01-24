@@ -5,11 +5,10 @@ namespace App\Http\Controllers\Api\Wechat;
 use App\Enums\ResponseEnum;
 use App\Exceptions\BusinessException;
 use App\Http\Controllers\Controller;
+use App\Models\ClientUserOrder;
 use App\Models\ServiceCar;
 use App\Models\System;
 use App\Models\SysTradeDate;
-use Carbon\Carbon;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 
 class TradeDateController extends Controller
@@ -18,25 +17,28 @@ class TradeDateController extends Controller
     {
         $validated = arrHumpToLine($request->input());
 
-        if (Carbon::parse($validated['date'])->lt(Carbon::today())) {
-            throw new BusinessException(ResponseEnum::HTTP_ERROR, '所选日期不允许预约');
-        }
-
         if (0 === SysTradeDate::where('date', $validated['date'])->where('status', true)->count('id')) {
             throw new BusinessException(ResponseEnum::HTTP_ERROR, '所选日期未营业，请重新选择');
         }
 
-        try {
-            $fullRange = json_decode(System::where('key', 'COMPANY_TRADE_TIMES')->first()->value, true);
+        $fullRange = json_decode(System::where('key', 'COMPANY_TRADE_TIMES')->firstOrFail()->value, true);
 
-            $times = [];
-            for ($i = 0; $i < ServiceCar::count('id'); $i++) {
-                $times[$i] = ['car_number' => $i + 1, 'car_title' => ($i + 1) . ' 号车', 'times' => $this->getAvailableTimeRanges($fullRange, [], $validated['duration'])];
-            }
+        $times = [];
+        $cars = ServiceCar::select('id', 'title')->where('status', true)->orderBy('created_at', 'asc')->get();
 
-//            ClientUserOrder::where('reservation_date', Carbon::parse($validated['date']))->latest('reservation_time_end')->firstOrFail();
-        } catch (ModelNotFoundException) {
+        if (0 !== count($cars)) {
+            $orders = ClientUserOrder::select('reservation_car', 'reservation_time_start', 'reservation_time_end')->whereIn('status', [2, 3, 4])->where('reservation_date', $validated['date'])->get()->toArray();
 
+            // 使用 array_reduce 实现分组
+            $removeRanges = array_reduce($orders, function ($carry, $item) {
+                $carId = $item['reservation_car']; // 获取分组的键
+                $carry[$carId][] = $item;         // 将当前元素追加到对应分组中
+                return $carry;                    // 返回累积的分组结果
+            }, []);
+        }
+
+        foreach ($cars as $car) {
+            $times[$car->id] = ['car_number' => $car->id, 'car_title' => $car->title, 'times' => $this->getAvailableTimeRanges($fullRange, $removeRanges[$car->id] ?? [], $validated['duration'])];
         }
 
         return $this->success(arrLineToHump($times));
@@ -67,8 +69,8 @@ class TradeDateController extends Controller
         // 转换移除的时间段为分钟形式
         $removeRangesMinutes = array_map(function ($range) {
             return [
-                'start' => $this->timeToMinutes($range['start']),
-                'end' => $this->timeToMinutes($range['end'])
+                'start' => $this->timeToMinutes($range['reservation_time_start']),
+                'end' => $this->timeToMinutes($range['reservation_time_end'])
             ];
         }, $removeRanges);
 
@@ -100,9 +102,9 @@ class TradeDateController extends Controller
         }
 
         // 过滤出能够覆盖指定时长的时间段
-        $availableRanges = array_filter($remainingRanges, function ($range) use ($duration) {
-            return ($range['end'] - $range['start']) >= $duration;
-        });
+//        $availableRanges = array_filter($remainingRanges, function ($range) use ($duration) {
+//            return ($range['end'] - $range['start']) >= $duration;
+//        });
 
         $newremainingRanges = [];
         foreach ($remainingRanges as $remainingRange) {
@@ -111,7 +113,8 @@ class TradeDateController extends Controller
             while ($start + $duration <= $remainingRange['end']) {
                 $newremainingRanges[] = ['start' => $start, 'end' => $start + $duration];
 
-                $start++;
+//                $start++;
+                $start += 15;
             }
         }
 
