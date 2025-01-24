@@ -3,6 +3,7 @@
 namespace App\Services\Wechat;
 
 use App\Enums\OrderStatusEnum;
+use App\Events\NewPayedOrderEvent;
 use App\Models\ClientUserOrder;
 use Carbon\Carbon;
 use GuzzleHttp\Exception\RequestException;
@@ -255,6 +256,8 @@ class MiniProgramPaymentService
                     'payer_currency' => $wechatpay_body_resource_array['amount']['payer_currency'],
                     'status' => OrderStatusEnum::finishing
                 ]);
+
+                NewPayedOrderEvent::dispatch();
             }
         }
 
