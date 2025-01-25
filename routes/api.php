@@ -3,7 +3,6 @@
 use App\Http\Controllers;
 use App\Http\Controllers\Api\Admin;
 use App\Http\Controllers\V1;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/testEvent', [Controllers\TestController::class, 'testEvent']);
@@ -83,7 +82,7 @@ Route::prefix('v1')->group(function () {
             Route::post('logout', 'logout');
         });
         Route::get('info', [V1\UserController::class, 'info']);
-        Route::apiResource('role', V1\UserRoleController::class);
+        Route::apiResource('role', Admin\AuthRoleController::class);
         Route::put('batchToggle', [V1\UserController::class, 'batchToggle']);
         Route::put('resetPasswd/{id}', [V1\UserController::class, 'resetPasswd']);
         Route::apiResource('permission', V1\UserPermissionController::class);

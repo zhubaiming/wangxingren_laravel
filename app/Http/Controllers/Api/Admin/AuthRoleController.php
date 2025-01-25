@@ -1,16 +1,17 @@
 <?php
 
-namespace App\Http\Controllers\V1;
+namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserRoleResource;
 use App\Models\User;
+use App\Models\UserPermission;
 use App\Models\UserRole;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class UserRoleController extends Controller
+class AuthRoleController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -81,7 +82,9 @@ class UserRoleController extends Controller
 
                 $userRole->save();
 
-                $userRole->permissions()->sync($validated['permissions']);
+                $noRootPermission = UserPermission::select('id')->doesntHave('childrenRecursive')->pluck('id')->toArray();
+
+                $userRole->permissions()->sync(array_intersect($validated['permissions'], $noRootPermission));
 
                 return $this->success();
             } catch (ModelNotFoundException) {
