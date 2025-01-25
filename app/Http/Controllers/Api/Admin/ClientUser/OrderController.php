@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\Api\Admin\ClientUser;
 
+use App\Enums\OrderStatusEnum;
+use App\Enums\ResponseEnum;
+use App\Exceptions\BusinessException;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ClientUserOrderResource;
 use App\Models\ClientUserOrder;
@@ -37,7 +40,7 @@ class OrderController extends Controller
             return $query->where('address_json->person_phone_number', 'like', '%' . $validated['pay_channel'] . '%');
         })->when(isset($validated['address']), function ($query) use ($validated) {
             return $query->where('address_json->full_address', 'like', '%' . $validated['address'] . '%');
-        })->orderBy('created_at','desc');
+        })->orderBy('created_at', 'desc');
 
         $payload = $paginate ? $query->paginate($request->get('page_size') ?? $this->pageSize, ['*'], 'page', $request->get('page') ?? $this->page) : $query->get();
 
@@ -67,7 +70,30 @@ class OrderController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $validated = arrHumpToLine($request->input());
+
+        $order = ClientUserOrder::where('trade_no', $id)->firstOrFail();
+
+        $orderState = null;
+        foreach (OrderStatusEnum::cases() as $case) {
+            // 输出枚举值名称和对应的中文名称
+//            echo "枚举值: {$case->name}, 数值: {$case->value}, 中文名称: {$case->name()}" . PHP_EOL;
+            if ($case->name === $validated['state']) {
+                $orderState = $case->value;
+            }
+        }
+
+        if (is_null($orderState)) {
+            throw new BusinessException(ResponseEnum::HTTP_ERROR, '当前操作无效');
+        }
+
+        $order->status = $orderState;
+
+        $payload = null;
+
+        $order->save();
+
+        return $this->success($payload);
     }
 
     /**
