@@ -22,7 +22,7 @@ class UserRoleResource extends CommentsResource
                 'show' => [
                     'id' => $this->id,
                     'title' => $this->title,
-                    'permissions' => $this->permissions->pluck('id'),
+                    'permissions' => $this->permissions->pluck('id')->concat($this->menus->pluck('id')),
                 ],
                 'default' => []
             },

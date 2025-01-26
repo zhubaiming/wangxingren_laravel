@@ -18,8 +18,10 @@ class UserResource extends CommentsResource
                     'avatar' => $this->avatar,
                     'is_default_passwd' => $this->is_default_passwd,
                     'role' => $this->role->title,
-                    'routes' => (new BaseCollection($this->role->permissions->groupBy('type')[1]))->additional(['resource' => 'App\Http\Resources\UserPermissionResource'])->pluck('code'),
-                    'buttons' => (new BaseCollection($this->role->permissions->groupBy('type')[2]))->additional(['resource' => 'App\Http\Resources\UserPermissionResource'])->pluck('code')
+//                    'routes' => (new BaseCollection($this->role->permissions->groupBy('type')[1]))->additional(['resource' => 'App\Http\Resources\UserPermissionResource'])->pluck('code'),
+//                    'buttons' => (new BaseCollection($this->role->permissions->groupBy('type')[2]))->additional(['resource' => 'App\Http\Resources\UserPermissionResource'])->pluck('code')
+                    'routes' => (new BaseCollection($this->role->menus))->additional(['resource' => 'App\Http\Resources\UserPermissionResource'])->pluck('code'),
+                    'buttons' => (new BaseCollection($this->role->permissions))->additional(['resource' => 'App\Http\Resources\UserPermissionResource'])->pluck('code')
                 ],
                 'index' => [
                     'id' => $this->id,

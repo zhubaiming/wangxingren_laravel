@@ -77,19 +77,20 @@ Route::prefix('v1')->group(function () {
     // 账户操作
     Route::prefix('user')->group(function () {
         Route::controller(Admin\AuthController::class)->group(function () {
-            Route::post('registered', 'registered');
-            Route::post('login', 'login');
-            Route::post('logout', 'logout');
+            Route::post('/registered', 'registered');
+            Route::post('/login', 'login');
+            Route::post('/logout', 'logout');
+            Route::put('/resetPasswd/{id}', 'resetPasswd');
+            Route::put('/user', 'updateSelf');
+            Route::get('info', 'info');
         });
-        Route::get('info', [V1\UserController::class, 'info']);
+//        Route::get('info', [V1\UserController::class, 'info']);
         Route::apiResource('role', Admin\AuthRoleController::class);
         Route::put('batchToggle', [V1\UserController::class, 'batchToggle']);
-        Route::put('resetPasswd/{id}', [V1\UserController::class, 'resetPasswd']);
         Route::apiResource('permission', V1\UserPermissionController::class);
     });
     Route::apiResource('/user', V1\UserController::class);
 //    Route::put('/user', [V1\UserController::class, 'updateSelf']);
-    Route::put('/user', [Admin\AuthController::class, 'updateSelf']);
 
 
     // 营业日期 - 已完成
@@ -107,10 +108,9 @@ Route::prefix('v1')->group(function () {
         Route::put('/company', [Admin\SystemController::class, 'companyUpdate']);
     });
 
-    Route::post('/coupon/{id}/user', [Admin\Coupon\CouponController::class,'issueCouponToUser'])->withoutMiddleware('api');
+    Route::post('/coupon/{id}/user', [Admin\Coupon\CouponController::class, 'issueCouponToUser'])->withoutMiddleware('api');
     Route::apiResource('/coupon', Admin\Coupon\CouponController::class);
     Route::apiResource('/clientUser', Admin\ClientUser\UserController::class);
-
 
 
     Route::get('/home', [V1\HomeController::class, 'info']);
@@ -141,7 +141,6 @@ Route::prefix('v1')->group(function () {
     Route::prefix('pet')->group(function () {
         Route::apiResource('breed', V1\PetBreedController::class);
     });
-
 
 
     // 上传

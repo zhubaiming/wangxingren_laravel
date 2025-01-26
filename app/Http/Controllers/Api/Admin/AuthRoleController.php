@@ -60,7 +60,9 @@ class AuthRoleController extends Controller
      */
     public function show(string $id)
     {
-        $payload = UserRole::with(['permissions:id'])->findOrFail($id);
+        $payload = UserRole::with(['permissions:id', 'menus' => function ($query) {
+            $query->doesntHave('childrenRecursive');
+        }])->findOrFail($id);
 
         return $this->success((new UserRoleResource($payload))->additional(['format' => __FUNCTION__]));
     }
@@ -82,9 +84,25 @@ class AuthRoleController extends Controller
 
                 $userRole->save();
 
-                $noRootPermission = UserPermission::select('id')->doesntHave('childrenRecursive')->pluck('id')->toArray();
+                $permissionArr = UserPermission::select('id', 'type')->whereIn('id', $validated['permissions'])->get()->toArray();
 
-                $userRole->permissions()->sync(array_intersect($validated['permissions'], $noRootPermission));
+                $menu = array_filter($permissionArr, function ($item) {
+                    return $item['type'] === 1;
+                });
+
+                $permission = array_filter($permissionArr, function ($item) {
+                    return $item['type'] === 2;
+                });
+
+//                $noRootPermission = UserPermission::select('id', 'type')->doesntHave('childrenRecursive')->pluck('id')->toArray();
+//                $userRole->permissions()->sync(array_intersect($validated['permissions'], $noRootPermission));
+
+                $userRole->permissions()->sync(array_map(function ($item) {
+                    return $item['id'];
+                }, $permission));
+                $userRole->menus()->sync(array_map(function ($item) {
+                    return $item['id'];
+                }, $menu));
 
                 return $this->success();
             } catch (ModelNotFoundException) {

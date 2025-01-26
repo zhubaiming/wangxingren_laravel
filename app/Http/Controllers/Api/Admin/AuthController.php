@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Enums\ResponseEnum;
 use App\Exceptions\BusinessException;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -73,16 +74,7 @@ class AuthController extends Controller
         return $this->success();
     }
 
-    public function authenticate(): \Illuminate\Http\JsonResponse
-    {
-        if (Auth::guard('admin')->check()) {
-            return $this->success();
-        } else {
-            throw new BusinessException(ResponseEnum::CLIENT_HTTP_UNAUTHORIZED);
-        }
-    }
-
-    public function updateSelf(Request $request)
+    public function updateSelf(Request $request): \Illuminate\Http\JsonResponse
     {
         $validated = arrHumpToLine($request->post());
 
@@ -102,5 +94,47 @@ class AuthController extends Controller
         $user->save();
 
         return $this->success();
+    }
+
+    public function resetPasswd(string $id): \Illuminate\Http\JsonResponse
+    {
+        User::where('id', $id)->update(['password' => Hash::make('Dcba@1234'), 'is_default_passwd' => true]);
+
+        return $this->success();
+    }
+
+    public function info()
+    {
+        $payload = User::select('name', 'avatar', 'role_id', 'is_default_passwd')->with(['role' => function ($query) {
+            $query->select('id', 'title')->with(['permissions' => function ($perQuery) {
+                $perQuery->select('id', 'code', 'type')->wherePivotNotIn('permission_id', [1]);
+            }, 'menus' => function ($perQuery) {
+                $perQuery->select('id', 'code', 'type')->wherePivotNotIn('permission_id', [1]);
+            }]);
+        }])->where('uid', Auth::guard('admin')->id())->firstOrFail();
+
+        return $this->success((new UserResource($payload))->additional(['format' => __FUNCTION__]));
+    }
+
+
+//    public function info()
+//    {
+//        $payload = User::select('name', 'avatar', 'role_id', 'is_default_passwd')->with(['role' => function ($query) {
+//            $query->select('id', 'title')->with(['permissions' => function ($perQuery) {
+//                $perQuery->select('id', 'code', 'type')->wherePivotNotIn('permission_id', [1]);
+//            }]);
+//        }])->where('uid', Auth::guard('admin')->id())->firstOrFail();
+//
+//        return $this->success((new UserResource($payload))->additional(['format' => __FUNCTION__]));
+//    }
+
+
+    public function authenticate(): \Illuminate\Http\JsonResponse
+    {
+        if (Auth::guard('admin')->check()) {
+            return $this->success();
+        } else {
+            throw new BusinessException(ResponseEnum::CLIENT_HTTP_UNAUTHORIZED);
+        }
     }
 }

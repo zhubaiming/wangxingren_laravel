@@ -27,4 +27,10 @@ class UserRole extends Model
     {
         return $this->belongsToMany(UserPermission::class, 'pivot_role_permission', 'role_id', 'permission_id', 'id', 'id');
     }
+
+    // 关联 - 菜单
+    public function menus()
+    {
+        return $this->belongsToMany(UserPermission::class, 'pivot_role_menu', 'role_id', 'permission_id', 'id', 'id');
+    }
 }
