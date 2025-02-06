@@ -65,7 +65,7 @@ class OrderController extends Controller
             ->with('trademark')
             ->simplePaginate($request->get('pageSize') ?? $this->pageSize, ['*'], 'page', $request->get('page') ?? $this->page); // 必须分页
 
-        return $this->returnIndex($payload, 'Wechat\ClientUserOrderResource', __FUNCTION__);
+        return $this->success($this->returnIndex($payload, 'Wechat\ClientUserOrderResource', __FUNCTION__));
     }
 
     /**
@@ -152,7 +152,7 @@ class OrderController extends Controller
 
         $payload = null;
         if (0 !== $order['payer_total']) {
-            $payload = $this->payTransactionsWithChannel($pay_channel, $out_trade_no, $order['payer_total'], Auth::guard('wechat')->user()->loginInfo[0]->openid, "移动洗护服务-{$order_pet_info['name']}({$order_pet_info['weight']}KG)");
+            $payload = $this->payTransactionsWithChannel($pay_channel, $out_trade_no, $order['payer_total'], Auth::guard('wechat')->user()->info->openid, "移动洗护服务-{$order_pet_info['name']}({$order_pet_info['weight']}KG)");
         }
 
         Auth::guard('wechat')->user()->orders()->create($order);
@@ -165,7 +165,7 @@ class OrderController extends Controller
      */
     public function show(string $id)
     {
-        $payload = ClientUserOrder::owner()->where('trade_no', $id)->with('refund','car')->firstOrFail();
+        $payload = ClientUserOrder::owner()->where('trade_no', $id)->with('refund', 'car')->firstOrFail();
 
         return $this->success((new ClientUserOrderResource($payload))->additional(['format' => __FUNCTION__]));
     }
@@ -204,7 +204,7 @@ class OrderController extends Controller
 
             $order->trade_no = $out_trade_no;
 
-            $payload = $this->payTransactionsWithChannel($validated['pay_channel'], $out_trade_no, $order->payer_total, Auth::guard('wechat')->user()->loginInfo[0]->openid, "移动洗护服务-{$order->pet_json['name']}({$order->pet_json['weight']}KG)");
+            $payload = $this->payTransactionsWithChannel($validated['pay_channel'], $out_trade_no, $order->payer_total, Auth::guard('wechat')->user()->info->openid, "移动洗护服务-{$order->pet_json['name']}({$order->pet_json['weight']}KG)");
         }
 
         if ($validated['state'] === 'refund') {

@@ -29,7 +29,7 @@ class PetController extends Controller
 
         $payload = $paginate ? $query->simplePaginate($request->get('pageSize') ?? $this->pageSize, ['*'], 'page', $request->get('page') ?? $this->page) : $query->get();
 
-        return $this->returnIndex($payload, 'Wechat\ClientUserPetResource', __FUNCTION__, $paginate);
+        return $this->success($this->returnIndex($payload, 'Wechat\ClientUserPetResource', __FUNCTION__, $paginate));
     }
 
     /**
