@@ -12,7 +12,7 @@ enum ResponseEnum
     // 101 - 切换协议
     /*----------*/
     // 200 开头的表示服务器成功地接受了客户端请求
-    const  HTTP_OK = [200001, '操作成功'];
+    const HTTP_OK = [200001, '操作成功'];
     const HTTP_ERROR = [200002, '操作失败'];
     const HTTP_ACTION_COUNT_ERROR = [200302, '操作频繁'];
     const USER_SERVICE_LOGIN_SUCCESS = [200200, '登录成功'];
@@ -38,7 +38,8 @@ enum ResponseEnum
     const CLIENT_DELETED_ERROR = [400202, '数据不存在'];
     // 401 - 访问被拒绝
     const CLIENT_HTTP_UNAUTHORIZED = [401001, '授权失败，请先登录'];
-    const CLIENT_HTTP_UNAUTHORIZED_EXPIRED = [401200, '账号信息已过期，请重新登录'];
+    const CLIENT_HTTP_AUTHORIZED_ILLEGAL = [401003, '登录信息非法存在'];
+    const CLIENT_HTTP_UNAUTHORIZED_EXPIRED = [401004, '账号信息已过期，请重新登录'];
     const CLIENT_HTTP_UNAUTHORIZED_BLACKLISTED = [401201, '账号在其他设备登录，请重新登录'];
     // 403 - 禁止访问
     // 404 - 没有找到文件或目录
@@ -75,4 +76,9 @@ enum ResponseEnum
     // 503 - 服务不可用，这个错误代码为 IIS 6.0 所专用
     // 504 - 网关超时
     // 505 - HTTP 版本不受支持
+
+    public static function get(string $key): ?array
+    {
+        return defined("self::{$key}") ? constant("self::{$key}") : null;
+    }
 }
