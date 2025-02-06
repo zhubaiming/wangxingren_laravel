@@ -12,9 +12,9 @@ class ClientUserResource extends CommentsResource
 
         return match ($format) {
             'silentLogin' => [
-                'nick_name' => $this->user->nick_name,
-                'avatar' => $this->user->avatar,
-                'created_at' => $this->user->created_at
+                'nick_name' => $this->nick_name,
+                'avatar' => $this->avatar,
+                'created_at' => $this->created_at
             ],
             'registerLogin' => [
                 'nick_name' => $this->nick_name,

@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\ResponseEnum;
+use App\Exceptions\BusinessException;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -11,13 +13,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 class WechatAuthMiddleware
 {
-//    protected $auth;
-//
-//    public function __construct(Auth $auth)
-//    {
-//        $this->auth = $auth;
-//    }
-
     /**
      * Handle an incoming request.
      *
@@ -25,59 +20,24 @@ class WechatAuthMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-//        dd($request->bearerToken());
-        if (is_null($request->bearerToken())) {
-            dd(1);
+        if (!Auth::guard('wechat')->check()) {
+            throw new BusinessException([401, ResponseEnum::get($request->input('http_error'))[1]]);
         }
 
-        $user = Auth::guard('wechat')->user();
+//        $response = $next($request)
+//            ->header('Access-Control-Allow-Origin', 'http://192.168.31.4:3001')  // 允许跨域的源
+//            ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')  // 允许的请求方法
+//            ->header('Access-Control-Allow-Headers', 'Content-Type, X-Requested-With, Authorization')  // 允许的请求头
+//            ->header('Access-Control-Allow-Credentials', 'true');  // 是否允许携带凭证（如 cookies）
 
-        if (Auth::guard('wechat')->guest()) {
+        $response = $next($request)
+            ->header('Access-Control-Allow-Origin', '*');  // 允许跨域的源
 
+        if ($request->bearerToken() !== Auth::guard('wechat')->getToken()) {
+            $response->header('Refresh', Auth::guard('wechat')->getToken());
         }
 
-//        if ($request->is('api/*')) {
-//            if ($request->is('*/login')) {
-//                if (!is_null($request->bearerToken())) {
-//                    if (!\Illuminate\Support\Facades\Auth::guard('admin')->check()) {
-//                        throw new BusinessException(ResponseEnum::CLIENT_HTTP_UNAUTHORIZED);
-//                    } else {
-//                        $token = Redis::hget('user_login', Auth::guard('admin')->id());
-//                    }
-//                    return $this->success(compact('token'));
-//                } else {
-//                    return $next($request);
-//                }
-//            } else {
-//                if (is_null($request->bearerToken())) {
-//                    throw new BusinessException(ResponseEnum::CLIENT_HTTP_UNAUTHORIZED);
-//                }
-//
-//                if (!Auth::guard('admin')->check()) {
-//                    throw new BusinessException(ResponseEnum::CLIENT_HTTP_UNAUTHORIZED);
-//                }
-//            }
-//        }
-//
-
-        return $next($request)
-            ->header('Access-Control-Allow-Origin', 'http://192.168.31.4:3001')  // 允许跨域的源
-            ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')  // 允许的请求方法
-            ->header('Access-Control-Allow-Headers', 'Content-Type, X-Requested-With, Authorization')  // 允许的请求头
-            ->header('Access-Control-Allow-Credentials', 'true');  // 是否允许携带凭证（如 cookies）
-
-//        if (!$request->cookie($this->auth->guard('wechat')->getRecallerName())) {
-//            return response()->json([
-//                'code' => 208,
-//                'message' => '请先进行登录'
-//            ]);
-//        }
-//
-//        if ($request->is('wechat/registerLogin')) {
-//            return $this->registerMid($request, $next);
-//        } else {
-//            return $this->defaultMid($request, $next);
-//        }
+        return $response;
     }
 
     private function registerMid($request, $next)

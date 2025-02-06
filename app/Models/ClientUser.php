@@ -48,7 +48,7 @@ class ClientUser extends Model implements AuthenticatableContract
      *
      * @var string[]
      */
-    protected $with = ['loginInfo'];
+//    protected $with = ['info'];
 
     public function getAuthIdentifierName(): string
     {
@@ -77,6 +77,16 @@ class ClientUser extends Model implements AuthenticatableContract
 
     // ==============================  关联  ==============================
 
+    /**
+     * 用户信息
+     *
+     * @return HasMany
+     */
+    public function info(): HasMany
+    {
+        return $this->hasMany(ClientUserInfo::class, 'user_id', 'id');
+    }
+
     public function loginInfo(): HasMany
     {
         return $this->hasMany(ClientUserLoginInfo::class, 'user_id', 'id');
@@ -86,16 +96,6 @@ class ClientUser extends Model implements AuthenticatableContract
 //    {
 //        return $this->hasMany(ClientUserDeviceInfo::class, 'user_id', 'id');
 //    }
-
-    /**
-     * 用户信息
-     *
-     * @return HasOne
-     */
-    public function info(): HasOne
-    {
-        return $this->hasOne(ClientUserInfo::class, 'user_id', 'id');
-    }
 
     /**
      * 宠物列表

@@ -3,8 +3,7 @@
 namespace App\Providers;
 
 use App\Services\Guard\AdminGuard;
-use App\Services\Wechat\WechatAppUserGuard;
-use Illuminate\Auth\RequestGuard;
+use App\Services\Guard\WechatMiniprogramGuard;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Events\QueryExecuted;
@@ -35,7 +34,9 @@ class AppServiceProvider extends ServiceProvider
         Auth::extend('wechat', function (Application $app, string $name, array $config) {
             // 返回 Illuminate\Contracts\Auth\Guard 的实例
 
-            return new WechatAppUserGuard($app, Auth::createUserProvider($config['provider']));
+//            dump($name, $config); // $name = 'wechat', $config = ['driver' => 'wechat', 'provider' => 'wechat_user']
+//            return new WechatAppUserGuard($app, Auth::createUserProvider($config['provider']));
+            return new WechatMiniprogramGuard($app);
         });
         Auth::extend('admin', function ($app, $name, $config) {
 

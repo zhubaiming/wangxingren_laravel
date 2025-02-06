@@ -31,7 +31,8 @@ Route::prefix('system')->group(function () {
 /**
  * 用户
  */
-Route::get('/userInfo', [Wechat\UserController::class, 'info']);
+Route::get('/userInfo', [Api\Wechat\AuthController::class, 'info']);
+Route::get('/logout', [Api\Wechat\AuthController::class, 'logout']);
 
 /**
  * 宠物

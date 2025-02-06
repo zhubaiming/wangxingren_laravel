@@ -8,12 +8,18 @@ class ClientUserInfo extends CommentsModel
 {
     protected $table = 'client_user_info';
 
-    /**
-     * 所有需要被触摸的关系名
-     *
-     * @var string[]
-     */
-    protected $touches = ['user'];
+    protected $attributes = [
+        'is_register' => false
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'is_register' => 'boolean',
+            'device' => 'array',
+            'system' => 'array'
+        ];
+    }
 
     // ==============================  关联  ==============================
     public function user(): BelongsTo

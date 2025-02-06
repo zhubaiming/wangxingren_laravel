@@ -4,8 +4,6 @@ namespace App\Http\Controllers\Api\Wechat;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Wechat\ClientUserResource;
-use App\Models\ClientUser;
-use App\Models\ClientUserLoginInfo;
 use App\Services\Wechat\MiniAppServerSideService;
 use App\Support\Traits\ApiToken;
 use Illuminate\Http\Request;
@@ -16,17 +14,9 @@ class AuthController extends Controller
 {
     use ApiToken;
 
-    public readonly string $name;
-
-    public readonly string $redis_connection;
-
     public function __construct(MiniAppServerSideService $service)
     {
         $this->service = $service;
-
-        $this->name = 'user:uid:';
-
-        $this->redis_connection = 'wechat_user';
     }
 
     public function silentLogin(Request $request)
@@ -35,27 +25,29 @@ class AuthController extends Controller
 
         $code_session = $this->service->code2session($validated['code']);
 
-        $user = ClientUserLoginInfo::where('app_type', 'wechat_miniprogram')
-            ->where('appid', config('wechat.miniprogram.app_id'))
-            ->where('openid', $code_session['openid'])
-            ->when(isset($code_session['unionid']), function ($query) use ($code_session) {
-                return $query->where('unionid', $code_session['unionid']);
-            })->with('user')->first();
-
-        $payload = ['is_register' => false, 'token' => null, 'info' => []];
-
-        if (is_null($user)) {
-            ClientUserLoginInfo::create([
+        $credentials = [
+            'attributes' => [
                 'app_type' => 'wechat_miniprogram',
                 'appid' => config('wechat.miniprogram.app_id'),
-                'openid' => $code_session['openid'],
+                'openid' => $code_session['openid']
+            ],
+            'data' => [
                 'unionid' => $code_session['unionid'] ?? null,
-                'is_register' => false
-            ]);
-        } else {
-            if (!is_null($user->user)) {
-                $payload = ['is_register' => true, 'token' => Auth::guard('wechat')->login($user->user), 'info' => (new ClientUserResource($user))->additional(['format' => __FUNCTION__])];
-            }
+                'is_register' => false,
+                'device' => $validated['device'],
+                'system' => $validated['app_base']
+            ],
+            'func' => __FUNCTION__
+        ];
+
+        if (isset($code_session['unionid'])) {
+            $credentials['attributes']['unionid'] = $code_session['unionid'];
+        }
+
+        $payload = Auth::guard('wechat')->attempt($credentials);
+
+        if (!is_null($payload['info'])) {
+            $payload['info'] = (new ClientUserResource($payload['info']))->additional(['format' => __FUNCTION__]);
         }
 
         return $this->success(arrLineToHump($payload));
@@ -69,30 +61,42 @@ class AuthController extends Controller
 
         $phone_info = $this->service->getPhoneNumber($validated['code_phone'], $code_session['openid']);
 
-        $user = ClientUser::where('phone_number', $phone_info['purePhoneNumber'])
-            ->where('phone_prefix', $phone_info['countryCode'])->first();
+        $credentials = [
+            'attributes' => [
+                'phone_prefix' => $phone_info['countryCode'],
+                'phone_number' => $phone_info['purePhoneNumber']
+            ],
+            'data' => [
+                'uid' => strval(Str::ulid())
+            ],
+            'extra' => [
+                'openid' => $code_session['openid'],
+            ],
+            'func' => __FUNCTION__
+        ];
 
-        if (is_null($user)) {
-            $user = ClientUser::create([
-                'uid' => strval(Str::ulid()),
-                'phone_number' => $phone_info['purePhoneNumber'],
-                'phone_prefix' => $phone_info['countryCode']
-            ]);
+        if (isset($code_session['unionid'])) {
+            $credentials['extra']['unionid'] = $code_session['unionid'];
         }
 
-        ClientUserLoginInfo::where('app_type', 'wechat_miniprogram')
-            ->where('appid', config('wechat.miniprogram.app_id'))
-            ->where('openid', $code_session['openid'])
-            ->when(isset($code_session['unionid']), function ($query) use ($code_session) {
-                return $query->where('unionid', $code_session['unionid']);
-            })->update(['user_id' => $user->id]);
+        $payload = Auth::guard('wechat')->attempt($credentials);
 
-        $user->refresh()->load('loginInfo');
-
-        $token = Auth::guard('wechat')->login($user);
-
-        $payload = ['is_register' => true, 'token' => $token, 'info' => (new ClientUserResource($user))->additional(['format' => __FUNCTION__])];
+        if (!is_null($payload['info'])) {
+            $payload['info'] = (new ClientUserResource($payload['info']))->additional(['format' => __FUNCTION__]);
+        }
 
         return $this->success(arrLineToHump($payload));
+    }
+
+    public function logout()
+    {
+        Auth::guard('wechat')->logout();
+
+        return $this->success();
+    }
+
+    public function info()
+    {
+
     }
 }
