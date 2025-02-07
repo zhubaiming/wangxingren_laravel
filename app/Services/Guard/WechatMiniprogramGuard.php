@@ -219,7 +219,7 @@ class WechatMiniprogramGuard implements StatefulGuard
         $result = ['is_register' => false, 'token' => null, 'info' => []];
 
         $user = $this->{'attempt' . ucfirst($credentials['func'])}($credentials);
-
+        
         if (!is_null($user)) {
             $result = ['is_register' => $user->info->is_register, 'token' => $this->login($user), 'info' => $user];
         }
@@ -246,13 +246,11 @@ class WechatMiniprogramGuard implements StatefulGuard
 
     private function attemptRegisterLogin($credentials)
     {
-        $user = ClientUser::with('info', function ($query) use ($credentials) {
+        $user = ClientUser::with(['info' => function ($query) use ($credentials) {
             $query->where('appid', config('wechat.miniprogram.app_id'))->where('openid', $credentials['extra']['openid']);
-        })->firstOrCreate($credentials['attributes'], $credentials['data']);
+        }])->firstOrCreate($credentials['attributes'], $credentials['data']);
 
-        if (!is_null($user->info)) {
-            $user->info = $user->info->first();
-        } else {
+        if (0 === count($user->info)) {
             ClientUserInfo::where('app_type', 'wechat_miniprogram')
                 ->where('appid', config('wechat.miniprogram.app_id'))
                 ->where('openid', $credentials['extra']['openid'])
@@ -262,6 +260,9 @@ class WechatMiniprogramGuard implements StatefulGuard
 
             $user->refresh()->load('info');
         }
+
+
+        $user->info = $user->info->first();
 
         return $user;
     }

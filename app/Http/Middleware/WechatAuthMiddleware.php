@@ -9,8 +9,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
-//use Illuminate\Contracts\Auth\Factory as Auth;
-
 class WechatAuthMiddleware
 {
     /**

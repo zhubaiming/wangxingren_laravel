@@ -46,7 +46,7 @@ class AuthController extends Controller
 
         $payload = Auth::guard('wechat')->attempt($credentials);
 
-        if (!is_null($payload['info'])) {
+        if (!empty($payload['info'])) {
             $payload['info'] = (new ClientUserResource($payload['info']))->additional(['format' => __FUNCTION__]);
         }
 
@@ -81,7 +81,7 @@ class AuthController extends Controller
 
         $payload = Auth::guard('wechat')->attempt($credentials);
 
-        if (!is_null($payload['info'])) {
+        if (!empty($payload['info'])) {
             $payload['info'] = (new ClientUserResource($payload['info']))->additional(['format' => __FUNCTION__]);
         }
 
