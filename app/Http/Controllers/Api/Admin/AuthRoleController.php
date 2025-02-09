@@ -75,7 +75,6 @@ class AuthRoleController extends Controller
         $validated = arrHumpToLine($request->post());
 
         if (0 === UserRole::where(['title' => $validated['title']])->whereNot('id', $id)->count('id')) {
-
             try {
                 $userRole = UserRole::findOrFail($id);
 

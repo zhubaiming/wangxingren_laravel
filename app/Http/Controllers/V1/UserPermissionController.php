@@ -44,7 +44,11 @@ class UserPermissionController extends Controller
             'sort' => $validated['sort']
         ]);
 
-        $userPermission->roles()->attach(1);
+        if ($userPermission->type === 1) {
+            $userPermission->menus()->attach(1);
+        } else {
+            $userPermission->permissions()->attach(1);
+        }
 
         return $this->success();
     }
@@ -83,9 +87,15 @@ class UserPermissionController extends Controller
     public function destroy(string $id)
     {
         try {
-            $userPermisstion = UserPermission::findOrFail($id);
+            $userPermission = UserPermission::findOrFail($id);
 
-            $userPermisstion->delete();
+            if ($userPermission->type === 1) {
+                $userPermission->menus()->detach();
+            } else {
+                $userPermission->permissions()->detach();
+            }
+
+            $userPermission->delete();
         } catch (ModelNotFoundException) {
             return $this->failed('要删除的菜单不存在');
         }

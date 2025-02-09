@@ -53,4 +53,16 @@ class UserPermission extends Model
     {
         return $this->belongsToMany(UserRole::class, 'pivot_role_permission', 'permission_id', 'role_id', 'id', 'id');
     }
+
+    // 关联 - 权限
+    public function permissions()
+    {
+        return $this->belongsToMany(UserRole::class, 'pivot_role_permission', 'permission_id', 'role_id', 'id', 'id');
+    }
+
+    // 关联 - 菜单
+    public function menus()
+    {
+        return $this->belongsToMany(UserRole::class, 'pivot_role_menu', 'permission_id', 'role_id', 'id', 'id');
+    }
 }
