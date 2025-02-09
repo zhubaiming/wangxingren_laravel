@@ -3,11 +3,18 @@
 namespace App\Http\Controllers\Api\Admin\ClientUser;
 
 use App\Enums\OrderStatusEnum;
+use App\Enums\PayChannelEnum;
 use App\Enums\ResponseEnum;
 use App\Exceptions\BusinessException;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ClientUserOrderResource;
+use App\Models\ClientUserAddress;
 use App\Models\ClientUserOrder;
+use App\Models\ClientUserPet;
+use App\Models\ProductSku;
+use App\Models\ProductSpu;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
@@ -52,7 +59,77 @@ class OrderController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = arrHumpToLine($request->input());
+
+        [
+            'client_user_id' => $client_user_id,
+            'trademark_id' => $trademark_id,
+            'category_id' => $category_id,
+            'spu_id' => $spu_id,
+            'sku_id' => $sku_id,
+            'client_user_address_id' => $client_user_address_id,
+            'client_user_pet_id' => $client_user_pet_id,
+            'reservation_date' => $reservation_date,
+            'reservation_time' => $reservation_time,
+            'pay_channel' => $pay_channel
+        ] = $validated;
+
+        try {
+            $spu = ProductSpu::where('trademark_id', $trademark_id)->where('category_id', $category_id)->findOrFail($spu_id);
+            $sku = ProductSku::where('spu_id', $spu_id)->findOrFail($sku_id);
+            $address = ClientUserAddress::where('user_id', $client_user_id)->findOrFail($client_user_address_id);
+            $pet = ClientUserPet::where('user_id', $client_user_id)->findOrFail($client_user_pet_id);
+        } catch (ModelNotFoundException) {
+            throw new BusinessException(ResponseEnum::HTTP_ERROR, '订单创建非法');
+        }
+
+        $reservation_date = Carbon::createFromTimestamp($reservation_date / 1000);
+
+        $now = Carbon::now();
+
+        if ($reservation_date->lt($now)) {
+            throw new BusinessException(ResponseEnum::HTTP_ERROR, '预约日期非法');
+        }
+
+        $reservation = explode('-', $reservation_time);
+        if (count($reservation) !== 3) {
+            throw new BusinessException(ResponseEnum::HTTP_ERROR, '预约时间格式非法');
+        }
+
+        $out_trade_no = date('Ymd') . $now->getPreciseTimestamp(3) . str_pad(1, 4, '0', STR_PAD_LEFT) . random_int(100000, 999999);
+
+        $out_trade_no .= generateLuhnCheckDigit($out_trade_no);
+
+        $order = [
+            'trade_no' => $out_trade_no,
+            'user_id' => $client_user_id,
+            'status' => in_array($pay_channel, PayChannelEnum::getOffLineChannels()) ? OrderStatusEnum::finishing : OrderStatusEnum::paying,
+            'total' => $sku->price,
+            'payer_total' => $sku->price,
+            'spu_id' => $spu_id,
+            'spu_json' => $spu->toArray(),
+            'category_id' => $category_id,
+            'category_title' => $category_id,
+            'trademark_id' => $trademark_id,
+            'trademark_title' => $trademark_id,
+            'sku_id' => $sku_id,
+            'sku_json' => $sku->toArray(),
+            'address_id' => $client_user_address_id,
+            'address_json' => $address->toArray(),
+            'pet_id' => $client_user_pet_id,
+            'pet_json' => $pet->toArray(),
+            'remark' => null,
+            'pay_channel' => $pay_channel,
+            'reservation_date' => $reservation_date->format('Y-m-d'),
+            'reservation_car' => $reservation[0],
+            'reservation_time_start' => $reservation[1],
+            'reservation_time_end' => $reservation[2],
+            'expected_at' => $now->addMinutes(15)->toDateTimeString()
+        ];
+
+        ClientUserOrder::create($order);
+
+        return $this->success();
     }
 
     /**

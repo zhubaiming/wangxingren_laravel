@@ -18,13 +18,28 @@ class SpuController extends Controller
         $validated = arrHumpToLine($request->input());
         $paginate = isset($validated['paginate']) ? isTrue($validated['paginate']) : true; // 是否分页
 
-        $query = ProductSpu::with(['category', 'trademark'])->withCount(['order' => function ($order) {
-            $order->where('status', OrderStatusEnum::finished);
-        }])->orderBy('created_at', 'desc');
+        $title = isset($validated['title']) ? (is_null($validated['title']) || $validated['title'] === 'null' ? null : $validated['title']) : null;
 
-        $payload = $query->paginate($validated['page_size'] ?? $this->pageSize, ['*'], 'page', $validated['page'] ?? $this->page);
+        $query = ProductSpu::with(['category', 'trademark'])
+            ->when(isset($validated['trademark_id']), function ($trademark) use ($validated) {
+                return $trademark->where('trademark_id', $validated['trademark_id']);
+            })
+            ->when(isset($validated['category_id']), function ($category) use ($validated) {
+                return $category->where('category_id', $validated['category_id']);
+            })
+            ->when(isset($validated['saleable']), function ($saleable) use ($validated) {
+                return $saleable->where('saleable', isTrue($validated['saleable']));
+            })
+            ->when(!is_null($title), function ($title) use ($validated) {
+                return $title->where('title', 'like', '%' . $validated['title'] . '%');
+            })
+            ->withCount(['order' => function ($order) {
+                $order->where('status', OrderStatusEnum::finished);
+            }])->orderBy('created_at', 'desc');
 
-        return $this->returnIndex($payload, 'ProductSpuResource', __FUNCTION__);
+        $payload = $paginate ? $query->paginate($request->get('page_size') ?? $this->pageSize, ['*'], 'page', $request->get('page') ?? $this->page) : $query->get();
+
+        return $this->returnIndex($payload, 'ProductSpuResource', __FUNCTION__, $paginate);
     }
 
     /**

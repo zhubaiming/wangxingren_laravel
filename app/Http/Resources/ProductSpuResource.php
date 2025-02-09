@@ -46,6 +46,27 @@ class ProductSpuResource extends CommentsResource
             false => [
                 'value' => $this->id,
                 'label' => $this->title
+                /*
+                 * 'value' => [
+                    'id' => $this->id,
+                    'trademark_id' => $this->trademark_id,
+                    'category_id' => $this->category_id,
+                    'title' => $this->title,
+                    'sub_title' => $this->sub_title,
+                    'min_price' => applyIntegerToFloatModifier($this->skus_min_price),
+                    'order_count' => $this->order_count,
+                    'score' => 5,
+                    'is_new' => !Carbon::parse($this->created_at)->lt(Carbon::now()->subHours(12)),
+                    'description' => $this->description,
+                    'images' => array_map(function ($value) {
+                        $value['tabType'] = substr($value['type'], 0, strpos($value['type'], '/'));
+                        return $value;
+                    }, $this->images),
+                    'packing_list' => $this->packing_list,
+                    'after_service' => $this->after_service,
+                    'pet_breeds' => $this->spu_breed->pluck('id'),
+                ],
+                 */
             ]
         };
 

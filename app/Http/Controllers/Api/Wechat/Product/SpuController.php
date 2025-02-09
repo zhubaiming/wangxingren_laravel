@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Wechat\Product;
 
+use App\Enums\OrderStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Wechat\ProductSpuResource;
 use App\Models\ProductSpu;
@@ -38,7 +39,7 @@ class SpuController extends Controller
     {
         $validated = arrHumpToLine($request->input());
 
-        $title = $validated['title'] === 'null' || is_null($validated['title']) ? null : $validated['title'];
+        $title = isset($validated['title']) ? (is_null($validated['title']) || $validated['title'] === 'null' ? null : $validated['title']) : null;
 
         $payload = ProductSpu::where('trademark_id', 325403)->where('saleable', true)
             ->when(isset($validated['category_id']), function ($query) use ($validated) {
@@ -48,7 +49,9 @@ class SpuController extends Controller
                 return $query->where('title', 'like', '%' . $validated['title'] . '%');
             })
             ->withMin('skus', 'price')
-            ->withCount('order')
+            ->withCount(['order' => function ($query) {
+                $query->where('status', OrderStatusEnum::finished);
+            }])
             ->orderBy('created_at', 'desc')
             ->simplePaginate($this->pageSize, ['*'], 'page', $validated['page'] ?? $this->page);
 

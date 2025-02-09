@@ -23,16 +23,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
         then: function () {
             Route::middleware([
-                'auth.wechat'
+                'antiShake', 'auth.wechat'
             ])
                 ->prefix('wechat')
                 ->name('wechat.')
                 ->group(base_path('routes/wechat.php'));
-
-//            Route::middleware('api')
-//                ->prefix('wechat_notify')
-//                ->name('wechat_notify.')
-//                ->group(base_path('routes/wechat_notify.php'));
 
             Route::prefix('wechat_notify')
                 ->name('wechat_notify.')
@@ -59,10 +54,12 @@ return Application::configure(basePath: dirname(__DIR__))
             // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             // 'throttle:api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            CustomMiddleware\AntiShakeMiddleware::class,
             CustomMiddleware\ApiAuthMiddleware::class,
         ]);
         // 中间件别名
         $middleware->alias([
+            'antiShake' => CustomMiddleware\AntiShakeMiddleware::class,
             'auth.wechat' => CustomMiddleware\WechatAuthMiddleware::class
         ]);
         /*

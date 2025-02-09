@@ -45,6 +45,7 @@ trait HttpClient
                     'errmsg' => null,
                     'openid' => 'oaQAW7UWF6z-jH6YljVJi4uvtdI4',
 //                    'openid' => 'oaQAW7RBqF5QGJInV83RLfb6IFEg',
+//                    'openid' => 'test1',
                     'errcode' => null
                 ], 200),
                 // 支付后获取 Unionid

@@ -88,10 +88,9 @@ class OrderController extends Controller
 
         if (
             0 === ProductSpu::where('id', $order_spu_info['id'])->count('id') ||
-            0 === ProductSku::where('id', $order_sku_info['id'])->count('id') ||
+            0 === ProductSku::where('spu_id', $order_spu_info['id'])->where('id', $order_sku_info['id'])->count('id') ||
             0 === ClientUserAddress::where('id', $order_address_info['id'])->where('user_id', Auth::guard('wechat')->user()->id)->count('id') ||
             0 === ClientUserPet::where('id', $order_pet_info['id'])->where('user_id', Auth::guard('wechat')->user()->id)->count('id')
-
         ) {
             throw new BusinessException(ResponseEnum::HTTP_ERROR, '订单创建非法');
         }
@@ -104,29 +103,23 @@ class OrderController extends Controller
         $order = [
             'trade_no' => $out_trade_no,
             'status' => OrderStatusEnum::paying,
-//            'user_id' => Auth::guard('wechat')->user()->id,
             'total' => $order_sku_info['price'],
             'payer_total' => $order_sku_info['price'],
             'spu_id' => $order_spu_info['id'],
-//            'spu_json' => json_encode($order_spu_info, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
             'spu_json' => $order_spu_info,
             'category_id' => $order_spu_info['category_id'],
             'category_title' => $order_spu_info['category_id'],
             'trademark_id' => $order_spu_info['trademark_id'],
             'trademark_title' => $order_spu_info['trademark_id'],
             'sku_id' => $order_sku_info['id'],
-//            'sku_json' => json_encode($order_sku_info, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
             'sku_json' => $order_sku_info,
             'address_id' => $order_address_info['id'],
-//            'address_json' => json_encode($order_address_info, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
             'address_json' => $order_address_info,
             'pet_id' => $order_pet_info['id'],
-//            'pet_json' => json_encode($order_pet_info, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
             'pet_json' => $order_pet_info,
             'remark' => $order_remark,
             'pay_channel' => $pay_channel,
             'reservation_date' => $order_time_info['reservation_date'],
-//            'reservation_car' => $order_time_info['car_number'] . ' 号车',
             'reservation_car' => $order_time_info['car_number'],
             'reservation_time_start' => $order_time_info['start_time'],
             'reservation_time_end' => $order_time_info['end_time'],

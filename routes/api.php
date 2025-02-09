@@ -94,7 +94,8 @@ Route::prefix('v1')->group(function () {
 
 
     // 营业日期 - 已完成
-    Route::apiResource('/tradeDate', V1\TradeDateController::class)->only(['index', 'update']);
+    Route::get('/tradeDate/reservation', [Admin\TradeDateController::class, 'getReservation']);
+    Route::apiResource('/tradeDate', Admin\TradeDateController::class)->only(['index', 'update']);
     // 营业车辆 - 已完成
     Route::apiResource('/serviceCar', V1\ServiceCarController::class)->only(['index']);
 
@@ -110,6 +111,10 @@ Route::prefix('v1')->group(function () {
 
     Route::post('/coupon/{id}/user', [Admin\Coupon\CouponController::class, 'issueCouponToUser'])->withoutMiddleware('api');
     Route::apiResource('/coupon', Admin\Coupon\CouponController::class);
+    Route::prefix('clientUser')->group(function () {
+        Route::apiResource('/pet', Admin\ClientUser\PetController::class);
+        Route::apiResource('/address', Admin\ClientUser\AddressController::class);
+    });
     Route::apiResource('/clientUser', Admin\ClientUser\UserController::class);
 
 
@@ -134,7 +139,7 @@ Route::prefix('v1')->group(function () {
 
 
         // sku
-        Route::apiResource('/sku', V1\ProductSkuController::class);
+        Route::apiResource('/sku', Admin\Product\SkuController::class);
     });
 
 
