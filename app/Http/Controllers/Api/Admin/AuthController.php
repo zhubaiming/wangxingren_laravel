@@ -7,6 +7,7 @@ use App\Exceptions\BusinessException;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -14,34 +15,6 @@ use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
-    public function registered(Request $request): \Illuminate\Http\JsonResponse
-    {
-        $validated = $request->validate([
-            'account' => ['bail', 'required', 'alpha_num'],
-            'role_id' => ['bail', 'required', 'integer'],
-            'name' => ['bail', 'required', 'string'],
-            'gender' => ['bail', 'required', 'integer'],
-            'phone_number' => ['bail', 'required', 'string'],
-            'password' => ['bail', 'exclude'],
-            'avatar' => ['bail', 'sometimes', 'url'],
-        ]);
-
-        if (0 !== User::where('account', $validated['account'])->orWhere('phone_number', $validated['phone_number'])->count('id')) {
-            throw new BusinessException(ResponseEnum::USER_ACCOUNT_REGISTERED);
-        }
-
-        User::create(array_merge($validated, [
-            'uid' => strval(Str::ulid()),
-            'password' => Hash::make('Dcba@1234'),
-            'status' => true,
-            'is_default_passwd' => true,
-            'updated_by' => $request->input('user')
-        ]));
-
-        return $this->success();
-    }
-
-
     public function login(Request $request): \Illuminate\Http\JsonResponse
     {
         $validated = $request->validate([
@@ -96,9 +69,15 @@ class AuthController extends Controller
         return $this->success();
     }
 
-    public function resetPasswd(string $id): \Illuminate\Http\JsonResponse
+    public function resetPasswd(Request $request, string $id): \Illuminate\Http\JsonResponse
     {
-        User::where('id', $id)->update(['password' => Hash::make('Dcba@1234'), 'is_default_passwd' => true]);
+        $user = User::findOrFail($id);
+
+        $user->password = Hash::make('Dcba@1234');
+        $user->is_default_passwd = true;
+        $user->updated_by = $request->input('user');
+
+        $user->save();
 
         return $this->success();
     }
@@ -136,5 +115,92 @@ class AuthController extends Controller
         } else {
             throw new BusinessException(ResponseEnum::CLIENT_HTTP_UNAUTHORIZED);
         }
+    }
+
+    public function index(Request $request)
+    {
+        $validated = arrHumpToLine($request->input());
+
+        $payload = User::with(['role'])->when(isset($validated['name']), function ($query) use ($validated) {
+            $query->where('name', 'like', '%' . $validated['name'] . '%');
+        });
+
+        $payload = $payload->paginate($validated['page_size'] ?? $this->pageSize, ['*'], 'page', $validated['page'] ?? $this->page);
+
+        return $this->success($this->returnIndex($payload, 'UserResource', __FUNCTION__));
+    }
+
+    public function show(string $id)
+    {
+        $payload = User::findOrFail($id);
+
+        return $this->success((new UserResource($payload))->additional(['format' => __FUNCTION__]));
+    }
+
+    public function store(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $validated = arrHumpToLine($request->post());
+
+        try {
+            $user = User::where('account', $validated['account'])->orWhere('name', $validated['name'])->orWhere('phone_number', $validated['phone_number'])->firstOrFail();
+
+            $message = match (true) {
+                $user->account === $validated['account'] => '登录账号重复',
+                $user->name === $validated['name'] => '用户已存在',
+                $user->phone_number === $validated['phone_number'] => '手机号码重复'
+            };
+
+            throw new BusinessException(ResponseEnum::HTTP_ERROR, $message);
+        } catch (ModelNotFoundException $e) {
+            unset($validated['user']);
+
+            User::create(array_merge($validated, [
+                'uid' => strval(Str::ulid()),
+                'password' => Hash::make('Dcba@1234'),
+                'is_default_passwd' => true,
+                'updated_by' => $request->input('user')
+            ]));
+        }
+
+        return $this->success();
+    }
+
+    public function update(Request $request, string $id)
+    {
+        $validated = arrHumpToLine($request->post());
+
+        try {
+            $user = User::whereNot('id', $id)->where(function ($query) use ($validated) {
+                $query->where('account', $validated['account'])->orWhere('name', $validated['name'])->orWhere('phone_number', $validated['phone_number']);
+            })->firstOrFail();
+
+            $message = match (true) {
+                $user->account === $validated['account'] => '登录账号重复',
+                $user->name === $validated['name'] => '用户已存在',
+                $user->phone_number === $validated['phone_number'] => '手机号码重复'
+            };
+
+            throw new BusinessException(ResponseEnum::HTTP_ERROR, $message);
+        } catch (ModelNotFoundException $e) {
+            unset($validated['user']);
+
+            User::where('id', $id)->update(array_merge($validated, [
+                'updated_by' => $request->input('user')
+            ]));
+        }
+
+        return $this->success();
+    }
+
+    public function batchToggle(Request $request)
+    {
+        $validated = arrHumpToLine($request->post());
+
+        User::whereIn('id', $validated['ids'])->update([
+            'status' => $validated['status'],
+            'updated_by' => $request->input('user')
+        ]);
+
+        return $this->success();
     }
 }

@@ -77,20 +77,18 @@ Route::prefix('v1')->group(function () {
     // 账户操作
     Route::prefix('user')->group(function () {
         Route::controller(Admin\AuthController::class)->group(function () {
-            Route::post('/registered', 'registered');
             Route::post('/login', 'login');
             Route::post('/logout', 'logout');
             Route::put('/resetPasswd/{id}', 'resetPasswd');
             Route::put('/user', 'updateSelf');
-            Route::get('info', 'info');
+            Route::get('/info', 'info');
+            Route::put('/batchToggle', 'batchToggle');
         });
 //        Route::get('info', [V1\UserController::class, 'info']);
         Route::apiResource('role', Admin\AuthRoleController::class);
-        Route::put('batchToggle', [V1\UserController::class, 'batchToggle']);
         Route::apiResource('permission', V1\UserPermissionController::class);
     });
-    Route::apiResource('/user', V1\UserController::class);
-//    Route::put('/user', [V1\UserController::class, 'updateSelf']);
+    Route::apiResource('/user', Admin\AuthController::class);
 
 
     // 营业日期 - 已完成
