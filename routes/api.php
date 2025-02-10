@@ -120,9 +120,9 @@ Route::prefix('v1')->group(function () {
     Route::apiResource('/order', Admin\ClientUser\OrderController::class);
     // 商品
     Route::prefix('product')->group(function () {
-        // 商品品牌 - 已完成
-        Route::apiResource('/trademark', V1\ProductTrademarkController::class);
-        Route::delete('/trademark', [V1\ProductTrademarkController::class, 'batchDestroy']);
+        // 商品品牌
+        Route::apiResource('/trademark', Admin\Product\TrademarkController::class);
+        Route::delete('/trademark', [Admin\Product\TrademarkController::class, 'batchDestroy']);
 
         // 商品分类 - 已完成
         Route::get('/category/{category_id}/pet_breed', [V1\PetBreedController::class, 'category_breed']);
@@ -134,7 +134,6 @@ Route::prefix('v1')->group(function () {
         Route::put('/spu', [Admin\Product\SpuController::class, 'batchUpdate']);
         Route::delete('/spu', [Admin\Product\SpuController::class, 'batchDestroy']);
         Route::apiResource('/spu', Admin\Product\SpuController::class);
-
 
         // sku
         Route::apiResource('/sku', Admin\Product\SkuController::class);
