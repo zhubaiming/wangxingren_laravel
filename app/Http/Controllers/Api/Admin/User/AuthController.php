@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\Admin;
+namespace App\Http\Controllers\Api\Admin\User;
 
 use App\Enums\ResponseEnum;
 use App\Exceptions\BusinessException;

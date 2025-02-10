@@ -1,16 +1,14 @@
 <?php
 
-namespace App\Http\Controllers\V1;
+namespace App\Http\Controllers\Api\Admin\User;
 
-use App\Enums\ResponseEnum;
-use App\Exceptions\BusinessException;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserPermissionResource;
 use App\Models\UserPermission;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 
-class UserPermissionController extends Controller
+class AuthPermissionController extends Controller
 {
     /**
      * Display a listing of the resource.

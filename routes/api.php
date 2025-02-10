@@ -71,12 +71,12 @@ Route::prefix('v1')->group(function () {
 
 
     Route::prefix('broadcasting')->group(function () {
-        Route::post('/auth', [Admin\AuthController::class, 'authenticate']);
+        Route::post('/auth', [Admin\User\AuthController::class, 'authenticate']);
     });
 
     // 账户操作
     Route::prefix('user')->group(function () {
-        Route::controller(Admin\AuthController::class)->group(function () {
+        Route::controller(Admin\User\AuthController::class)->group(function () {
             Route::post('/login', 'login');
             Route::post('/logout', 'logout');
             Route::put('/resetPasswd/{id}', 'resetPasswd');
@@ -85,10 +85,10 @@ Route::prefix('v1')->group(function () {
             Route::put('/batchToggle', 'batchToggle');
         });
 //        Route::get('info', [V1\UserController::class, 'info']);
-        Route::apiResource('role', Admin\AuthRoleController::class);
-        Route::apiResource('permission', V1\UserPermissionController::class);
+        Route::apiResource('role', Admin\User\AuthRoleController::class);
+        Route::apiResource('permission', Admin\User\AuthPermissionController::class);
     });
-    Route::apiResource('/user', Admin\AuthController::class);
+    Route::apiResource('/user', Admin\User\AuthController::class);
 
 
     // 营业日期 - 已完成
