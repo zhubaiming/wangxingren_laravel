@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use App\Enums\OrderStatusEnum;
 use App\Enums\PayChannelEnum;
+use App\Enums\PetWeightRangeEnum;
 
 class ClientUserOrderResource extends CommentsResource
 {
@@ -56,7 +57,7 @@ class ClientUserOrderResource extends CommentsResource
                     'pet_name' => $this->pet_json['name'],
                     'pet_breed_title' => $this->pet_json['breed_title'],
                     'pet_gender' => $this->pet_json['gender_conv'],
-                    'pet_weight' => $this->pet_json['weight'] . '(kg)',
+                    'pet_weight' => PetWeightRangeEnum::from($this->pet_json['weight'])->name(),
                     'pet_age' => calculateAge($this->pet_json['birth'], 'Y-m'),
                     'pet_is_sterilization' => $this->pet_json['is_sterilization'] ? '是' : '否'
                 ],
