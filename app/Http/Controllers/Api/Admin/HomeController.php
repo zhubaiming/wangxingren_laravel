@@ -1,11 +1,10 @@
 <?php
 
-namespace App\Http\Controllers\V1;
+namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ClientUser;
 use App\Models\ClientUserOrder;
-use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
