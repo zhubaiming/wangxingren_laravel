@@ -69,6 +69,8 @@ Route::prefix('v1')->group(function () {
         exit(0);
     });
 
+    // 获取行政区域
+    Route::get('/areaCascader', [Admin\SystemController::class, 'areaCascader']);
 
     Route::prefix('broadcasting')->group(function () {
         Route::post('/auth', [Admin\User\AuthController::class, 'authenticate']);

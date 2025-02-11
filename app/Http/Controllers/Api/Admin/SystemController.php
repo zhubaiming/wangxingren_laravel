@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\SysArea;
 use App\Models\System;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 
 class SystemController extends Controller
@@ -68,5 +70,27 @@ class SystemController extends Controller
         System::where('key', 'COMPANY_TRADE_TIMES')->update(['value' => json_encode(['time_start' => $time_start, 'time_end' => $time_end], JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)]);
 
         return $this->success();
+    }
+
+    public function areaCascader(Request $request)
+    {
+        $validated = arrHumpToLine($request->input());
+
+        $payload = [];
+        SysArea::select('name as label', 'code as value', 'type as depth')->where('status', true)->where('deleted', false)->where('type', $validated['type'])
+            ->when(isset($validated['parent_code']), function ($query) use ($validated) {
+                $query->where('parent_code', $validated['parent_code']);
+            })
+            ->orderBy('sort', 'asc')->chunk(200, function (Collection $areas) use (&$payload) {
+                // 对每批数据进行处理
+                $areas->each(function ($area) {
+                    $area->isLeaf = $area->depth === 4;
+                });
+
+                // 将处理后的数据存储到 $payload 数组中
+                $payload = array_merge($payload, $areas->toArray());
+            });
+
+        return $this->success(arrLineToHump($payload));
     }
 }
