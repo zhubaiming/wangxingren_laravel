@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\V1;
+namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PetBreedResource;
@@ -21,15 +21,13 @@ class PetBreedController extends Controller
         $validated = arrHumpToLine($request->input());
         $paginate = isset($validated['paginate']) ? isTrue($validated['paginate']) : true; // 是否分页
 
-        $query = SysPetBreed::orderBy('letter', 'asc')->orderBy('id', 'asc');
+        $payload = SysPetBreed::when(isset($validated['type']), function ($query) use ($validated) {
+            $query->where('type', $validated['type']);
+        })->orderBy('letter', 'asc')->orderBy('id', 'asc');
 
-        if (isset($validated['type'])) {
-            $query = $query->where('type', $validated['type']);
-        }
+        $payload = $paginate ? $payload->paginate($validated['page_size'] ?? $this->pageSize, ['*'], 'page', $validated['page'] ?? $this->page) : $payload->get();
 
-        $payload = $paginate ? $query->paginate($request->get('pageSize') ?? $this->pageSize, ['*'], 'page', $request->get('page') ?? $this->page) : $query->get();
-
-        return $this->returnIndex($payload, 'PetBreedResource', __FUNCTION__, $paginate);
+        return $this->success($this->returnIndex($payload, 'PetBreedResource', __FUNCTION__, $paginate));
     }
 
     /**

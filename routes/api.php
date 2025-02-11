@@ -118,7 +118,7 @@ Route::prefix('v1')->group(function () {
     Route::apiResource('/clientUser', Admin\ClientUser\UserController::class);
 
 
-    Route::get('/home', [V1\HomeController::class, 'info']);
+    Route::get('/home', [Admin\HomeController::class, 'info']);
     Route::apiResource('/order', Admin\ClientUser\OrderController::class);
     // 商品
     Route::prefix('product')->group(function () {
@@ -127,12 +127,12 @@ Route::prefix('v1')->group(function () {
         Route::delete('/trademark', [Admin\Product\TrademarkController::class, 'batchDestroy']);
 
         // 商品分类 - 已完成
-        Route::get('/category/{category_id}/pet_breed', [V1\PetBreedController::class, 'category_breed']);
+        Route::get('/category/{category_id}/pet_breed', [Admin\PetBreedController::class, 'category_breed']);
         Route::delete('/category', [V1\ProductCategoryController::class, 'batchDestroy']);
         Route::apiResource('/category', V1\ProductCategoryController::class);
 
         // spu - 已完成
-        Route::get('/spu/{spu_id}/pet_breed', [V1\PetBreedController::class, 'spu_breed']);
+        Route::get('/spu/{spu_id}/pet_breed', [Admin\PetBreedController::class, 'spu_breed']);
         Route::put('/spu', [Admin\Product\SpuController::class, 'batchUpdate']);
         Route::delete('/spu', [Admin\Product\SpuController::class, 'batchDestroy']);
         Route::apiResource('/spu', Admin\Product\SpuController::class);
@@ -143,7 +143,7 @@ Route::prefix('v1')->group(function () {
 
 
     Route::prefix('pet')->group(function () {
-        Route::apiResource('breed', V1\PetBreedController::class);
+        Route::apiResource('breed', Admin\PetBreedController::class);
     });
 
 
