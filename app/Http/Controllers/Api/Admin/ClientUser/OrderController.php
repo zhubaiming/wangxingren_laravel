@@ -39,7 +39,7 @@ class OrderController extends Controller
         })->when(isset($validated['address']), function ($query) use ($validated) {
             return $query->where('address_json->full_address', 'like', '%' . $validated['address'] . '%');
         })->when(isset($validated['reservation_date']), function ($query) use ($validated) {
-            return $query->where('reservation_date', Carbon::createFromTimeStamp($validated['reservation_date'] / 1000, Carbon::now()->timezone)->format('Y-m-d'));
+            return $query->where('reservation_date', Carbon::createFromTimeStamp($validated['reservation_date'] / 1000, config('app.timezone'))->format('Y-m-d'));
         })->orderBy('created_at', 'desc');
 
         $payload = $paginate ? $query->paginate($request->get('page_size') ?? $this->pageSize, ['*'], 'page', $request->get('page') ?? $this->page) : $query->get();
@@ -76,7 +76,7 @@ class OrderController extends Controller
             throw new BusinessException(ResponseEnum::HTTP_ERROR, '订单创建非法');
         }
 
-        $reservation_date = Carbon::createFromTimeStamp($reservation_date / 1000, Carbon::now()->timezone);
+        $reservation_date = Carbon::createFromTimeStamp($reservation_date / 1000, config('app.timezone'));
 
         $now = Carbon::now();
 

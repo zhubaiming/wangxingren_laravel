@@ -251,7 +251,7 @@ class MiniProgramPaymentService
                     'transaction_id' => $wechatpay_body_resource_array['transaction_id'],
                     'trade_type' => $wechatpay_body_resource_array['trade_type'],
                     'bank_type' => $wechatpay_body_resource_array['bank_type'],
-                    'pay_success_at' => Carbon::parse($wechatpay_body_resource_array['success_time']),
+                    'pay_success_at' => Carbon::parse($wechatpay_body_resource_array['success_time'], config('app.timezone')),
                     'currency' => $wechatpay_body_resource_array['amount']['currency'],
                     'payer_currency' => $wechatpay_body_resource_array['amount']['payer_currency'],
                     'status' => OrderStatusEnum::finishing
