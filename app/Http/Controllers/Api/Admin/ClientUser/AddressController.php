@@ -42,6 +42,7 @@ class AddressController extends Controller
             'district' => $area[3],
             'street' => null,
             'address' => $validated['address'],
+            'full_address' => $area[0] . $area[1] . $area[2] . $area[3] . $validated['address'],
             'is_default' => false,
             'person_name' => $validated['person_name'],
             'person_phone_prefix' => '86',
