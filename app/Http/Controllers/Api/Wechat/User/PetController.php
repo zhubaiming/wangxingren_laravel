@@ -27,7 +27,7 @@ class PetController extends Controller
             })
             ->orderBy('is_default', 'desc')->orderBy('created_at', 'asc');
 
-        $payload = $paginate ? $query->simplePaginate($request->get('pageSize') ?? $this->pageSize, ['*'], 'page', $request->get('page') ?? $this->page) : $query->get();
+        $payload = $paginate ? $query->simplePaginate($request->get('pageSize') ?? $this->pageSize, ['*'], 'page', $validated['page'] ?? $this->page) : $query->get();
 
         return $this->success($this->returnIndex($payload, 'Wechat\ClientUserPetResource', __FUNCTION__, $paginate));
     }

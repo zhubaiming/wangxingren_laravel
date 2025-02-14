@@ -21,7 +21,7 @@ class DictController extends Controller
             $query = $query->where('code', $validated['code']);
         }
 
-        $payload = $paginate ? $query->paginate($request->get('pageSize') ?? $this->pageSize, ['*'], 'page', $request->get('page') ?? $this->page) : $query->get();
+        $payload = $paginate ? $query->paginate($request->get('pageSize') ?? $this->pageSize, ['*'], 'page', $validated['page'] ?? $this->page) : $query->get();
 
         return $this->returnIndex($payload, 'DictResource', __FUNCTION__, $paginate);
     }

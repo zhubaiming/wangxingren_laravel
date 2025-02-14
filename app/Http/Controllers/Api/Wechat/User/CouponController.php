@@ -21,18 +21,20 @@ class CouponController extends Controller
 
         $status = isset($validated['status']) ? isTrue($validated['status']) : true; // 是否分页
 
-        $query = ClientUserCoupon::owner()
-            ->when(isset($validated['status']), function ($when) use ($status) {
-                $when->where('status', $status);
+        $payload = ClientUserCoupon::owner()
+            ->when(isset($validated['status']), function ($query) use ($status) {
+                $query->where('status', $status);
             })
-            ->when(isset($validated['is_get']), function ($when) use ($validated) {
-                $when->where('is_get', isTrue($validated['is_get']));
+            ->when(isset($validated['is_get']), function ($query) use ($validated) {
+                $query->where('is_get', isTrue($validated['is_get']));
             })
-            ->when(!$paginate, function ($when) {
-                $when->where('expiration_at', '>=', Carbon::now())->orWhereNull('expiration_at');
+            ->when(!$paginate, function ($query) {
+                $query->where(function ($q) {
+                    $q->where('expiration_at', '>=', Carbon::now())->orWhereNull('expiration_at');
+                });
             });
 
-        $payload = $paginate ? $query->simplePaginate($request->get('pageSize') ?? $this->pageSize, ['*'], 'page', $request->get('page') ?? $this->page) : $query->get();
+        $payload = $paginate ? $payload->simplePaginate($validated['page_size'] ?? $this->pageSize, ['*'], 'page', $validated['page'] ?? $this->page) : $payload->get();
 
         return $this->success($this->returnIndex($payload, 'Wechat\ClientUserCouponResource', __FUNCTION__, $paginate));
     }
@@ -53,6 +55,7 @@ class CouponController extends Controller
         foreach ($validated as $key => $value) {
             $coupon->{$key} = $value;
         }
+        $coupon->status = true;
 
         $coupon->save();
 

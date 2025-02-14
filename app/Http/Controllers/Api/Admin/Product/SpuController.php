@@ -37,7 +37,7 @@ class SpuController extends Controller
                 $order->where('status', OrderStatusEnum::finished);
             }])->orderBy('created_at', 'desc');
 
-        $payload = $paginate ? $query->paginate($request->get('page_size') ?? $this->pageSize, ['*'], 'page', $request->get('page') ?? $this->page) : $query->get();
+        $payload = $paginate ? $query->paginate($validated['page_size'] ?? $this->pageSize, ['*'], 'page', $validated['page'] ?? $this->page) : $query->get();
 
         return $this->returnIndex($payload, 'ProductSpuResource', __FUNCTION__, $paginate);
     }

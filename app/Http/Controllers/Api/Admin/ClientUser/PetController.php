@@ -27,7 +27,7 @@ class PetController extends Controller
             })
             ->orderBy('id', 'asc');
 
-        $payload = $paginate ? $query->paginate($request->get('pageSize') ?? $this->pageSize, ['*'], 'page', $request->get('page') ?? $this->page) : $query->get();
+        $payload = $paginate ? $query->paginate($request->get('pageSize') ?? $this->pageSize, ['*'], 'page', $validated['page'] ?? $this->page) : $query->get();
 
         return $this->returnIndex($payload, 'ClientUserPetResource', __FUNCTION__, $paginate);
     }

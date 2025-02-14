@@ -32,7 +32,7 @@ class UserController extends Controller
 //            })
             ->orderBy('id', 'asc');
 
-//        $payload = $paginate ? $payload->paginate($request->get('page_size') ?? $this->pageSize, ['*'], 'page', $request->get('page') ?? $this->page) : $query->get();
+//        $payload = $paginate ? $payload->paginate($validated['page_size'] ?? $this->pageSize, ['*'], 'page', $validated['page'] ?? $this->page) : $query->get();
         $payload = $paginate ? $payload->paginate($validated['page_size'] ?? $this->pageSize, ['*'], 'page', $validated['page'] ?? $this->page) : $payload->get();
 
         return $this->success($this->returnIndex($payload, 'ClientUserResource', __FUNCTION__, $paginate));

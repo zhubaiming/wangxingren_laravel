@@ -449,3 +449,60 @@ Route::get('/a2', function () {
         ]);
     }
 });
+
+Route::get('/a3', function () {
+    $pets = [];
+    $weightRange = [5, 8, 11, 16, 21, 26, 30, 40, 60, 80, 100];
+    $now = \Carbon\Carbon::now();
+
+    $cats = \App\Models\SysPetBreed::where('type', 1)->orderBy('letter', 'asc')->get();
+
+    foreach ($cats as $cat) {
+        $pets[] = [
+            'user_id' => 3,
+            'breed_id' => $cat->id,
+            'breed_title' => $cat->title,
+            'name' => '系统添加-' . $cat->title,
+            'breed_type' => $cat->type,
+            'gender' => 0,
+            'weight' => 500,
+            'color' => null,
+            'avatar' => null,
+            'remark' => null,
+            'is_sterilization' => false,
+            'is_default' => false,
+            'birth' => null,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ];
+    }
+
+    $dogs = $cats = \App\Models\SysPetBreed::where('type', 2)->orderBy('letter', 'asc')->get();
+
+    foreach ($dogs as $dog) {
+        foreach ($weightRange as $wight) {
+            $pets[] = [
+                'user_id' => 3,
+                'breed_id' => $dog->id,
+                'breed_title' => $dog->title,
+                'name' => '系统添加-' . $dog->title . '-(' . \App\Enums\PetWeightRangeEnum::from($wight)->name() . ')',
+                'breed_type' => $dog->type,
+                'gender' => 0,
+                'weight' => $wight * 100,
+                'color' => null,
+                'avatar' => null,
+                'remark' => null,
+                'is_sterilization' => false,
+                'is_default' => false,
+                'birth' => null,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+        }
+    }
+
+//    dd(\App\Models\ClientUserPet::where('user_id',3)->pluck('id')->toArray());
+    \App\Models\ClientUserPet::destroy(\App\Models\ClientUserPet::where('user_id', 3)->pluck('id')->toArray());
+    \App\Models\ClientUserPet::insert($pets);
+    dd('批量添加成功');
+});

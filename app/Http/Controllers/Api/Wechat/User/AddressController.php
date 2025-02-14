@@ -19,7 +19,7 @@ class AddressController extends Controller
 
         $query = ClientUserAddress::select('id', 'province', 'city', 'district', 'street', 'address', 'full_address', 'person_name', 'person_phone_prefix', 'person_phone_number', 'is_default')->owner()->orderBy('is_default', 'desc')->orderBy('created_at', 'asc');
 
-        $payload = $paginate ? $query->simplePaginate($request->get('pageSize') ?? $this->pageSize, ['*'], 'page', $request->get('page') ?? $this->page) : $query->get();
+        $payload = $paginate ? $query->simplePaginate($request->get('pageSize') ?? $this->pageSize, ['*'], 'page', $validated['page'] ?? $this->page) : $query->get();
 
         return $this->success($this->returnIndex($payload, 'Wechat\ClientUserAddressResource', __FUNCTION__, $paginate));
     }

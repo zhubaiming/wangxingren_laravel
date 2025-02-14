@@ -26,7 +26,7 @@ class ServiceCarController extends Controller
 //        if (!is_null($request->get('trademarkId'))) $conditions['trademark_id'] = $request->get('trademarkId');
 //        if (!is_null($request->get('saleable'))) $conditions['saleable'] = $request->get('saleable');
 
-        $payload = $this->service->getList($conditions, paginate: true, page: $request->get('page') ?? $this->page, per_page: $request->get('pageSize') ?? $this->pageSize);
+        $payload = $this->service->getList($conditions, paginate: true, page: $validated['page'] ?? $this->page, per_page: $request->get('pageSize') ?? $this->pageSize);
 
         return (new BaseCollection($payload))->additional(['resource' => 'App\Http\Resources\ServiceCarResource', 'format' => __FUNCTION__]);
     }

@@ -17,9 +17,9 @@ class AddressController extends Controller
         $validated = arrHumpToLine($request->input());
         $paginate = isset($validated['paginate']) ? isTrue($validated['paginate']) : true; // 是否分页
 
-        $query = ClientUserAddress::where('user_id', $validated['user_id'])->orderBy('id', 'asc');
+        $payload = ClientUserAddress::where('user_id', $validated['user_id'])->orderBy('id', 'asc');
 
-        $payload = $paginate ? $query->paginate($request->get('pageSize') ?? $this->pageSize, ['*'], 'page', $request->get('page') ?? $this->page) : $query->get();
+        $payload = $paginate ? $payload->paginate($validated['page_size'] ?? $this->pageSize, ['*'], 'page', $validated['page'] ?? $this->page) : $payload->get();
 
         return $this->returnIndex($payload, 'ClientUserAddressResource', __FUNCTION__, $paginate);
     }

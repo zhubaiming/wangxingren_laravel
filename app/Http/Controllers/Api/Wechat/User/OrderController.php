@@ -16,6 +16,7 @@ use App\Models\ProductSku;
 use App\Models\ProductSpu;
 use App\Services\Wechat\MiniProgramPaymentService;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -63,7 +64,7 @@ class OrderController extends Controller
 
         $payload = $query->orderBy('created_at', 'desc')
             ->with('trademark')
-            ->simplePaginate($request->get('pageSize') ?? $this->pageSize, ['*'], 'page', $request->get('page') ?? $this->page); // 必须分页
+            ->simplePaginate($request->get('pageSize') ?? $this->pageSize, ['*'], 'page', $validated['page'] ?? $this->page); // 必须分页
 
         return $this->success($this->returnIndex($payload, 'Wechat\ClientUserOrderResource', __FUNCTION__));
     }
@@ -86,12 +87,12 @@ class OrderController extends Controller
             'order_remark' => $order_remark,
         ] = $validated;
 
-        if (
-            0 === ProductSpu::where('id', $order_spu_info['id'])->count('id') ||
-            0 === ProductSku::where('spu_id', $order_spu_info['id'])->where('id', $order_sku_info['id'])->count('id') ||
-            0 === ClientUserAddress::where('id', $order_address_info['id'])->where('user_id', Auth::guard('wechat')->user()->id)->count('id') ||
-            0 === ClientUserPet::where('id', $order_pet_info['id'])->where('user_id', Auth::guard('wechat')->user()->id)->count('id')
-        ) {
+        try {
+            $spu = ProductSpu::findOrFail($order_spu_info['id']);
+            $sku = ProductSku::where('spu_id', $order_spu_info['id'])->findOrFail($order_sku_info['id']);
+            $address = ClientUserAddress::where('user_id', Auth::guard('wechat')->user()->id)->findOrFail($order_address_info['id']);
+            $pet = ClientUserPet::where('user_id', Auth::guard('wechat')->user()->id)->findOrFail($order_pet_info['id']);
+        } catch (ModelNotFoundException) {
             throw new BusinessException(ResponseEnum::HTTP_ERROR, '订单创建非法');
         }
 
@@ -103,20 +104,20 @@ class OrderController extends Controller
         $order = [
             'trade_no' => $out_trade_no,
             'status' => OrderStatusEnum::paying,
-            'total' => $order_sku_info['price'],
-            'payer_total' => $order_sku_info['price'],
+            'total' => $sku->price,
+            'payer_total' => $sku->price,
             'spu_id' => $order_spu_info['id'],
-            'spu_json' => $order_spu_info,
+            'spu_json' => $spu->toArray(),
             'category_id' => $order_spu_info['category_id'],
             'category_title' => $order_spu_info['category_id'],
             'trademark_id' => $order_spu_info['trademark_id'],
             'trademark_title' => $order_spu_info['trademark_id'],
             'sku_id' => $order_sku_info['id'],
-            'sku_json' => $order_sku_info,
+            'sku_json' => $sku->toArray(),
             'address_id' => $order_address_info['id'],
-            'address_json' => $order_address_info,
+            'address_json' => $address->toArray(),
             'pet_id' => $order_pet_info['id'],
-            'pet_json' => $order_pet_info,
+            'pet_json' => $pet->makeHidden('deleted_at')->toArray(),
             'remark' => $order_remark,
             'pay_channel' => $pay_channel,
             'reservation_date' => $order_time_info['reservation_date'],
@@ -127,20 +128,25 @@ class OrderController extends Controller
         ];
 
         if (!empty($order_coupon_info)) {
-            if (0 === ClientUserCoupon::where('id', $order_coupon_info['id'])->where('user_id', Auth::guard('wechat')->user()->id)->where('status', true)->count('id')) {
+            $coupon = ClientUserCoupon::where('user_id', Auth::guard('wechat')->user()->id)->where('status', true)->find($order_coupon_info['id']);
+
+            if (is_null($coupon)) {
                 throw new BusinessException(ResponseEnum::HTTP_ERROR, '订单创建非法');
             }
             $payer_total = intval(bcsub($order['total'], $order_coupon_info['amount'], 0));
             $order = array_merge($order, [
                 'coupon_id' => $order_coupon_info['id'],
-                'coupon_json' => json_encode($order_coupon_info, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
-                'payer_total' => $payer_total < 0 ? 0 : $payer_total,
-                'coupon_total' => $order_coupon_info['amount']
+                'coupon_json' => $coupon->toArray(),
+                'payer_total' => max($payer_total, 0),
+                'coupon_total' => $coupon->amount
             ]);
 
             if (0 === $order['payer_total']) {
                 $order['status'] = OrderStatusEnum::finishing;
             }
+
+            $coupon->status = false;
+            $coupon->save();
         }
 
         $payload = null;
