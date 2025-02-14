@@ -10,6 +10,7 @@ use App\Exceptions\BusinessException;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ClientUserOrderResource;
 use App\Models\ClientUserAddress;
+use App\Models\ClientUserCoupon;
 use App\Models\ClientUserOrder;
 use App\Models\ClientUserPet;
 use App\Models\ProductSku;
@@ -28,7 +29,7 @@ class OrderController extends Controller
         $validated = arrHumpToLine($request->input());
         $paginate = isset($validated['paginate']) ? isTrue($validated['paginate']) : true; // 是否分页
 
-        $query = ClientUserOrder::when(isset($validated['trade_no']), function ($query) use ($validated) {
+        $payload = ClientUserOrder::when(isset($validated['trade_no']), function ($query) use ($validated) {
             return $query->where('trade_no', $validated['trade_no']);
         })->when(isset($validated['pay_channel']), function ($query) use ($validated) {
             return $query->where('pay_channel', $validated['pay_channel']);
@@ -42,9 +43,9 @@ class OrderController extends Controller
             return $query->where('reservation_date', Carbon::createFromTimeStamp($validated['reservation_date'] / 1000, config('app.timezone'))->format('Y-m-d'));
         })->orderBy('created_at', 'desc');
 
-        $payload = $paginate ? $query->paginate($request->get('page_size') ?? $this->pageSize, ['*'], 'page', $request->get('page') ?? $this->page) : $query->get();
+        $payload = $paginate ? $payload->paginate($validated['page_size'] ?? $this->pageSize, ['*'], 'page', $validated['page'] ?? $this->page) : $payload->get();
 
-        return $this->returnIndex($payload, 'ClientUserOrderResource', __FUNCTION__, $paginate);
+        return $this->success($this->returnIndex($payload, 'ClientUserOrderResource', __FUNCTION__, $paginate));
     }
 
     /**
@@ -54,6 +55,8 @@ class OrderController extends Controller
     {
         $validated = arrHumpToLine($request->input());
 
+//        dd($validated);
+
         [
             'client_user_id' => $client_user_id,
             'trademark_id' => $trademark_id,
@@ -62,9 +65,11 @@ class OrderController extends Controller
             'sku_id' => $sku_id,
             'client_user_address_id' => $client_user_address_id,
             'client_user_pet_id' => $client_user_pet_id,
+            'client_user_coupon_id' => $client_user_coupon_code,
             'reservation_date' => $reservation_date,
             'reservation_time' => $reservation_time,
-            'pay_channel' => $pay_channel
+            'pay_channel' => $pay_channel,
+            'remark' => $remark,
         ] = $validated;
 
         try {
@@ -80,7 +85,7 @@ class OrderController extends Controller
 
         $now = Carbon::now();
 
-        if ($reservation_date->lt($now)) {
+        if ($reservation_date->lt(Carbon::today())) {
             throw new BusinessException(ResponseEnum::HTTP_ERROR, '预约日期非法');
         }
 
@@ -93,7 +98,7 @@ class OrderController extends Controller
 
         $out_trade_no .= generateLuhnCheckDigit($out_trade_no);
 
-        $pet->gender_conv = GenderEnum::from($this->gender)->name('animal');
+        $pet->gender_conv = GenderEnum::from($pet->gender)->name('animal');
 
         $order = [
             'trade_no' => $out_trade_no,
@@ -113,7 +118,7 @@ class OrderController extends Controller
             'address_json' => $address->toArray(),
             'pet_id' => $client_user_pet_id,
             'pet_json' => $pet->makeHidden('deleted_at')->toArray(),
-            'remark' => null,
+            'remark' => $remark,
             'pay_channel' => $pay_channel,
             'reservation_date' => $reservation_date->format('Y-m-d'),
             'reservation_car' => $reservation[0],
@@ -121,6 +126,23 @@ class OrderController extends Controller
             'reservation_time_end' => $reservation[2],
             'expected_at' => $now->addMinutes(15)->toDateTimeString()
         ];
+
+        if ($coupon = ClientUserCoupon::where('user_id', $client_user_id)->where('status', true)->where('code', $client_user_coupon_code)->where('is_get', true)->first()) {
+            $payer_total = intval(bcsub($sku->price, $coupon->amount, 0));
+            $order = array_merge($order, [
+                'coupon_id' => $coupon->id,
+                'coupon_json' => $coupon->toArray(),
+                'payer_total' => max($payer_total, 0),
+                'coupon_total' => $coupon->amount
+            ]);
+
+            if (0 === $order['payer_total']) {
+                $order['status'] = OrderStatusEnum::finishing;
+            }
+
+            $coupon->status = false;
+            $coupon->save();
+        }
 
         ClientUserOrder::create($order);
 
