@@ -22,6 +22,7 @@ class ClientUserOrder extends Model
             'sku_json' => 'array',
             'address_json' => 'array',
             'pet_json' => 'array',
+            'coupon_json' => 'array',
         ];
     }
 
