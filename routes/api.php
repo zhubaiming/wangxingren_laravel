@@ -114,6 +114,7 @@ Route::prefix('v1')->group(function () {
     Route::prefix('clientUser')->group(function () {
         Route::apiResource('/pet', Admin\ClientUser\PetController::class);
         Route::apiResource('/address', Admin\ClientUser\AddressController::class);
+        Route::apiResource('/coupon', Admin\ClientUser\CouponController::class);
     });
     Route::apiResource('/clientUser', Admin\ClientUser\UserController::class);
 
