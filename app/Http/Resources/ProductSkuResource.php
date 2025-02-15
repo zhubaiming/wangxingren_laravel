@@ -47,15 +47,13 @@ class ProductSkuResource extends CommentsResource
             false => match ($format) {
                 'index' => [
                     'id' => $this->id,
-//                    'category_id' => $this->category_id,
-//                    'title' => $this->title,
-//                    'sub_title' => $this->sub_title,
-//                    'min_price' => applyIntegerToFloatModifier($this->skus_min_price),
-//                    'sales_volume' => '缺销量',
-//                    'cover' => $this->images[0] ?? null,
-////                    'is_new' => !(43200 > intval(bcsub(strtotime(date('Y-m-d H:i:s')), strtotime($this->created_at), 0))),
-//                    'is_new' => !Carbon::parse($this->created_at)->lt(Carbon::now()->subHours(12)),
-//                    'order_count' => $this->order_count
+                    'spu_id' => $this->spu_id,
+                    'breed_id' => $this->breed_id,
+                    'weight_min' => $this->weight_min,
+                    'weight_max' => $this->weight_max,
+                    'duration' => $this->duration,
+                    'stock' => $this->stock,
+                    'price' => applyIntegerToFloatModifier($this->price)
                 ],
                 'show' => [
                     'id' => $this->id,

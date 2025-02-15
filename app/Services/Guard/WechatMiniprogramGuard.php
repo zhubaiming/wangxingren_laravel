@@ -187,8 +187,8 @@ class WechatMiniprogramGuard implements StatefulGuard
             'openid' => $user->info->openid,
             'is_register' => $user->info['is_register'],
             // 下次 token 刷新时间: 当前时间 + refreshInterval 秒数
-            'last_token_expire_time' => Carbon::now()->addSeconds(10)->timestamp
-//            'last_token_expire_time' => Carbon::now()->addSeconds($this->refreshInterval)->timestamp
+//            'last_token_expire_time' => Carbon::now()->addSeconds(10)->timestamp
+            'last_token_expire_time' => Carbon::now()->addSeconds($this->refreshInterval)->timestamp
         ];
 
         $json = json_encode($data, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
