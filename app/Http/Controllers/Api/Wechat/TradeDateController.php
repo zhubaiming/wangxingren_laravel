@@ -9,6 +9,7 @@ use App\Models\ClientUserOrder;
 use App\Models\ServiceCar;
 use App\Models\System;
 use App\Models\SysTradeDate;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class TradeDateController extends Controller
@@ -17,7 +18,10 @@ class TradeDateController extends Controller
     {
         $validated = arrHumpToLine($request->input());
 
-        if (0 === SysTradeDate::where('date', $validated['date'])->where('status', true)->count('id')) {
+        $now = Carbon::now();
+        $date = Carbon::parse($validated['date'], config('app.timezone'));
+
+        if (0 === SysTradeDate::where('date', $date->format('Y-m-d'))->where('status', true)->count('id')) {
             throw new BusinessException(ResponseEnum::HTTP_ERROR, '所选日期未营业，请重新选择');
         }
 
@@ -27,7 +31,7 @@ class TradeDateController extends Controller
         $cars = ServiceCar::select('id', 'title')->where('status', true)->orderBy('created_at', 'asc')->get();
 
         if (0 !== count($cars)) {
-            $orders = ClientUserOrder::select('reservation_car', 'reservation_time_start', 'reservation_time_end')->whereIn('status', [2, 3, 4])->where('reservation_date', $validated['date'])->get()->toArray();
+            $orders = ClientUserOrder::select('reservation_car', 'reservation_time_start', 'reservation_time_end')->whereIn('status', [2, 3, 4])->where('reservation_date', $date->format('Y-m-d'))->get()->toArray();
 
             // 使用 array_reduce 实现分组
             $removeRanges = array_reduce($orders, function ($carry, $item) {
@@ -38,6 +42,7 @@ class TradeDateController extends Controller
         }
 
         foreach ($cars as $car) {
+            $removeRanges[$car->id][] = ['reservation_car' => $car->id, 'reservation_time_start' => $fullRange['time_start'], 'reservation_time_end' => $now->hour . ':' . $now->minute];
             $times[$car->id] = ['car_number' => $car->id, 'car_title' => $car->title, 'times' => $this->getAvailableTimeRanges($fullRange, $removeRanges[$car->id] ?? [], $validated['duration'])];
         }
 
