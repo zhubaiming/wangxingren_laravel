@@ -21,6 +21,10 @@ class TradeDateController extends Controller
         $now = Carbon::now();
         $date = Carbon::parse($validated['date'], config('app.timezone'));
 
+        if ($date->lt(Carbon::today())) {
+            throw new BusinessException(ResponseEnum::HTTP_ERROR, '不可选择今天之前的日期');
+        }
+
         if (0 === SysTradeDate::where('date', $date->format('Y-m-d'))->where('status', true)->count('id')) {
             throw new BusinessException(ResponseEnum::HTTP_ERROR, '所选日期未营业，请重新选择');
         }
