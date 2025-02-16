@@ -35,7 +35,7 @@ class SpuController extends Controller
             })
             ->withCount(['order' => function ($query) {
                 $query->whereIn('status', OrderStatusEnum::getFinishStatuses());
-            }])->orderBy('created_at', 'desc');
+            }])->orderBy('category_id', 'asc')->orderBy('sort', 'asc')->orderBy('created_at', 'desc');
 
         $payload = $paginate ? $payload->paginate($validated['page_size'] ?? $this->pageSize, ['*'], 'page', $validated['page'] ?? $this->page) : $payload->get();
 

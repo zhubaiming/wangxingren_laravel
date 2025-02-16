@@ -24,7 +24,8 @@ class ProductSpuResource extends CommentsResource
                     'can_use_pet' => $this->id,
                     'sales_count' => $this->order_count,
                     'saleable_color' => $this->transformSaleableColor($this->saleable),
-                    'saleable' => $this->saleable
+                    'saleable' => $this->saleable,
+                    'sort' => $this->sort
                 ],
                 'show' => [
                     'id' => $this->id,
