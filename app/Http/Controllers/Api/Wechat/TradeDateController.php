@@ -18,7 +18,7 @@ class TradeDateController extends Controller
     {
         $validated = arrHumpToLine($request->input());
 
-        $now = Carbon::now();
+        $now = Carbon::now()->addMinutes(30);
         $date = Carbon::parse($validated['date'], config('app.timezone'));
 
         if ($date->lt(Carbon::today())) {
