@@ -31,6 +31,7 @@ class ClientUserOrderResource extends CommentsResource
                     'reservation_time_start' => $this->reservation_time_start,
                     'reservation_time_end' => $this->reservation_time_end,
                     'pay_channel' => PayChannelEnum::from($this->pay_channel)->name(),
+                    'can_cancel' => $this->status === OrderStatusEnum::paying->value || ($this->status === OrderStatusEnum::finishing->value && in_array($this->pay_channel, PayChannelEnum::getOffLineChannels())),
                 ],
                 'show' => [
                     'id' => $this->id,

@@ -55,8 +55,6 @@ class OrderController extends Controller
     {
         $validated = arrHumpToLine($request->input());
 
-//        dd($validated);
-
         [
             'client_user_id' => $client_user_id,
             'trademark_id' => $trademark_id,
