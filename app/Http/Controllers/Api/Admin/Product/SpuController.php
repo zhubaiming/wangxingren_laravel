@@ -20,24 +20,24 @@ class SpuController extends Controller
 
         $title = isset($validated['title']) ? (is_null($validated['title']) || $validated['title'] === 'null' ? null : $validated['title']) : null;
 
-        $query = ProductSpu::with(['category', 'trademark'])
-            ->when(isset($validated['trademark_id']), function ($trademark) use ($validated) {
-                return $trademark->where('trademark_id', $validated['trademark_id']);
+        $payload = ProductSpu::with(['category', 'trademark'])
+            ->when(isset($validated['trademark_id']), function ($query) use ($validated) {
+                return $query->where('trademark_id', $validated['trademark_id']);
             })
-            ->when(isset($validated['category_id']), function ($category) use ($validated) {
-                return $category->where('category_id', $validated['category_id']);
+            ->when(isset($validated['category_id']), function ($query) use ($validated) {
+                return $query->where('category_id', $validated['category_id']);
             })
-            ->when(isset($validated['saleable']), function ($saleable) use ($validated) {
-                return $saleable->where('saleable', isTrue($validated['saleable']));
+            ->when(isset($validated['saleable']), function ($query) use ($validated) {
+                return $query->where('saleable', isTrue($validated['saleable']));
             })
-            ->when(!is_null($title), function ($title) use ($validated) {
-                return $title->where('title', 'like', '%' . $validated['title'] . '%');
+            ->when(!is_null($title), function ($query) use ($validated) {
+                return $query->where('title', 'like', '%' . $validated['title'] . '%');
             })
-            ->withCount(['order' => function ($order) {
-                $order->where('status', OrderStatusEnum::finished);
+            ->withCount(['order' => function ($query) {
+                $query->whereIn('status', OrderStatusEnum::getFinishStatuses());
             }])->orderBy('created_at', 'desc');
 
-        $payload = $paginate ? $query->paginate($validated['page_size'] ?? $this->pageSize, ['*'], 'page', $validated['page'] ?? $this->page) : $query->get();
+        $payload = $paginate ? $payload->paginate($validated['page_size'] ?? $this->pageSize, ['*'], 'page', $validated['page'] ?? $this->page) : $payload->get();
 
         return $this->returnIndex($payload, 'ProductSpuResource', __FUNCTION__, $paginate);
     }
@@ -59,7 +59,8 @@ class SpuController extends Controller
             'description' => $validated['description'] ?? null,
             'images' => $validated['images'] ?? [],
             'packing_list' => $validated['packing_list'] ?? null,
-            'after_service' => $validated['after_service'] ?? null
+            'after_service' => $validated['after_service'] ?? null,
+            'sort' => $validated['sort'] ?? 999
         ];
 
         $spu = ProductSpu::create($spuData);

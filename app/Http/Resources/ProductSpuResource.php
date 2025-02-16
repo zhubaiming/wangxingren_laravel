@@ -39,6 +39,7 @@ class ProductSpuResource extends CommentsResource
                     'images' => $this->images,
                     'packing_list' => $this->packing_list,
                     'after_service' => $this->after_service,
+                    'sort' => $this->sort,
                     'pet_breeds' => $this->spu_breed->pluck('id'),
                 ],
                 'default' => []

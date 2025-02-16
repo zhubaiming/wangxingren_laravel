@@ -50,8 +50,9 @@ class SpuController extends Controller
             })
             ->withMin('skus', 'price')
             ->withCount(['order' => function ($query) {
-                $query->where('status', OrderStatusEnum::finished);
+                $query->whereIn('status', OrderStatusEnum::getFinishStatuses());
             }])
+            ->orderBy('sort', 'asc')
             ->orderBy('created_at', 'desc')
             ->simplePaginate($this->pageSize, ['*'], 'page', $validated['page'] ?? $this->page);
 
