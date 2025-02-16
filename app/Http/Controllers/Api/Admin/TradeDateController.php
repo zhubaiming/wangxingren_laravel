@@ -46,7 +46,9 @@ class TradeDateController extends Controller
         }
 
         foreach ($cars as $car) {
-            $removeRanges[$car->id][] = ['reservation_car' => $car->id, 'reservation_time_start' => $fullRange['time_start'], 'reservation_time_end' => $now->hour . ':' . $now->minute];
+            if ($date->eq(Carbon::today())) {
+                $removeRanges[$car->id][] = ['reservation_car' => $car->id, 'reservation_time_start' => $fullRange['time_start'], 'reservation_time_end' => $now->hour . ':' . $now->minute];
+            }
             $times[$car->id] = ['car_number' => $car->id, 'car_title' => $car->title, 'times' => $this->getAvailableTimeRanges($fullRange, $removeRanges[$car->id] ?? [], $validated['duration'])];
         }
 
