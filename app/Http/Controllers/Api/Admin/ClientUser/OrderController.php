@@ -34,7 +34,7 @@ class OrderController extends Controller
         })->when(isset($validated['pay_channel']), function ($query) use ($validated) {
             return $query->where('pay_channel', $validated['pay_channel']);
         })->when(isset($validated['order_status']), function ($query) use ($validated) {
-            return $query->where('status', $validated['order_status']);
+            return $query->whereIn('status', explode(',', $validated['order_status']));
         })->when(isset($validated['person_phone_number']), function ($query) use ($validated) {
             return $query->where('address_json->person_phone_number', 'like', '%' . $validated['pay_channel'] . '%');
         })->when(isset($validated['address']), function ($query) use ($validated) {

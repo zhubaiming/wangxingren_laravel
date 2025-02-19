@@ -5,6 +5,7 @@ namespace App\Http\Resources;
 use App\Enums\OrderStatusEnum;
 use App\Enums\PayChannelEnum;
 use App\Enums\PetWeightRangeEnum;
+use Carbon\Carbon;
 
 class ClientUserOrderResource extends CommentsResource
 {
@@ -65,8 +66,19 @@ class ClientUserOrderResource extends CommentsResource
                 'default' => []
             },
             false => [
-                'value' => $this->id,
-                'label' => $this->title
+//                'name' => $this->trade_no . '\n' . $this->spu_json['title'] . '\n支付金额: ¥' . applyIntegerToFloatModifier($this->payer_total) . '\n' . '\n预约时间: ' . $this->reservation_time_start . '\n服务地址: ' . $this->address_json['full_address'],
+                'name' => [
+                    'trade_no' => $this->trade_no,
+                    'spu_title' => $this->spu_json['title'],
+                    'reservation_time' => $this->reservation_time_start,
+                    'address' => $this->address_json['province'] . $this->address_json['city'] . $this->address_json['district'] . $this->address_json['street']
+                ],
+                'value' => [
+                    $this->reservation_car,
+                    Carbon::parse($this->reservation_date . ' ' . $this->reservation_time_start)->valueOf(),
+                    Carbon::parse($this->reservation_date . ' ' . $this->reservation_time_end)->valueOf(),
+                    Carbon::parse($this->reservation_date . ' ' . $this->reservation_time_start)->diffInMilliseconds(Carbon::parse($this->reservation_date . ' ' . $this->reservation_time_end)),
+                ]
             ]
         };
 

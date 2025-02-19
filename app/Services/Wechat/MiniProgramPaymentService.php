@@ -5,6 +5,7 @@ namespace App\Services\Wechat;
 use App\Enums\OrderStatusEnum;
 use App\Events\NewPayedOrderEvent;
 use App\Models\ClientUserOrder;
+use App\Models\SysTradeDate;
 use Carbon\Carbon;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Http\Request;
@@ -229,8 +230,8 @@ class MiniProgramPaymentService
             $this->platformPublicKeyInstance
         );
 
-        $log = 'timeOffsetStatus: ' . ($timeOffsetStatus ? 'true' : 'false') . ', verifiedStatus: ' . ($verifiedStatus ? 'true' : 'false');
-        Log::channel('test')->info($log);
+//        $log = 'timeOffsetStatus: ' . ($timeOffsetStatus ? 'true' : 'false') . ', verifiedStatus: ' . ($verifiedStatus ? 'true' : 'false');
+//        Log::channel('test')->info($log);
 
         if ($timeOffsetStatus && $verifiedStatus) {
             // 使用PHP7的数据解构语法，从Array中解构并赋值变量
@@ -241,7 +242,7 @@ class MiniProgramPaymentService
             ]] = json_decode($wechatpay_body, true);
             // 加密文本消息解密
             $wechatpay_body_resource = AesGcm::decrypt($ciphertext, config('wechat.merchant.api_v3_key'), $nonce, $aad);
-            Log::channel('test')->info($wechatpay_body_resource);
+//            Log::channel('test')->info($wechatpay_body_resource);
             // 把解密后的文本转换为PHP Array数组
             $wechatpay_body_resource_array = json_decode($wechatpay_body_resource, true);
 
