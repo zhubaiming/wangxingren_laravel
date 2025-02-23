@@ -202,12 +202,12 @@ class OrderController extends Controller
 
     public function allStatus()
     {
-        $payload = array_map(function ($status) {
+        $payload = array_merge(array_map(function ($status) {
             return [
                 'label' => $status->name(),
                 'value' => $status->value
             ];
-        }, OrderStatusEnum::cases());
+        }, OrderStatusEnum::cases()));
 
         return $this->success($payload);
     }
@@ -218,12 +218,12 @@ class OrderController extends Controller
             return 'unknown' !== $channel->name;
         });
 
-        $payload = array_map(function ($channel) {
+        $payload = array_merge(array_map(function ($channel) {
             return [
                 'label' => $channel->name(),
                 'value' => $channel->value
             ];
-        }, $payload);
+        }, $payload));
 
         return $this->success($payload);
     }
