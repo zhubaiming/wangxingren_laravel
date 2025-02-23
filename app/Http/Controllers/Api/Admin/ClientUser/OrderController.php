@@ -195,4 +195,16 @@ class OrderController extends Controller
     {
         //
     }
+
+    public function allStatus()
+    {
+        $payload = array_map(function ($status) {
+            return [
+                'label' => $status->name(),
+                'value' => $status->value
+            ];
+        }, OrderStatusEnum::cases());
+
+        return $this->success($payload);
+    }
 }
