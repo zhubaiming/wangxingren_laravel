@@ -121,6 +121,7 @@ Route::prefix('v1')->group(function () {
 
     Route::get('/home', [Admin\HomeController::class, 'info']);
     Route::get('/order/allStatus', [Admin\ClientUser\OrderController::class, 'allStatus']);
+    Route::get('/order/allPayChannels', [Admin\ClientUser\OrderController::class, 'allPayChannels']);
     Route::apiResource('/order', Admin\ClientUser\OrderController::class);
     // 商品
     Route::prefix('product')->group(function () {

@@ -68,7 +68,11 @@ class OrderController extends Controller
             'reservation_time' => $reservation_time,
             'pay_channel' => $pay_channel,
             'remark' => $remark,
+            'payer_total' => $payer_total,
+            'duration' => $duration,
         ] = $validated;
+
+        $price = applyFloatToIntegerModifier($validated['payer_total']);
 
         try {
             $spu = ProductSpu::where('trademark_id', $trademark_id)->where('category_id', $category_id)->findOrFail($spu_id);
@@ -102,8 +106,8 @@ class OrderController extends Controller
             'trade_no' => $out_trade_no,
             'user_id' => $client_user_id,
             'status' => in_array($pay_channel, PayChannelEnum::getOffLineChannels()) ? OrderStatusEnum::finishing : OrderStatusEnum::paying,
-            'total' => $sku->price,
-            'payer_total' => $sku->price,
+            'total' => $sku->price === $price ? $sku->price : $price,
+            'payer_total' => $sku->price === $price ? $sku->price : $price,
             'spu_id' => $spu_id,
             'spu_json' => $spu->toArray(),
             'category_id' => $category_id,
@@ -126,7 +130,7 @@ class OrderController extends Controller
         ];
 
         if ($coupon = ClientUserCoupon::where('user_id', $client_user_id)->where('status', true)->where('code', $client_user_coupon_code)->where('is_get', true)->first()) {
-            $payer_total = intval(bcsub($sku->price, $coupon->amount, 0));
+            $payer_total = intval(bcsub($sku->price === $price ? $sku->price : $price, $coupon->amount, 0));
             $order = array_merge($order, [
                 'coupon_id' => $coupon->id,
                 'coupon_json' => $coupon->toArray(),
@@ -204,6 +208,22 @@ class OrderController extends Controller
                 'value' => $status->value
             ];
         }, OrderStatusEnum::cases());
+
+        return $this->success($payload);
+    }
+
+    public function allPayChannels()
+    {
+        $payload = array_filter(PayChannelEnum::cases(), function ($channel) {
+            return 'unknown' !== $channel->name;
+        });
+
+        $payload = array_map(function ($channel) {
+            return [
+                'label' => $channel->name(),
+                'value' => $channel->value
+            ];
+        }, $payload);
 
         return $this->success($payload);
     }
