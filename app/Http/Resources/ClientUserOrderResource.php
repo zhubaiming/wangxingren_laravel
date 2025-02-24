@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Enums\GenderEnum;
 use App\Enums\OrderStatusEnum;
 use App\Enums\PayChannelEnum;
 use App\Enums\PetWeightRangeEnum;
@@ -58,9 +59,9 @@ class ClientUserOrderResource extends CommentsResource
                     'address_person_phone' => '+' . $this->address_json['person_phone_prefix'] . ' ' . $this->address_json['person_phone_number'],
                     'pet_name' => $this->pet_json['name'],
                     'pet_breed_title' => $this->pet_json['breed_title'],
-                    'pet_gender' => $this->pet_json['gender_conv'],
+                    'pet_gender' => GenderEnum::from($this->pet_json['gender'])->name('animal'),
                     'pet_weight' => PetWeightRangeEnum::from($this->pet_json['weight'])->name(),
-                    'pet_age' => calculateAge($this->pet_json['birth'], 'Y-m'),
+                    'pet_age' => is_null($this->pet_json['birth']) ? 0 : calculateAge($this->pet_json['birth'], 'Y-m'),
                     'pet_is_sterilization' => $this->pet_json['is_sterilization'] ? '是' : '否'
                 ],
                 'default' => []
