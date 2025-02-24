@@ -18,6 +18,7 @@ class ClientUserOrder extends Model
     protected function casts(): array
     {
         return [
+            'is_revise_price' => 'boolean',
             'spu_json' => 'array',
             'sku_json' => 'array',
             'address_json' => 'array',
