@@ -124,6 +124,7 @@ class OrderController extends Controller
             'reservation_car' => $order_time_info['car_number'],
             'reservation_time_start' => $order_time_info['start_time'],
             'reservation_time_end' => $order_time_info['end_time'],
+            'is_revise_price' => false,
             'expected_at' => $now->addMinutes(15)->toDateTimeString()
         ];
 

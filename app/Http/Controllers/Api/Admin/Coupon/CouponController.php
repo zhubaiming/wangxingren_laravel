@@ -44,7 +44,7 @@ class CouponController extends Controller
                 'description' => $validated['description'] ?: null,
                 'expiration_at' => isset($validated['expiration_at']) ? Carbon::createFromTimestamp(intval($validated['expiration_at'] / 1000), config('app.timezone')) : null,
                 'related_action' => $validated['related_action'] ?: null,
-                'updated_by' => $request->input('user')
+                'updated_by' => $validated['user']
             ];
 
             $coupon = Coupon::create($data);

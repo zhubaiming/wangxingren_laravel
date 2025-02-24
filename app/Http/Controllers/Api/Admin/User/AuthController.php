@@ -75,7 +75,7 @@ class AuthController extends Controller
 
         $user->password = Hash::make('Dcba@1234');
         $user->is_default_passwd = true;
-        $user->updated_by = $request->input('user');
+        $user->updated_by = $validated['user'];
 
         $user->save();
 
@@ -158,7 +158,7 @@ class AuthController extends Controller
                 'uid' => strval(Str::ulid()),
                 'password' => Hash::make('Dcba@1234'),
                 'is_default_passwd' => true,
-                'updated_by' => $request->input('user')
+                'updated_by' => $validated['user']
             ]));
         }
 
@@ -185,7 +185,7 @@ class AuthController extends Controller
             unset($validated['user']);
 
             User::where('id', $id)->update(array_merge($validated, [
-                'updated_by' => $request->input('user')
+                'updated_by' => $validated['user']
             ]));
         }
 
@@ -198,7 +198,7 @@ class AuthController extends Controller
 
         User::whereIn('id', $validated['ids'])->update([
             'status' => $validated['status'],
-            'updated_by' => $request->input('user')
+            'updated_by' => $validated['user']
         ]);
 
         return $this->success();
