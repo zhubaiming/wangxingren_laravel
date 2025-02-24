@@ -126,6 +126,7 @@ class OrderController extends Controller
             'reservation_car' => $reservation[0],
             'reservation_time_start' => $reservation[1],
             'reservation_time_end' => $reservation[2],
+            'is_revise_price' => false,
             'expected_at' => $now->addMinutes(15)->toDateTimeString()
         ];
 
@@ -144,6 +145,11 @@ class OrderController extends Controller
 
             $coupon->status = false;
             $coupon->save();
+        }
+
+        if ($sku->price !== $price) {
+            $order['is_revise_price'] = true;
+            $order['revise_by'] = $validated['user'];
         }
 
         ClientUserOrder::create($order);
@@ -167,29 +173,35 @@ class OrderController extends Controller
     public function update(Request $request, string $id)
     {
         $validated = arrHumpToLine($request->input());
-
+        
         $order = ClientUserOrder::where('trade_no', $id)->firstOrFail();
 
-        $orderState = null;
-        foreach (OrderStatusEnum::cases() as $case) {
-            // 输出枚举值名称和对应的中文名称
+        if (isset($validated['state'])) { // 修改订单状态
+            $orderState = null;
+            foreach (OrderStatusEnum::cases() as $case) {
+                // 输出枚举值名称和对应的中文名称
 //            echo "枚举值: {$case->name}, 数值: {$case->value}, 中文名称: {$case->name()}" . PHP_EOL;
-            if ($case->name === $validated['state']) {
-                $orderState = $case->value;
+                if ($case->name === $validated['state']) {
+                    $orderState = $case->value;
+                }
             }
+
+            if (is_null($orderState)) {
+                throw new BusinessException(ResponseEnum::HTTP_ERROR, '当前操作无效');
+            }
+
+            $order->status = $orderState;
         }
 
-        if (is_null($orderState)) {
-            throw new BusinessException(ResponseEnum::HTTP_ERROR, '当前操作无效');
+        if (isset($validated['payer_total'])) { // 修改订单价格
+            $order->payer_total = applyFloatToIntegerModifier($validated['payer_total']);
+            $order->is_revise_price = true;
+            $order->revise_by = $validated['user'];
         }
-
-        $order->status = $orderState;
-
-        $payload = null;
 
         $order->save();
 
-        return $this->success($payload);
+        return $this->success();
     }
 
     /**
