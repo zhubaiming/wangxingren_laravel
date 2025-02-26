@@ -36,7 +36,7 @@ class OrderController extends Controller
         })->when(isset($validated['order_status']), function ($query) use ($validated) {
             return $query->whereIn('status', explode(',', $validated['order_status']));
         })->when(isset($validated['person_phone_number']), function ($query) use ($validated) {
-            return $query->where('address_json->person_phone_number', 'like', '%' . $validated['pay_channel'] . '%');
+            return $query->where('address_json->person_phone_number', 'like', '%' . $validated['person_phone_number'] . '%');
         })->when(isset($validated['address']), function ($query) use ($validated) {
             return $query->where('address_json->full_address', 'like', '%' . $validated['address'] . '%');
         })->when(isset($validated['reservation_date']), function ($query) use ($validated) {
@@ -173,7 +173,7 @@ class OrderController extends Controller
     public function update(Request $request, string $id)
     {
         $validated = arrHumpToLine($request->input());
-        
+
         $order = ClientUserOrder::where('trade_no', $id)->firstOrFail();
 
         if (isset($validated['state'])) { // 修改订单状态
