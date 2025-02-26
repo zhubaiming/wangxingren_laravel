@@ -29,7 +29,8 @@ class WechatAuthMiddleware
 //            ->header('Access-Control-Allow-Credentials', 'true');  // 是否允许携带凭证（如 cookies）
 
         $response = $next($request)
-            ->header('Access-Control-Allow-Origin', '*');  // 允许跨域的源
+            ->header('Access-Control-Allow-Origin', '*')  // 允许跨域的源
+            ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');  // 允许的请求方法
 
         if ($request->bearerToken() !== Auth::guard('wechat')->getToken()) {
             $response->header('Refresh', Auth::guard('wechat')->getToken());
