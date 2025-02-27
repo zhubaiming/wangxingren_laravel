@@ -97,7 +97,7 @@ Route::prefix('v1')->group(function () {
     Route::get('/tradeDate/reservation', [Admin\TradeDateController::class, 'getReservation']);
     Route::apiResource('/tradeDate', Admin\TradeDateController::class)->only(['index', 'update']);
     // 营业车辆 - 已完成
-    Route::apiResource('/serviceCar', V1\ServiceCarController::class)->only(['index']);
+    Route::apiResource('/serviceCar', Admin\Schedule\CarController::class)->only(['index']);
 
     // 系统相关设置 - 完成
     Route::prefix('system')->group(function () {
