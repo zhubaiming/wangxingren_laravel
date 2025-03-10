@@ -66,11 +66,10 @@ return [
 
         'redis' => [
             'driver' => 'redis',
-//            'connection' => env('REDIS_QUEUE_CONNECTION', 'default'),
-            'connection' => 'queue',                              // 对应config/database.php中redis的default配置
-            'queue' => env('REDIS_QUEUE', 'default'), // 默认队列名称
+            'connection' => env('QUEUE_REDIS_CONFIG', 'default'), // 对应config/database.php中redis的default配置
+            'queue' => env('QUEUE_NAME', env('APP_ENV')),                    // 默认队列名称
 //            'expire'=>'', // 队列任务过期时间（秒）
-            'retry_after' => (int)env('REDIS_QUEUE_RETRY_AFTER', 90),
+            'retry_after' => (int)env('QUEUE_RETRY_AFTER', 90),
             'block_for' => null,
             'after_commit' => false,
         ],

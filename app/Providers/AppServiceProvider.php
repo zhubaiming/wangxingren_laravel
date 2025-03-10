@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Services\Guard\AdminGuard;
 use App\Services\Guard\WechatMiniprogramGuard;
+use App\Services\Pay\PayManager;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Events\QueryExecuted;
@@ -22,7 +23,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton('pay', function () {
+            return new PayManager();
+        });
     }
 
     /**

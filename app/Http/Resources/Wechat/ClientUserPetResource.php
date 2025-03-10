@@ -55,6 +55,7 @@ class ClientUserPetResource extends CommentsResource
             false => [
                 'id' => $this->id,
                 'breed_id' => $this->breed_id,
+                'breed_title' => $this->breed_title,
                 'name' => $this->name,
                 'breed_type_conv' => strtoupper(PetCategoryEnum::from($this->breed_type)->name),
                 'gender_conv' => GenderEnum::from($this->gender)->name('animal'),

@@ -148,6 +148,22 @@ function isTrue($value, $return_null = false)
     return ($boolval === null && $return_null ? false : $boolval);
 }
 
+/**
+ * 数字反转，在 大数计算 时更高效
+ * @param int $num
+ * @return float|int
+ */
+function reverseNumberMath(int $num)
+{
+    $rev = 0;
+    while ($num > 0) {
+        $rev = $rev * 10 + $num % 10; // 取最后一位，并移动到新数字的末尾
+        $num = intval($num / 10); // 去掉原数字的最后一位
+    }
+
+    return $rev;
+}
+
 // --------------------------------------------------  以下为测试专用函数  --------------------------------------------------
 /**
  * 随机生成8:00-22:00中的几个时间段

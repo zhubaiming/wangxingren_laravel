@@ -14,11 +14,15 @@ use App\Models\ClientUserOrderRefund;
 use App\Models\ClientUserPet;
 use App\Models\ProductSku;
 use App\Models\ProductSpu;
+use App\Services\OrderService;
+use App\Services\TradeDateService;
 use App\Services\Wechat\MiniProgramPaymentService;
 use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redis;
 
 class OrderController extends Controller
 {
@@ -72,10 +76,11 @@ class OrderController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, TradeDateService $dateService, OrderService $orderService)
     {
         $validated = arrHumpToLine($request->input());
 
+        // 解构数据
         [
             'order_spu_info' => $order_spu_info,
             'order_sku_info' => $order_sku_info,
@@ -87,75 +92,80 @@ class OrderController extends Controller
             'order_remark' => $order_remark,
         ] = $validated;
 
+        $user_id = Auth::guard('wechat')->user()->id;
+
+        // 再次校验预约时间是否被锁定
+        $reservation_date = CarbonImmutable::createFromTimeStamp(intval($order_time_info['reservation_date']['time'] / 1000), config('app.timezone'))->format('Y-m-d');
+
+        if (0 !== Redis::connection('order')->exists('reservation_date_' . $reservation_date . '-' . $order_time_info['car_number'])) {
+            if (!$dateService->checkTimeRange(
+                ['start' => $order_time_info['start_time'], 'end' => $order_time_info['end_time']],
+                array_map(fn($item) => json_decode($item, true), Redis::connection('order')->lrange('reservation_date_' . $reservation_date . '-' . $order_time_info['car_number'], 0, -1))
+            )) {
+                throw new BusinessException(ResponseEnum::HTTP_ERROR, '当前时间已被抢先预约，请重新选择时间');
+            }
+        }
+
+        // 校验数据合法性
         try {
             $spu = ProductSpu::findOrFail($order_spu_info['id']);
             $sku = ProductSku::where('spu_id', $order_spu_info['id'])->findOrFail($order_sku_info['id']);
-            $address = ClientUserAddress::where('user_id', Auth::guard('wechat')->user()->id)->findOrFail($order_address_info['id']);
-            $pet = ClientUserPet::where('user_id', Auth::guard('wechat')->user()->id)->findOrFail($order_pet_info['id']);
+            $address = ClientUserAddress::where('user_id', $user_id)->findOrFail($order_address_info['id']);
+            $pet = ClientUserPet::where('user_id', $user_id)->findOrFail($order_pet_info['id']);
+
+            $payer_total = $sku->price;
+
+            if (!empty($order_coupon_info)) {
+                $coupon = ClientUserCoupon::where('user_id', $user_id)
+                    ->where('status', true)
+                    ->where('code', $order_coupon_info['code'] ?? null)
+                    ->where('min_total', '<=', $sku->price)
+                    ->findOrFail($order_coupon_info['id']);
+
+                $payer_total = intval(bcsub($sku->price, $coupon->amount, 0));
+
+                $coupon->status = false;
+                $coupon->save();
+            }
         } catch (ModelNotFoundException) {
             throw new BusinessException(ResponseEnum::HTTP_ERROR, '订单创建非法');
         }
 
-        $now = Carbon::now();
-        $out_trade_no = date('Ymd') . $now->getPreciseTimestamp(3) . str_pad(1, 4, '0', STR_PAD_LEFT) . random_int(100000, 999999);
+        // 入库前锁定时间
+        Redis::connection('order')->rpush('reservation_date_' . $reservation_date . '-' . $order_time_info['car_number'], json_encode([
+            'start' => $order_time_info['start_time'],
+            'end' => $order_time_info['end_time'],
+        ], JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
 
-        $out_trade_no .= generateLuhnCheckDigit($out_trade_no);
-
-        $order = [
-            'trade_no' => $out_trade_no,
-            'status' => OrderStatusEnum::paying,
+        $out_trade_no = $orderService->create([
             'total' => $sku->price,
-            'payer_total' => $sku->price,
+            'payer_total' => max($payer_total, 0),
             'spu_id' => $order_spu_info['id'],
             'spu_json' => $spu->toArray(),
-            'category_id' => $order_spu_info['category_id'],
-            'category_title' => $order_spu_info['category_id'],
-            'trademark_id' => $order_spu_info['trademark_id'],
-            'trademark_title' => $order_spu_info['trademark_id'],
-            'sku_id' => $order_sku_info['id'],
+            'category_id' => $spu->category_id,
+            'category_title' => $spu->category_id,
+            'trademark_id' => $spu->trademark_id,
+            'trademark_title' => $spu->trademark_id,
+            'sku_id' => $sku->id,
             'sku_json' => $sku->toArray(),
-            'address_id' => $order_address_info['id'],
+            'address_id' => $address->id,
             'address_json' => $address->toArray(),
-            'pet_id' => $order_pet_info['id'],
-            'pet_json' => $pet->makeHidden('deleted_at')->toArray(),
+            'pet_id' => $pet->id,
+            'pet_json' => $pet->toArray(),
             'remark' => $order_remark,
-            'pay_channel' => $pay_channel,
-            'reservation_date' => $order_time_info['reservation_date'],
+            'pay_channel' => 1,
+            'pay_method' => 1,
+            'reservation_date' => $reservation_date,
             'reservation_car' => $order_time_info['car_number'],
             'reservation_time_start' => $order_time_info['start_time'],
             'reservation_time_end' => $order_time_info['end_time'],
             'is_revise_price' => false,
-            'expected_at' => $now->addMinutes(15)->toDateTimeString()
-        ];
+            'coupon_id' => isset($coupon) ? $coupon->id : null,
+            'coupon_json' => isset($coupon) ? $coupon->toArray() : null,
+            'coupon_total' => isset($coupon) ? $coupon->amount : null
+        ], $user_id, max($payer_total, 0) === 0 ? OrderStatusEnum::finishing : OrderStatusEnum::paying);
 
-        if (!empty($order_coupon_info)) {
-            $coupon = ClientUserCoupon::where('user_id', Auth::guard('wechat')->user()->id)->where('status', true)->find($order_coupon_info['id']);
-
-            if (is_null($coupon)) {
-                throw new BusinessException(ResponseEnum::HTTP_ERROR, '订单创建非法');
-            }
-            $payer_total = intval(bcsub($order['total'], $order_coupon_info['amount'], 0));
-            $order = array_merge($order, [
-                'coupon_id' => $order_coupon_info['id'],
-                'coupon_json' => $coupon->toArray(),
-                'payer_total' => max($payer_total, 0),
-                'coupon_total' => $coupon->amount
-            ]);
-
-            if (0 === $order['payer_total']) {
-                $order['status'] = OrderStatusEnum::finishing;
-            }
-
-            $coupon->status = false;
-            $coupon->save();
-        }
-
-        $payload = null;
-        if (0 !== $order['payer_total']) {
-            $payload = $this->payTransactionsWithChannel($pay_channel, $out_trade_no, $order['payer_total'], Auth::guard('wechat')->user()->info->openid, "移动洗护服务-{$order_pet_info['name']}({$order_pet_info['weight']}KG)");
-        }
-
-        Auth::guard('wechat')->user()->orders()->create($order);
+        $payload = max($payer_total, 0) === 0 ? null : $this->payTransactionsWithChannel('1', $out_trade_no, $payer_total, Auth::guard('wechat')->user()->info->openid, "移动洗护服务-{$order_pet_info['name']}({$order_pet_info['weight']}KG)");
 
         return $this->success($payload);
     }

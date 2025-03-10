@@ -506,3 +506,23 @@ Route::get('/a3', function () {
     \App\Models\ClientUserPet::insert($pets);
     dd('批量添加成功');
 });
+
+Route::get('/a4', function () {
+//    dd((new \Zhenzhu\MessagePusher\MessagePush())->channel('wecom')->delivery('groupBot'));
+
+//    (new \Zhenzhu\MessagePusher\MessagePush())->channel('wecom')->delivery('groupBot')->sendMarkdown('e893bd4e-9e6f-445c-8f6e-dcb9f99f6d4c','a1');
+//    (new \Zhenzhu\MessagePusher\MessagePush())->channel('wecom')->delivery('groupBot')->sendMarkdown('e893bd4e-9e6f-445c-8f6e-dcb9f99f6d4c', "今日日期: xxxx年xx月xx日\n今日实时预约订单: **<font color=\"warning\">xxxxxx笔</font>**，请相关同事注意。\n\n\n# 新增预约订单\n\n\n> 订单编号: <font color=\"comment\">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</font>\n预约时间: **<font color=\"info\">xx:xx</font>**\n服务地址: <font color=\"warning\">中国辽宁省沈阳市沈河区文艺路130号汪星人·宠物店(总店)</font>\n宠物品种: <font color=\"comment\">xxxx</font>\n宠物体重范围: <font color=\"comment\">xxx-xxx公斤</font>\n宠物信息: 呼啦啦(弟弟-5岁)");
+    (new \Zhenzhu\MessagePusher\MessagePush())->channel('wecom')->delivery('groupBot')->sendText('e893bd4e-9e6f-445c-8f6e-dcb9f99f6d4c', '测试文本');
+});
+
+Route::get('/a5', function () {
+    \App\Jobs\TestJob::dispatch(now())->onQueue(config('app.env'))->delay(now()->addSeconds(900));
+
+    dd(1);
+});
+
+Route::get('/a6', function () {
+    $server = new \App\Services\OrderService();
+
+//    dd($server->generateOrderNo(111, null));
+});

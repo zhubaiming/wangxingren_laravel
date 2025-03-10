@@ -47,6 +47,18 @@ class AuthController extends Controller
         $payload = Auth::guard('wechat')->attempt($credentials);
 
         if (!empty($payload['info'])) {
+            $authDefault = Auth::guard('wechat')->user()->with([
+                'pets' => function ($query) {
+                    $query->where('is_default', true);
+                },
+                'addresses' => function ($query) {
+                    $query->where('is_default', true);
+                }
+            ])->first();
+
+            $payload['info']->pets = $authDefault->pets;
+            $payload['info']->addresses = $authDefault->addresses;
+
             $payload['info'] = (new ClientUserResource($payload['info']))->additional(['format' => __FUNCTION__]);
         }
 
@@ -97,6 +109,15 @@ class AuthController extends Controller
 
     public function info()
     {
+        $payload = Auth::guard('wechat')->user()->with([
+            'pets' => function ($query) {
+                $query->where('is_default', true);
+            },
+            'addresses' => function ($query) {
+                $query->where('is_default', true);
+            }
+        ])->first();
 
+        return $this->success($this->returnIndex($payload, 'Wechat/UserInfoResource', __FUNCTION__, false));
     }
 }

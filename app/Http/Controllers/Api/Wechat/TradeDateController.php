@@ -20,7 +20,8 @@ class TradeDateController extends Controller
         $validated = arrHumpToLine($request->input());
 
         $now = Carbon::now()->addMinutes(30);
-        $date = Carbon::parse($validated['date'], config('app.timezone'));
+        $date = Carbon::createFromTimeStamp($validated['date'] / 1000, config('app.timezone'));
+//        $date = Carbon::parse($validated['date'], config('app.timezone'));
 
         if ($date->lt(Carbon::today())) {
             throw new BusinessException(ResponseEnum::HTTP_ERROR, '不可选择今天之前的日期');
@@ -53,7 +54,7 @@ class TradeDateController extends Controller
             $times[$car->id] = ['car_number' => $car->id, 'car_title' => $car->title, 'times' => $this->getAvailableTimeRanges($fullRange, $removeRanges[$car->id] ?? [], $validated['duration'])];
         }
 
-        return $this->success(arrLineToHump($times));
+        return $this->success(arrLineToHump(array_values($times)));
     }
 
     // 时间转分钟工具函数

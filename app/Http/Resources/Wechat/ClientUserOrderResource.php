@@ -18,7 +18,7 @@ class ClientUserOrderResource extends CommentsResource
                 'index' => [
                     'id' => $this->id,
                     'no' => $this->trade_no,
-                    'cover' => $this->spu_json['images'][0]['url'],
+                    'cover' => $this->spu_json['images'][0]['url'] ?? null,
                     'trademark_title' => $this->trademark->title,
                     'product_title' => $this->spu_json['title'],
                     'payer_total' => applyIntegerToFloatModifier($this->payer_total),
@@ -32,7 +32,7 @@ class ClientUserOrderResource extends CommentsResource
                     'id' => $this->id,
                     'order_status' => $this->status,
                     'no' => $this->trade_no,
-                    'cover' => $this->spu_json['images'][0]['url'],
+                    'cover' => $this->spu_json['images'][0]['url'] ?? null,
                     'trademark_title' => $this->trademark->title,
                     'product_title' => $this->spu_json['title'],
                     'product_sub_title' => $this->spu_json['sub_title'],
