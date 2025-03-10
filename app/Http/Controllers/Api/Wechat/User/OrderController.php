@@ -162,7 +162,8 @@ class OrderController extends Controller
             'is_revise_price' => false,
             'coupon_id' => isset($coupon) ? $coupon->id : null,
             'coupon_json' => isset($coupon) ? $coupon->toArray() : null,
-            'coupon_total' => isset($coupon) ? $coupon->amount : null
+            'coupon_total' => isset($coupon) ? $coupon->amount : null,
+            'pay_success_at' => max($payer_total, 0) === 0 ? CarbonImmutable::now(config('app.timezone')) : null,
         ], $user_id, max($payer_total, 0) === 0 ? OrderStatusEnum::finishing : OrderStatusEnum::paying);
 
         $payload = max($payer_total, 0) === 0 ? null : $this->payTransactionsWithChannel('1', $out_trade_no, $payer_total, Auth::guard('wechat')->user()->info->openid, "移动洗护服务-{$order_pet_info['name']}({$order_pet_info['weight']}KG)");
