@@ -22,6 +22,8 @@ class ClientUserResource extends CommentsResource
                     'created_at' => $this->created_at,
                     'status_color' => $this->transformStatus($this->is_freeze ? 1 : ($this->deleted_at ? 2 : 0)),
                     'status' => $this->is_freeze ? '冻结' : ($this->deleted_at ? '已注销' : '正常'),
+                    'pets_count' => $this->pets_count ?? 0,
+                    'addresss_count' => $this->addresses_count ?? 0,
                 ],
                 'show' => [
                     'id' => $this->id,
