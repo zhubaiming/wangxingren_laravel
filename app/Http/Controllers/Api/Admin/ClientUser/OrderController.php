@@ -16,6 +16,7 @@ use App\Models\ClientUserPet;
 use App\Models\ProductSku;
 use App\Models\ProductSpu;
 use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 
@@ -127,7 +128,8 @@ class OrderController extends Controller
             'reservation_time_start' => $reservation[1],
             'reservation_time_end' => $reservation[2],
             'is_revise_price' => false,
-            'expected_at' => $now->addMinutes(15)->toDateTimeString()
+            'expected_at' => $now->addMinutes(15)->toDateTimeString(),
+            'pay_success_at' => in_array($pay_channel, PayChannelEnum::getOffLineChannels()) ? CarbonImmutable::now(config('app.timezone')) : null
         ];
 
         if ($coupon = ClientUserCoupon::where('user_id', $client_user_id)->where('status', true)->where('code', $client_user_coupon_code)->where('is_get', true)->first()) {
@@ -141,6 +143,7 @@ class OrderController extends Controller
 
             if (0 === $order['payer_total']) {
                 $order['status'] = OrderStatusEnum::finishing;
+                $order['pay_success_at'] = CarbonImmutable::now(config('app.timezone'));
             }
 
             $coupon->status = false;

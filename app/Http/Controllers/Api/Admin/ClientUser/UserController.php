@@ -20,13 +20,11 @@ class UserController extends Controller
 
         $payload = ClientUser::when(isset($validated['name']), function ($query) use ($validated) {
             $query->where('name', 'like', '%' . $validated['name'] . '%');
-        })
-            ->when(isset($validated['phone']), function ($query) use ($validated) {
-                $query->where('phone_number', 'like', '%' . $validated['phone'] . '%');
-            })
-            ->when(isset($validated['gender']), function ($query) use ($validated) {
-                $query->where('gender', $validated['gender']);
-            })
+        })->when(isset($validated['phone']), function ($query) use ($validated) {
+            $query->where('phone_number', 'like', '%' . $validated['phone'] . '%');
+        })->when(isset($validated['gender']), function ($query) use ($validated) {
+            $query->where('gender', $validated['gender']);
+        })->withCount('pets')->withCount('addresses')
 //            ->when(isset($validated['status']), function ($query) use ($validated) {
 //                $query->where('gender', $validated['gender']);
 //            })
