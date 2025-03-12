@@ -125,6 +125,7 @@ class SpuController extends Controller
         }
 
         $spu->saleable = $validated['saleable'];
+        $spu->sort = $validated['sort'] ?? $spu->sort;
 
         $spu->save();
 
