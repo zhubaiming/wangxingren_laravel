@@ -87,7 +87,7 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
-//        $exceptions->render(function (Exception $e) {
+//        $exceptions->render(function (Exceptions $e) {
 //            $message = $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine();
 //            $state = -2;
 //            $code = 500;

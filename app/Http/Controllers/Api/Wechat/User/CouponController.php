@@ -36,7 +36,7 @@ class CouponController extends Controller
 
         $payload = $paginate ? $payload->simplePaginate($validated['page_size'] ?? $this->pageSize, ['*'], 'page', $validated['page'] ?? $this->page) : $payload->get();
 
-        return $this->success($this->returnIndex($payload, 'Wechat\ClientUserCouponResource', __FUNCTION__, $paginate));
+        return $this->success($this->returnIndex($payload, 'WechatService\ClientUserCouponResource', __FUNCTION__, $paginate));
     }
 
     /**

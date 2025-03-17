@@ -202,6 +202,18 @@ class OrderController extends Controller
             $order->revise_by = $validated['user'];
         }
 
+        $order->remark = $validated['remark'] ?? $order->remark;
+
+        if (isset($validated['reservation_time'])) {
+            $reservation = explode('-', $validated['reservation_time']);
+            if (count($reservation) !== 3) {
+                throw new BusinessException(ResponseEnum::HTTP_ERROR, '预约时间格式非法');
+            }
+            $order->reservation_car = $reservation[0];
+            $order->reservation_time_start = $reservation[1];
+            $order->reservation_time_end = $reservation[2];
+        }
+
         $order->save();
 
         return $this->success();

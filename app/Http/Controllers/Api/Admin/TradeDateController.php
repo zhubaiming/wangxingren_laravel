@@ -18,11 +18,12 @@ class TradeDateController extends Controller
     public function getReservation(Request $request)
     {
         $validated = arrHumpToLine($request->input());
+        $force = isset($validated['_force']) ? isTrue($validated['_force']) : false;
 
         $now = Carbon::now()->addMinutes(30);
-        $date = Carbon::createFromTimestamp($validated['date'] / 1000, config('app.timezone'));
+        $date = Carbon::parse(strlen($validated['date']) === 13 ? $validated['date'] / 1000 : $validated['date'], config('app.timezone'));
 
-        if ($date->lt(Carbon::today())) {
+        if (!$force && $date->lt(Carbon::today())) {
             throw new BusinessException(ResponseEnum::HTTP_ERROR, '不可选择今天之前的日期');
         }
 

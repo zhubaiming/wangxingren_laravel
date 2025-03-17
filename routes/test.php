@@ -522,7 +522,33 @@ Route::get('/a5', function () {
 });
 
 Route::get('/a6', function () {
-    $server = new \App\Services\OrderService();
+//    $server = new \App\Services\OrderService();
 
 //    dd($server->generateOrderNo(111, null));
+
+//    \Zhubaiming\Pay\Pay::wechat()->mini();
+
+//    $a = Zhubaiming\Pay\Pay::class;
+//    $b = Zhubaiming\Pay\Pay::class;
+//    $c = new Zhubaiming\Pay\Pay();
+
+//    dd(spl_object_id((object)$a) === spl_object_id((object)$a));
+
+    $a = [
+        'limit' => 5,
+        'offset' => 10,
+        'authorized_data' => ['business_type' => 'FAVOR_STOCK', 'stock_id' => '2433405'],
+        'partner' => ['type' => 'APPID', 'appid' => 'wx4e1916a585d1f4e9', 'merchant_id' => '2480029552']
+    ];
+
+//    $s = [];
+    $s = array_map(function ($key, $value) {
+        if (is_array($value)) {
+            return rawurlencode($key . '=' . json_encode($value));
+        } else {
+            return $key . '=' . $value;
+        }
+    }, array_keys($a), $a);
+
+    dd($s, implode('&', $s));
 });

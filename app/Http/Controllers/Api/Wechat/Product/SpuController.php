@@ -56,7 +56,7 @@ class SpuController extends Controller
             ->orderBy('created_at', 'desc')
             ->simplePaginate($this->pageSize, ['*'], 'page', $validated['page'] ?? $this->page);
 
-        return $this->success($this->returnIndex($payload, 'Wechat\ProductSpuResource', __FUNCTION__, true));
+        return $this->success($this->returnIndex($payload, 'WechatService\ProductSpuResource', __FUNCTION__, true));
     }
 
     /**

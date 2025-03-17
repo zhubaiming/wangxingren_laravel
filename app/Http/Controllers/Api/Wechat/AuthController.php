@@ -118,6 +118,6 @@ class AuthController extends Controller
             }
         ])->first();
 
-        return $this->success($this->returnIndex($payload, 'Wechat/UserInfoResource', __FUNCTION__, false));
+        return $this->success($this->returnIndex($payload, 'WechatService/UserInfoResource', __FUNCTION__, false));
     }
 }

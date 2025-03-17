@@ -36,7 +36,8 @@
   "autoload-dev": {
     "psr-4": {
       "Tests\\": "tests/",
-      "Zhenzhu\\MessagePusher\\": "packages/zhenzhu/message-pusher/src/"
+      "Zhenzhu\\MessagePusher\\": "packages/zhenzhu/message-pusher/src/",
+      "Zhubaiming\\Pay\\": "packages/Zhubaiming/pay/src/"
     }
   },
   "scripts": {

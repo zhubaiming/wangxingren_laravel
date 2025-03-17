@@ -70,7 +70,7 @@ class OrderController extends Controller
             ->with('trademark')
             ->simplePaginate($request->get('pageSize') ?? $this->pageSize, ['*'], 'page', $validated['page'] ?? $this->page); // 必须分页
 
-        return $this->success($this->returnIndex($payload, 'Wechat\ClientUserOrderResource', __FUNCTION__));
+        return $this->success($this->returnIndex($payload, 'WechatService\ClientUserOrderResource', __FUNCTION__));
     }
 
     /**
