@@ -452,7 +452,8 @@ Route::get('/a2', function () {
 
 Route::get('/a3', function () {
     $pets = [];
-    $weightRange = [5, 8, 11, 16, 21, 26, 30, 40, 60, 80, 100];
+//    $weightRange = [5, 8, 11, 16, 21, 26, 30, 40, 60, 80, 100];
+    $weightRange = [500, 750, 1000, 1500, 2000, 2500, 3000, 4000, 5000, 6000, 8000, 10000];
     $now = \Carbon\Carbon::now();
 
     $cats = \App\Models\SysPetBreed::where('type', 1)->orderBy('letter', 'asc')->get();
@@ -488,7 +489,7 @@ Route::get('/a3', function () {
                 'name' => '系统添加-' . $dog->title . '-(' . \App\Enums\PetWeightRangeEnum::from($wight)->name() . ')',
                 'breed_type' => $dog->type,
                 'gender' => 0,
-                'weight' => $wight * 100,
+                'weight' => $wight,
                 'color' => null,
                 'avatar' => null,
                 'remark' => null,

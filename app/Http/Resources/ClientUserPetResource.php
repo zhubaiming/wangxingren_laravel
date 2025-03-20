@@ -25,7 +25,7 @@ class ClientUserPetResource extends CommentsResource
             },
             false => [
                 'value' => $this->id,
-                'label' => $this->name . '(' . $this->breed_title . '、' . PetCategoryEnum::from($this->breed_type)->name() . '、' . GenderEnum::from($this->gender)->name('animal') . ')' . '【' . PetWeightRangeEnum::from($this->weight)->name() . '】'
+                'label' => $this->name . '(' . $this->breed_title . '、' . PetCategoryEnum::from($this->breed_type)->name() . '、' . GenderEnum::from($this->gender)->name('animal') . ')' . '【' . PetWeightRangeEnum::from(applyFloatToIntegerModifier($this->weight))->name() . '】'
             ]
         };
     }

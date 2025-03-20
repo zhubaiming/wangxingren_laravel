@@ -62,7 +62,7 @@ class ClientUserOrderResource extends CommentsResource
                     'pet_name' => $this->pet_json['name'],
                     'pet_breed_title' => $this->pet_json['breed_title'],
                     'pet_gender' => GenderEnum::from($this->pet_json['gender'])->name('animal'),
-                    'pet_weight' => PetWeightRangeEnum::from($this->pet_json['weight'])->name(),
+                    'pet_weight' => PetWeightRangeEnum::from(applyFloatToIntegerModifier($this->pet_json['weight']))->name(),
                     'pet_age' => is_null($this->pet_json['birth']) ? 0 : calculateAge($this->pet_json['birth'], 'Y-m'),
                     'pet_is_sterilization' => $this->pet_json['is_sterilization'] ? '是' : '否'
                 ],

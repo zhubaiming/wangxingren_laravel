@@ -26,7 +26,7 @@ class ClientUserPetResource extends CommentsResource
                     'gender' => $this->gender,
                     'gender_conv' => GenderEnum::from($this->gender)->name('animal'),
                     'weight' => $this->weight,
-                    'weight_conv' => PetWeightRangeEnum::from($this->weight)->name(),
+                    'weight_conv' => PetWeightRangeEnum::from(applyFloatToIntegerModifier($this->weight))->name(),
                     'birth' => $this->birth,
                     'age' => calculateAge($this->birth, 'Y-m'),
                     'color' => $this->color,
@@ -60,7 +60,7 @@ class ClientUserPetResource extends CommentsResource
                 'breed_type_conv' => strtoupper(PetCategoryEnum::from($this->breed_type)->name),
                 'gender_conv' => GenderEnum::from($this->gender)->name('animal'),
                 'weight' => $this->weight,
-                'weight_conv' => PetWeightRangeEnum::from($this->weight)->name(),
+                'weight_conv' => PetWeightRangeEnum::from(applyFloatToIntegerModifier($this->weight))->name(),
                 'age' => calculateAge($this->birth, 'Y-m'),
                 'avatar' => $this->avatar,
             ]
