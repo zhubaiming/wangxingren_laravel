@@ -21,7 +21,7 @@ class AddressController extends Controller
 
         $payload = $paginate ? $query->simplePaginate($request->get('pageSize') ?? $this->pageSize, ['*'], 'page', $validated['page'] ?? $this->page) : $query->get();
 
-        return $this->success($this->returnIndex($payload, 'WechatService\ClientUserAddressResource', __FUNCTION__, $paginate));
+        return $this->success($this->returnIndex($payload, 'Wechat\ClientUserAddressResource', __FUNCTION__, $paginate));
     }
 
     /**
