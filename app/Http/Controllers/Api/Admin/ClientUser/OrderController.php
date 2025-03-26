@@ -15,10 +15,13 @@ use App\Models\ClientUserOrder;
 use App\Models\ClientUserPet;
 use App\Models\ProductSku;
 use App\Models\ProductSpu;
+use App\Services\OrderService;
+use App\Services\TradeDateService;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Redis;
 
 class OrderController extends Controller
 {
@@ -52,7 +55,7 @@ class OrderController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, TradeDateService $dateService, OrderService $orderService)
     {
         $validated = arrHumpToLine($request->input());
 
@@ -73,18 +76,24 @@ class OrderController extends Controller
             'duration' => $duration,
         ] = $validated;
 
-        $price = applyFloatToIntegerModifier($validated['payer_total']);
+        $payer_total = applyFloatToIntegerModifier($payer_total);
+        $reservation_date = CarbonImmutable::createFromTimeStamp($reservation_date / 1000, config('app.timezone'));
 
         try {
             $spu = ProductSpu::where('trademark_id', $trademark_id)->where('category_id', $category_id)->findOrFail($spu_id);
             $sku = ProductSku::where('spu_id', $spu_id)->findOrFail($sku_id);
             $address = ClientUserAddress::where('user_id', $client_user_id)->findOrFail($client_user_address_id);
             $pet = ClientUserPet::where('user_id', $client_user_id)->findOrFail($client_user_pet_id);
+
+            if (!is_null($coupon = ClientUserCoupon::where('user_id', $client_user_id)->where('status', true)->where('code', $client_user_coupon_code)->where('is_get', true)->first())) {
+                $payer_total = intval(bcsub($sku->price === $payer_total ? $sku->price : $payer_total, $coupon->amount, 0));
+
+                $coupon->status = false;
+                $coupon->save();
+            }
         } catch (ModelNotFoundException) {
             throw new BusinessException(ResponseEnum::HTTP_ERROR, '订单创建非法');
         }
-
-        $reservation_date = Carbon::createFromTimeStamp($reservation_date / 1000, config('app.timezone'));
 
         $now = Carbon::now();
 
@@ -97,18 +106,26 @@ class OrderController extends Controller
             throw new BusinessException(ResponseEnum::HTTP_ERROR, '预约时间格式非法');
         }
 
-        $out_trade_no = date('Ymd') . $now->getPreciseTimestamp(3) . str_pad(1, 4, '0', STR_PAD_LEFT) . random_int(100000, 999999);
+        // 再次校验预约时间是否被锁定
+        if (0 !== Redis::connection('order')->exists('reservation_date_' . $reservation_date->format('Y-m-d') . '-' . $reservation[0])) {
+            if (!$dateService->checkTimeRange(
+                ['start' => $reservation[1], 'end' => $reservation[2]],
+                array_map(fn($item) => json_decode($item, true), Redis::connection('order')->lrange('reservation_date_' . $reservation_date . '-' . $reservation[0], 0, -1))
+            )) {
+                throw new BusinessException(ResponseEnum::HTTP_ERROR, '当前时间已被抢先预约，请重新选择时间');
+            }
+        }
 
-        $out_trade_no .= generateLuhnCheckDigit($out_trade_no);
+        // 入库前锁定时间
+        Redis::connection('order')->rpush('reservation_date_' . $reservation_date . '-' . $reservation[0], json_encode([
+            'reservation_time_start' => $reservation[1],
+            'reservation_time_end' => $reservation[2],
+        ], JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
 
         $pet->gender_conv = GenderEnum::from($pet->gender)->name('animal');
-
-        $order = [
-            'trade_no' => $out_trade_no,
-            'user_id' => $client_user_id,
-            'status' => in_array($pay_channel, PayChannelEnum::getOffLineChannels()) ? OrderStatusEnum::finishing : OrderStatusEnum::paying,
-            'total' => $sku->price === $price ? $sku->price : $price,
-            'payer_total' => $sku->price === $price ? $sku->price : $price,
+        $out_trade_no = $orderService->create([
+            'total' => $sku->price === $payer_total ? $sku->price : $payer_total,
+            'payer_total' => max($payer_total, 0),
             'spu_id' => $spu_id,
             'spu_json' => $spu->toArray(),
             'category_id' => $category_id,
@@ -123,39 +140,18 @@ class OrderController extends Controller
             'pet_json' => $pet->makeHidden('deleted_at')->toArray(),
             'remark' => $remark,
             'pay_channel' => $pay_channel,
+            'pay_method' => null,
             'reservation_date' => $reservation_date->format('Y-m-d'),
             'reservation_car' => $reservation[0],
             'reservation_time_start' => $reservation[1],
             'reservation_time_end' => $reservation[2],
-            'is_revise_price' => false,
-            'expected_at' => $now->addMinutes(15)->toDateTimeString(),
-            'pay_success_at' => in_array($pay_channel, PayChannelEnum::getOffLineChannels()) ? CarbonImmutable::now(config('app.timezone')) : null
-        ];
-
-        if ($coupon = ClientUserCoupon::where('user_id', $client_user_id)->where('status', true)->where('code', $client_user_coupon_code)->where('is_get', true)->first()) {
-            $payer_total = intval(bcsub($sku->price === $price ? $sku->price : $price, $coupon->amount, 0));
-            $order = array_merge($order, [
-                'coupon_id' => $coupon->id,
-                'coupon_json' => $coupon->toArray(),
-                'payer_total' => max($payer_total, 0),
-                'coupon_total' => $coupon->amount
-            ]);
-
-            if (0 === $order['payer_total']) {
-                $order['status'] = OrderStatusEnum::finishing;
-                $order['pay_success_at'] = CarbonImmutable::now(config('app.timezone'));
-            }
-
-            $coupon->status = false;
-            $coupon->save();
-        }
-
-        if ($sku->price !== $price) {
-            $order['is_revise_price'] = true;
-            $order['revise_by'] = $validated['user'];
-        }
-
-        ClientUserOrder::create($order);
+            'is_revise_price' => !($sku->price === $payer_total),
+            'revise_by' => $sku->price === $payer_total ? null : $validated['user'],
+            'coupon_id' => !is_null($coupon) ? $coupon->id : null,
+            'coupon_json' => !is_null($coupon) ? $coupon->toArray() : null,
+            'coupon_total' => !is_null($coupon) ? $coupon->amount : 0,
+            'pay_success_at' => max($payer_total, 0) === 0 || in_array($pay_channel, PayChannelEnum::getOffLineChannels()) ? CarbonImmutable::now(config('app.timezone')) : null,
+        ], $client_user_id, max($payer_total, 0) === 0 || in_array($pay_channel, PayChannelEnum::getOffLineChannels()) ? OrderStatusEnum::finishing : OrderStatusEnum::paying);
 
         return $this->success();
     }

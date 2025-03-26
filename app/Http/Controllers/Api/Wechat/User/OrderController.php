@@ -133,8 +133,8 @@ class OrderController extends Controller
 
         // 入库前锁定时间
         Redis::connection('order')->rpush('reservation_date_' . $reservation_date . '-' . $order_time_info['car_number'], json_encode([
-            'start' => $order_time_info['start_time'],
-            'end' => $order_time_info['end_time'],
+            'reservation_time_start' => $order_time_info['start_time'],
+            'reservation_time_end' => $order_time_info['end_time'],
         ], JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
 
         $out_trade_no = $orderService->create([
@@ -162,7 +162,7 @@ class OrderController extends Controller
             'is_revise_price' => false,
             'coupon_id' => isset($coupon) ? $coupon->id : null,
             'coupon_json' => isset($coupon) ? $coupon->toArray() : null,
-            'coupon_total' => isset($coupon) ? $coupon->amount : null,
+            'coupon_total' => isset($coupon) ? $coupon->amount : 0,
             'pay_success_at' => max($payer_total, 0) === 0 ? CarbonImmutable::now(config('app.timezone')) : null,
         ], $user_id, max($payer_total, 0) === 0 ? OrderStatusEnum::finishing : OrderStatusEnum::paying);
 
