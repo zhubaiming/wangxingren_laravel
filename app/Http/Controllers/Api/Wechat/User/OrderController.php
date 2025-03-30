@@ -131,12 +131,6 @@ class OrderController extends Controller
             throw new BusinessException(ResponseEnum::HTTP_ERROR, '订单创建非法');
         }
 
-        // 入库前锁定时间
-        Redis::connection('order')->rpush('reservation_date_' . $reservation_date . '-' . $order_time_info['car_number'], json_encode([
-            'start' => $order_time_info['start_time'],
-            'end' => $order_time_info['end_time'],
-        ], JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
-
         $out_trade_no = $orderService->create([
             'total' => $sku->price,
             'payer_total' => max($payer_total, 0),
@@ -166,7 +160,17 @@ class OrderController extends Controller
             'pay_success_at' => max($payer_total, 0) === 0 ? CarbonImmutable::now(config('app.timezone')) : null,
         ], $user_id, max($payer_total, 0) === 0 ? OrderStatusEnum::finishing : OrderStatusEnum::paying);
 
-        $payload = max($payer_total, 0) === 0 ? null : $this->payTransactionsWithChannel('1', $out_trade_no, $payer_total, Auth::guard('wechat')->user()->info->openid, "移动洗护服务-{$order_pet_info['name']}({$order_pet_info['weight']}KG)");
+        if (max($payer_total, 0) === 0) {
+            $payload = null;
+        } else {
+            $payload = $this->payTransactionsWithChannel('1', $out_trade_no, $payer_total, Auth::guard('wechat')->user()->info->openid, "移动洗护服务-{$order_pet_info['name']}({$order_pet_info['weight']}KG)");
+
+            // 入库前锁定时间
+            Redis::connection('order')->rpush('reservation_date_' . $reservation_date . '-' . $order_time_info['car_number'], json_encode([
+                'start' => $order_time_info['start_time'],
+                'end' => $order_time_info['end_time'],
+            ], JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+        }
 
         return $this->success($payload);
     }

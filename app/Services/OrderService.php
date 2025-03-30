@@ -90,8 +90,10 @@ class OrderService
 
         // 创建流水
 
-        // 订单流入队列，进行15分钟未支付取消的判断
-        DelayCannelOrder::dispatch($order_no)->delay($this->time->addSeconds(900));
+        if ($status === OrderStatusEnum::paying) {
+            // 订单流入队列，进行15分钟未支付取消的判断
+            DelayCannelOrder::dispatch($order_no)->delay($this->time->addSeconds(900));
+        }
 
         return $trade_no;
     }
