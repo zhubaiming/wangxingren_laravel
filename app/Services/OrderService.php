@@ -2,10 +2,14 @@
 
 namespace App\Services;
 
+use App\Enums\GenderEnum;
 use App\Enums\OrderStatusEnum;
+use App\Enums\PetWeightRangeEnum;
+use App\Events\NewPayedOrderEvent;
 use App\Jobs\DelayCannelOrder;
 use App\Models\ClientUserOrder;
 use Carbon\CarbonImmutable;
+use Zhenzhu\MessagePusher\MessagePush;
 
 class OrderService
 {
@@ -94,6 +98,16 @@ class OrderService
             // 订单流入队列，进行15分钟未支付取消的判断
             DelayCannelOrder::dispatch($order_no)->delay($this->time->addSeconds(300));
         }
+
+        /*
+         * 消息推送
+         * 1、推送后台
+         * 2、推送企业微信机器人
+         */
+        NewPayedOrderEvent::dispatch();
+
+        new MessagePush()->channel('wecom')->delivery('groupBot')->sendMarkdown('e893bd4e-9e6f-445c-8f6e-dcb9f99f6d4c', "今日日期: {$this->time->isoFormat('YYYY年MM月DD日')}\n\n\n# 新增预约订单\n\n\n> 订单编号: <font color=\"comment\">{$trade_no}</font>\n预约时间: **<font color=\"info\">xx:xx</font>**\n服务地址: <font color=\"warning\">{$collects['address_json']['full_address']}</font>\n宠物品种: <font color=\"comment\">{$collects['pet_json']['breed_title']}</font>\n宠物体重范围: <font color=\"comment\">" . PetWeightRangeEnum::from(applyFloatToIntegerModifier($collects['pet_json']['weight']))->name() . "</font>\n宠物信息: {$collects['pet_json']['name']}(" . GenderEnum::from($collects['pet_json']['gender'])->name('animal') . "-" . is_null($collects['pet_json']['birth']) ? 0 : calculateAge($collects['pet_json']['birth'], 'Y-m') . "岁)");
+//        new MessagePush()->channel('wecom')->delivery('groupBot')->sendMarkdown('e893bd4e-9e6f-445c-8f6e-dcb9f99f6d4c', "今日日期: {$this->time->isoFormat('YYYYMMDD')}xxxx年xx月xx日\n今日实时预约订单: **<font color=\"warning\">xxxxxx笔</font>**，请相关同事注意。\n\n\n# 新增预约订单\n\n\n> 订单编号: <font color=\"comment\">{$trade_no}</font>\n预约时间: **<font color=\"info\">xx:xx</font>**\n服务地址: <font color=\"warning\">{$collects['address_json']['full_address']}</font>\n宠物品种: <font color=\"comment\">{$collects['pet_json']['breed_title']}</font>\n宠物体重范围: <font color=\"comment\">" . PetWeightRangeEnum::from(applyFloatToIntegerModifier($collects['pet_json']['weight']))->name() . "</font>\n宠物信息: {$collects['pet_json']['name']}(" . GenderEnum::from($collects['pet_json']['gender'])->name('animal') . "-" . is_null($collects['pet_json']['birth']) ? 0 : calculateAge($collects['pet_json']['birth'], 'Y-m') . "岁)");
 
         return $trade_no;
     }

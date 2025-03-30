@@ -3,7 +3,6 @@
 namespace App\Services\Wechat;
 
 use App\Enums\OrderStatusEnum;
-use App\Events\NewPayedOrderEvent;
 use App\Models\ClientUserOrder;
 use Carbon\Carbon;
 use GuzzleHttp\Exception\RequestException;
@@ -263,8 +262,6 @@ class MiniProgramPaymentService
                     'start' => Carbon::parse($reservation['reservation_time_start'])->format('H:i'),
                     'end' => Carbon::parse($reservation['reservation_time_end'])->format('H:i')
                 ], JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
-
-                NewPayedOrderEvent::dispatch();
             }
         }
 

@@ -12,7 +12,6 @@ use App\Models\System;
 use App\Models\SysTradeDate;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Redis;
 
 class TradeDateController extends Controller
 {
@@ -39,7 +38,7 @@ class TradeDateController extends Controller
 
         if (0 !== count($cars)) {
             $orders = ClientUserOrder::select('reservation_car', 'reservation_time_start', 'reservation_time_end')->whereIn('status', [OrderStatusEnum::finishing, OrderStatusEnum::finished, OrderStatusEnum::refund])->where('reservation_date', $date->format('Y-m-d'))->get()->toArray();
-            
+
             // 使用 array_reduce 实现分组
             $removeRanges = array_reduce($orders, function ($carry, $item) use ($date) {
                 $carId = $item['reservation_car']; // 获取分组的键
