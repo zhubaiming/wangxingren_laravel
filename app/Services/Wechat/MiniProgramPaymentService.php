@@ -5,11 +5,10 @@ namespace App\Services\Wechat;
 use App\Enums\OrderStatusEnum;
 use App\Events\NewPayedOrderEvent;
 use App\Models\ClientUserOrder;
-use App\Models\SysTradeDate;
 use Carbon\Carbon;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redis;
 use WeChatPay\Builder;
 use WeChatPay\Crypto\AesGcm;
 use WeChatPay\Crypto\Rsa;
@@ -130,7 +129,7 @@ class MiniProgramPaymentService
      * @param string $openid
      * @return array
      */
-    public function requestPayment(string $out_trade_no, int $total, string $openid, string $description = '')
+    public function requestPayment(string $out_trade_no, int $total, string $openid, string $description = '', ?string $attach = null)
     {
         try {
             $http_response = $this->instance->chain($this->url_path . 'jsapi')
@@ -141,7 +140,7 @@ class MiniProgramPaymentService
 //                    'out_trade_no' => app()->isLocal() ? 'test_payment_' . rand(100000, 999999) : $out_trade_no, // 商户系统内部订单号，只能是数字、大小写字母_-*且在同一个商户号下唯一
                     'out_trade_no' => $out_trade_no, // 商户系统内部订单号，只能是数字、大小写字母_-*且在同一个商户号下唯一
 //                'time_expire' => '', // 订单失效时间(非必填)，格式为yyyy-MM-DDTHH:mm:ss+TIMEZONE，yyyy-MM-DD表示年月日，T出现在字符串中，表示time元素的开头，HH:mm:ss表示时分秒，TIMEZONE表示时区（+08:00表示东八区时间，领先UTC8小时，即北京时间）。例如：2015-05-20T13:29:35+08:00表示，北京时间2015年5月20日13点29分35秒
-//                'attach' => 'attach_test_123456789', // 附加数据(非必填)，在查询API和支付通知中原样返回，可作为自定义参数使用，实际情况下只有支付完成状态才会返回该字段
+                    'attach' => $attach, // 附加数据(非必填)，在查询API和支付通知中原样返回，可作为自定义参数使用，实际情况下只有支付完成状态才会返回该字段
                     'notify_url' => 'https://wangxingren.fun/wechat_notify/payment/jsapi', // 异步接收微信支付结果通知的回调地址，通知URL必须为外网可访问的URL，不能携带参数。 公网域名必须为HTTPS，如果是走专线接入，使用专线NAT IP或者私有回调域名可使用HTTP
 //                'goods_tag' => '', // 订单优惠标记(非必填)
 //                'support_fapiao' => false, // 电子发票入口开放标识(非必填)，传入true时，支付成功消息和支付详情页将出现开票入口。需要在微信支付商户平台或微信公众平台开通电子发票功能，传此字段才可生效。true：是   false：否
@@ -257,6 +256,13 @@ class MiniProgramPaymentService
                     'payer_currency' => $wechatpay_body_resource_array['amount']['payer_currency'],
                     'status' => OrderStatusEnum::finishing
                 ]);
+
+                $reservation = json_decode($wechatpay_body_resource_array['attach'], true);
+
+                Redis::connection('order')->lrem('reservation_date_' . $reservation['reservation_date'] . '-' . $reservation['reservation_car'], 0, json_encode([
+                    'start' => Carbon::parse($reservation['reservation_time_start'])->format('H:i'),
+                    'end' => Carbon::parse($reservation['reservation_time_end'])->format('H:i')
+                ], JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
 
                 NewPayedOrderEvent::dispatch();
             }

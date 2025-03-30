@@ -163,7 +163,12 @@ class OrderController extends Controller
         if (max($payer_total, 0) === 0) {
             $payload = null;
         } else {
-            $payload = $this->payTransactionsWithChannel('1', $out_trade_no, $payer_total, Auth::guard('wechat')->user()->info->openid, "移动洗护服务-{$order_pet_info['name']}({$order_pet_info['weight']}KG)");
+            $payload = $this->payTransactionsWithChannel('1', $out_trade_no, $payer_total, Auth::guard('wechat')->user()->info->openid, "移动洗护服务-{$order_pet_info['name']}({$order_pet_info['weight']}KG)", json_encode([
+                'reservation_date' => $reservation_date,
+                'reservation_car' => $order_time_info['car_number'],
+                'reservation_time_start' => $order_time_info['start_time'],
+                'reservation_time_end' => $order_time_info['end_time']
+            ], JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
 
             // 入库前锁定时间
             Redis::connection('order')->rpush('reservation_date_' . $reservation_date . '-' . $order_time_info['car_number'], json_encode([
@@ -219,7 +224,12 @@ class OrderController extends Controller
 
             $order->trade_no = $out_trade_no;
 
-            $payload = $this->payTransactionsWithChannel($validated['pay_channel'], $out_trade_no, $order->payer_total, Auth::guard('wechat')->user()->info->openid, "移动洗护服务-{$order->pet_json['name']}({$order->pet_json['weight']}KG)");
+            $payload = $this->payTransactionsWithChannel($validated['pay_channel'], $out_trade_no, $order->payer_total, Auth::guard('wechat')->user()->info->openid, "移动洗护服务-{$order->pet_json['name']}({$order->pet_json['weight']}KG)", json_encode([
+                'reservation_date' => $order->reservation_date,
+                'reservation_car' => $order->reservation_car,
+                'reservation_time_start' => $order->reservation_time_start,
+                'reservation_time_end' => $order->reservation_time_end
+            ], JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
         }
 
         if ($validated['state'] === 'refund') {
@@ -249,11 +259,11 @@ class OrderController extends Controller
         //
     }
 
-    private function payTransactionsWithChannel($payChannel, $outTradeNo, $total, $payerId, $description = '')
+    private function payTransactionsWithChannel($payChannel, $outTradeNo, $total, $payerId, $description = '', $attach = null)
     {
         switch ($payChannel) {
             case 1: // 微信支付
-                return (new MiniProgramPaymentService())->requestPayment($outTradeNo, $total, $payerId, $description);
+                return (new MiniProgramPaymentService())->requestPayment($outTradeNo, $total, $payerId, $description,$attach);
         }
     }
 }
