@@ -4,10 +4,12 @@ namespace App\Services\Guard;
 
 use App\Models\ClientUser;
 use App\Models\ClientUserInfo;
+use App\Models\Coupon;
 use Carbon\Carbon;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Redis\Connections\Connection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redis;
 
 /**
@@ -219,7 +221,7 @@ class WechatMiniprogramGuard implements StatefulGuard
         $result = ['is_register' => false, 'token' => null, 'info' => []];
 
         $user = $this->{'attempt' . ucfirst($credentials['func'])}($credentials);
-        
+
         if (!is_null($user)) {
             $result = ['is_register' => $user->info->is_register, 'token' => $this->login($user), 'info' => $user];
         }
@@ -246,9 +248,35 @@ class WechatMiniprogramGuard implements StatefulGuard
 
     private function attemptRegisterLogin($credentials)
     {
+        $sendCoupon = 0 === ClientUser::where('phone_number', $credentials['attributes']['phone_number'])->count('id');
+
         $user = ClientUser::with(['info' => function ($query) use ($credentials) {
             $query->where('appid', config('wechat.miniprogram.app_id'))->where('openid', $credentials['extra']['openid']);
         }])->firstOrCreate($credentials['attributes'], $credentials['data']);
+
+        if ($sendCoupon) {
+            $coupons = Coupon::where('related_action', 'registered')->get();
+
+            $couponData = [];
+            $time = Carbon::now();
+            foreach ($coupons as $coupon) {
+                $couponData[] = [
+                    'coupon_code' => $coupon->code,
+                    'code' => $time->year . $time->month . $time->day . random_int(100000, 999999) . Auth::guard('wechat')->user()->id,
+                    'title' => $coupon->title,
+                    'amount' => $coupon->amount,
+                    'min_total' => $coupon->min_total,
+                    'description' => $coupon->description,
+                    'expiration_at' => $coupon->expiration_at,
+                    'status' => false,
+                    'is_get' => false,
+                ];
+            }
+
+            if (!empty($couponData)) {
+                $user->coupons()->createManyQuietly($couponData);
+            }
+        }
 
         if (0 === count($user->info)) {
             ClientUserInfo::where('app_type', 'wechat_miniprogram')
@@ -260,7 +288,6 @@ class WechatMiniprogramGuard implements StatefulGuard
 
             $user->refresh()->load('info');
         }
-
 
         $user->info = $user->info->first();
 
