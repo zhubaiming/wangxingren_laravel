@@ -118,8 +118,8 @@ class OrderController extends Controller
 
         // 入库前锁定时间
         Redis::connection('order')->rpush('reservation_date_' . $reservation_date . '-' . $reservation[0], json_encode([
-            'reservation_time_start' => $reservation[1],
-            'reservation_time_end' => $reservation[2],
+            'start' => $reservation[1],
+            'end' => $reservation[2],
         ], JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
 
         $pet->gender_conv = GenderEnum::from($pet->gender)->name('animal');
