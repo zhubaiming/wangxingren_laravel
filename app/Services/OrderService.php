@@ -82,7 +82,7 @@ class OrderService
             'trade_no' => $trade_no,
             'user_id' => $user_id,
             'status' => $status,
-            'expected_at' => $this->time->addSeconds(900)->toDateTimeString()
+            'expected_at' => $this->time->addSeconds(300)->toDateTimeString()
         ];
 
         // 创建订单
@@ -92,7 +92,7 @@ class OrderService
 
         if ($status === OrderStatusEnum::paying) {
             // 订单流入队列，进行15分钟未支付取消的判断
-            DelayCannelOrder::dispatch($order_no)->delay($this->time->addSeconds(900));
+            DelayCannelOrder::dispatch($order_no)->delay($this->time->addSeconds(300));
         }
 
         return $trade_no;
