@@ -2,13 +2,10 @@
 
 namespace App\Services;
 
-use App\Enums\GenderEnum;
 use App\Enums\OrderStatusEnum;
-use App\Enums\PetWeightRangeEnum;
 use App\Events\NewPayedOrderEvent;
 use App\Jobs\DelayCannelOrder;
 use App\Models\ClientUserOrder;
-use App\Services\Message\MessagePush;
 use Carbon\CarbonImmutable;
 
 class OrderService
@@ -85,7 +82,7 @@ class OrderService
             'order_no' => $order_no,
             'trade_no' => $trade_no,
             'user_id' => $user_id,
-            'status' => $status,
+            'status' => $status->value,
             'expected_at' => $this->time->addSeconds(300)->toDateTimeString()
         ];
 
@@ -94,7 +91,7 @@ class OrderService
 
         // 创建流水
 
-        if ($status === OrderStatusEnum::paying) {
+        if ($status === OrderStatusEnum::paying->value) {
             // 订单流入队列，进行15分钟未支付取消的判断
             DelayCannelOrder::dispatch($order_no)->delay($this->time->addSeconds(300));
         }

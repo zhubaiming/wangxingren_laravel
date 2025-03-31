@@ -32,8 +32,8 @@ class DelayCannelOrder implements ShouldQueue
      */
     public function handle(): void
     {
-        if ($this->order->status === OrderStatusEnum::paying) {
-            $this->order->update(['status' => OrderStatusEnum::cancel]);
+        if ($this->order->status === OrderStatusEnum::paying->value) {
+            $this->order->update(['status' => OrderStatusEnum::cancel->value]);
 
             Redis::connection('order')->lrem('reservation_date_' . $this->order->reservation_date . '-' . $this->order->reservation_car, 0, json_encode([
                 'start' => Carbon::parse($this->order->reservation_time_start)->format('H:i'),

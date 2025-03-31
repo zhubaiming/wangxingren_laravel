@@ -37,7 +37,7 @@ class TradeDateController extends Controller
         $cars = ServiceCar::select('id', 'title')->where('status', true)->orderBy('created_at', 'asc')->get();
 
         if (0 !== count($cars)) {
-            $orders = ClientUserOrder::select('reservation_car', 'reservation_time_start', 'reservation_time_end')->whereIn('status', [OrderStatusEnum::finishing, OrderStatusEnum::finished, OrderStatusEnum::refund])->where('reservation_date', $date->format('Y-m-d'))->get()->toArray();
+            $orders = ClientUserOrder::select('reservation_car', 'reservation_time_start', 'reservation_time_end')->whereIn('status', [OrderStatusEnum::finishing->value, OrderStatusEnum::finished->value, OrderStatusEnum::refund->value])->where('reservation_date', $date->format('Y-m-d'))->get()->toArray();
 
             // 使用 array_reduce 实现分组
             $removeRanges = array_reduce($orders, function ($carry, $item) {
@@ -159,7 +159,7 @@ class TradeDateController extends Controller
             ['startDay' => $startDay, 'endDay' => $endDay] = $this->getStartDay($validated['year'], $validated['month']);
 
             $payload = SysTradeDate::whereBetween('date', [$startDay, $endDay])->withCount(['userOrder' => function ($query) {
-                $query->whereIn('status', [OrderStatusEnum::finishing, OrderStatusEnum::finished]);
+                $query->whereIn('status', [OrderStatusEnum::finishing->value, OrderStatusEnum::finished->value]);
             }])->orderBy('date', 'asc')->get();
 
             $payload = array_column($payload->toArray(), null, 'date');

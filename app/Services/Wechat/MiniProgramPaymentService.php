@@ -253,7 +253,7 @@ class MiniProgramPaymentService
                     'pay_success_at' => Carbon::parse($wechatpay_body_resource_array['success_time'], config('app.timezone')),
                     'currency' => $wechatpay_body_resource_array['amount']['currency'],
                     'payer_currency' => $wechatpay_body_resource_array['amount']['payer_currency'],
-                    'status' => OrderStatusEnum::finishing
+                    'status' => OrderStatusEnum::finishing->value
                 ]);
 
                 $reservation = json_decode($wechatpay_body_resource_array['attach'], true);

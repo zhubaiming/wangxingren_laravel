@@ -16,7 +16,7 @@ class HomeController extends Controller
         $time = $now->toDateString() . '  ' . $now->isoFormat('A') . '好';
 
         $client_user_infos = ClientUserInfo::select('is_register')->get();
-        $client_user_orders = ClientUserOrder::select('payer_total', 'pay_channel', 'created_at', 'reservation_date', 'pay_success_at')->where('status', OrderStatusEnum::finishing)->orWhere('status', OrderStatusEnum::finished)->get();
+        $client_user_orders = ClientUserOrder::select('payer_total', 'pay_channel', 'created_at', 'reservation_date', 'pay_success_at')->where('status', OrderStatusEnum::finishing->value)->orWhere('status', OrderStatusEnum::finished->value)->get();
 
         // 使用人数
         $client_user_count = $client_user_infos->count();
