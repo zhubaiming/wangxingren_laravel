@@ -149,7 +149,7 @@ class OrderController extends Controller
 
         if (max($payer_total, 0) !== 0 && !in_array($pay_channel, PayChannelEnum::getOffLineChannels())) {
             // 入库前锁定时间
-            Redis::connection('order')->rpush('reservation_date_' . $reservation_date . '-' . $reservation[0], json_encode([
+            Redis::connection('order')->rpush('reservation_date_' . $reservation_date->format('Y-m-d') . '-' . $reservation[0], json_encode([
                 'start' => $reservation[1],
                 'end' => $reservation[2],
             ], JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
