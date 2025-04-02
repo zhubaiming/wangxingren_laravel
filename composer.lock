@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "52ae1f4e07251b33b9baba95e0f449ce",
+    "content-hash": "04c0b7afd73ece05950c9e1af3f9e3d1",
     "packages": [
         {
             "name": "brick/math",
@@ -1230,6 +1230,132 @@
                 }
             ],
             "time": "2025-02-03T10:55:03+00:00"
+        },
+        {
+            "name": "hongyi/designer",
+            "version": "1.0.5",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zhubaiming/Designer_PHP.git",
+                "reference": "ea7cc01fa879446a4814fdf29d36566c5b756294"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zhubaiming/Designer_PHP/zipball/ea7cc01fa879446a4814fdf29d36566c5b756294",
+                "reference": "ea7cc01fa879446a4814fdf29d36566c5b756294",
+                "shasum": ""
+            },
+            "require": {
+                "guzzlehttp/guzzle": "^7.0",
+                "hongyi/support": "^1.0.0",
+                "php": ">=8.0",
+                "psr/container": "^2.0.1",
+                "psr/log": "^3.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^9.0"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "src/Functions.php"
+                ],
+                "psr-4": {
+                    "Hongyi\\Designer\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "zhubaiming",
+                    "email": "other.zhubaiming@gmail.com"
+                }
+            ],
+            "description": "一个极具优秀设计且简单易用的第三方 API 请求架包，实现PSR标准",
+            "support": {
+                "issues": "https://github.com/zhubaiming/Designer_PHP/issues",
+                "source": "https://github.com/zhubaiming/Designer_PHP/tree/1.0.5"
+            },
+            "time": "2025-04-02T16:18:20+00:00"
+        },
+        {
+            "name": "hongyi/message",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zhubaiming/Message_PHP.git",
+                "reference": "6fa03b2a297e15a3dd352b5365d6f4d8df8b6b0b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zhubaiming/Message_PHP/zipball/6fa03b2a297e15a3dd352b5365d6f4d8df8b6b0b",
+                "reference": "6fa03b2a297e15a3dd352b5365d6f4d8df8b6b0b",
+                "shasum": ""
+            },
+            "require": {
+                "hongyi/designer": "^1.0.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Hongyi\\Message\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "zhubaiming",
+                    "email": "other.zhubaiming@gmail.com"
+                }
+            ],
+            "description": "消息通知(机器人类型)集合，集合国内外各大平台的不同类型机器人的消息推送，支持每个类型机器人的不同消息体类型的推送和回复",
+            "support": {
+                "issues": "https://github.com/zhubaiming/Message_PHP/issues",
+                "source": "https://github.com/zhubaiming/Message_PHP/tree/1.0.0"
+            },
+            "time": "2025-04-02T16:31:22+00:00"
+        },
+        {
+            "name": "hongyi/support",
+            "version": "1.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zhubaiming/Support_PHP.git",
+                "reference": "1a83ece157376469ea59878d830cebc138fac3c9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zhubaiming/Support_PHP/zipball/1a83ece157376469ea59878d830cebc138fac3c9",
+                "reference": "1a83ece157376469ea59878d830cebc138fac3c9",
+                "shasum": ""
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Hongyi\\Support\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "zhubaiming",
+                    "email": "other.zhubaiming@gmail.com"
+                }
+            ],
+            "support": {
+                "issues": "https://github.com/zhubaiming/Support_PHP/issues",
+                "source": "https://github.com/zhubaiming/Support_PHP/tree/1.0.2"
+            },
+            "time": "2025-04-02T14:39:27+00:00"
         },
         {
             "name": "laravel/framework",

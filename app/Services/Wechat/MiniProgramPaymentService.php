@@ -2,10 +2,15 @@
 
 namespace App\Services\Wechat;
 
+use App\Enums\GenderEnum;
 use App\Enums\OrderStatusEnum;
+use App\Enums\PetWeightRangeEnum;
+use App\Events\NewPayedOrderEvent;
 use App\Models\ClientUserOrder;
 use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use GuzzleHttp\Exception\RequestException;
+use Hongyi\Message\Message;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redis;
 use WeChatPay\Builder;
@@ -245,16 +250,18 @@ class MiniProgramPaymentService
             $wechatpay_body_resource_array = json_decode($wechatpay_body_resource, true);
 
             if ('SUCCESS' === $wechatpay_body_resource_array['trade_state']) {
-                ClientUserOrder::where('pay_channel', 1)->where('trade_no', $wechatpay_body_resource_array['out_trade_no'])->update([
-                    'mchid' => $wechatpay_body_resource_array['mchid'],
-                    'transaction_id' => $wechatpay_body_resource_array['transaction_id'],
-                    'trade_type' => $wechatpay_body_resource_array['trade_type'],
-                    'bank_type' => $wechatpay_body_resource_array['bank_type'],
-                    'pay_success_at' => Carbon::parse($wechatpay_body_resource_array['success_time'], config('app.timezone')),
-                    'currency' => $wechatpay_body_resource_array['amount']['currency'],
-                    'payer_currency' => $wechatpay_body_resource_array['amount']['payer_currency'],
-                    'status' => OrderStatusEnum::finishing->value
-                ]);
+                $order = ClientUserOrder::where('pay_channel', 1)->where('trade_no', $wechatpay_body_resource_array['out_trade_no'])->first();
+
+                $order->mchid = $wechatpay_body_resource_array['mchid'];
+                $order->transaction_id = $wechatpay_body_resource_array['transaction_id'];
+                $order->trade_type = $wechatpay_body_resource_array['trade_type'];
+                $order->bank_type = $wechatpay_body_resource_array['bank_type'];
+                $order->pay_success_at = CarbonImmutable::parse($wechatpay_body_resource_array['success_time'], config('app.timezone'));
+                $order->currency = $wechatpay_body_resource_array['amount']['currency'];
+                $order->payer_currency = $wechatpay_body_resource_array['amount']['payer_currency'];
+                $order->status = OrderStatusEnum::finishing->value;
+
+                $order->save();
 
                 $reservation = json_decode($wechatpay_body_resource_array['attach'], true);
 
@@ -262,6 +269,15 @@ class MiniProgramPaymentService
                     'start' => Carbon::parse($reservation['reservation_time_start'])->format('H:i'),
                     'end' => Carbon::parse($reservation['reservation_time_end'])->format('H:i')
                 ], JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+
+
+                NewPayedOrderEvent::dispatch();
+                Message::wecom()->bot([
+                    'msgtype' => 'markdown',
+                    'markdown' => [
+                        'content' => "今日日期: " . CarbonImmutable::now(config('app.timezone'))->isoFormat('YYYY年MM月DD日') . "\n\n\n# 新增预约订单\n\n\n> 订单编号: <font color=\"comment\">" . $wechatpay_body_resource_array['out_trade_no'] . "</font>\n预约时间: **<font color=\"info\">" . $order->reservation_date . " - " . $order->reservation_time_start . "</font>**\n服务地址: <font color=\"warning\">" . $order->address_json['full_address'] . "</font>\n宠物品种: <font color=\"comment\">" . $order->pet_json['breed_title'] . "</font>\n宠物体重范围: <font color=\"comment\">" . PetWeightRangeEnum::from(applyFloatToIntegerModifier($order->pet_json['weight']))->name() . "</font>\n宠物信息: " . $order->pet_json['name'] . "(" . GenderEnum::from($order->pet_json['gender'])->name('animal') . "-" . (is_null($order->pet_json['birth']) ? 0 : calculateAge($order->pet_json['birth'], 'Y-m')) . "岁)"
+                    ]
+                ]);
             }
         }
 
