@@ -21,8 +21,15 @@ class TradeDateController extends Controller
         $force = isset($validated['_force']) ? isTrue($validated['_force']) : false;
 
         $now = Carbon::now()->addMinutes(30);
-        $date = Carbon::createFromTimestamp((strlen($validated['date']) === 13 ? $validated['date'] / 1000 : $validated['date']), config('app.timezone'));
-        
+//        $date = Carbon::createFromTimestamp((strlen($validated['date']) === 13 ? $validated['date'] / 1000 : $validated['date']), config('app.timezone'));
+
+        // 处理 13 位毫秒时间戳
+        if (preg_match('/^\d{13}$/', $validated['date'])) {
+            $validated['date'] = (int)$validated['date'] / 1000; // 转换为 10 位秒级时间戳
+        }
+
+        $date = preg_match('/^\d{10}$/', $validated['date']) ? Carbon::createFromTimestamp($validated['date'], config('app.timezone')) : Carbon::parse($validated['date'], config('app.timezone'));
+
         if (!$force && $date->lt(Carbon::today())) {
             throw new BusinessException(ResponseEnum::HTTP_ERROR, '不可选择今天之前的日期');
         }
