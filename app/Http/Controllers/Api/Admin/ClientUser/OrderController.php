@@ -8,6 +8,7 @@ use App\Enums\PayChannelEnum;
 use App\Enums\ResponseEnum;
 use App\Exceptions\BusinessException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Order\StoreRequest;
 use App\Http\Resources\ClientUserOrderResource;
 use App\Models\ClientUserAddress;
 use App\Models\ClientUserCoupon;
@@ -55,14 +56,12 @@ class OrderController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request, TradeDateService $dateService, OrderService $orderService)
+    public function store(StoreRequest $request, OrderService $orderService)
     {
-        $validated = arrHumpToLine($request->input());
-
         [
             'client_user_id' => $client_user_id,
-            'trademark_id' => $trademark_id,
-            'category_id' => $category_id,
+//            'trademark_id' => $trademark_id,
+//            'category_id' => $category_id,
             'spu_id' => $spu_id,
             'sku_id' => $sku_id,
             'client_user_address_id' => $client_user_address_id,
@@ -73,87 +72,39 @@ class OrderController extends Controller
             'pay_channel' => $pay_channel,
             'remark' => $remark,
             'payer_total' => $payer_total,
-            'duration' => $duration,
-        ] = $validated;
-
-        $payer_total = applyFloatToIntegerModifier($payer_total);
-        $reservation_date = CarbonImmutable::createFromTimeStamp($reservation_date / 1000, config('app.timezone'));
-
-        try {
-            $spu = ProductSpu::where('trademark_id', $trademark_id)->where('category_id', $category_id)->findOrFail($spu_id);
-            $sku = ProductSku::where('spu_id', $spu_id)->findOrFail($sku_id);
-            $address = ClientUserAddress::where('user_id', $client_user_id)->findOrFail($client_user_address_id);
-            $pet = ClientUserPet::where('user_id', $client_user_id)->findOrFail($client_user_pet_id);
-
-            if (!is_null($coupon = ClientUserCoupon::where('user_id', $client_user_id)->where('status', true)->where('code', $client_user_coupon_code)->where('is_get', true)->first())) {
-                $payer_total = intval(bcsub($sku->price === $payer_total ? $sku->price : $payer_total, $coupon->amount, 0));
-
-                $coupon->status = false;
-                $coupon->save();
-            }
-        } catch (ModelNotFoundException) {
-            throw new BusinessException(ResponseEnum::HTTP_ERROR, '订单创建非法');
-        }
-
-        $now = Carbon::now();
-
-        if ($reservation_date->lt(Carbon::today())) {
-            throw new BusinessException(ResponseEnum::HTTP_ERROR, '预约日期非法');
-        }
+//            'duration' => $duration,
+            'user' => $user
+        ] = $request->safe()->all();
 
         $reservation = explode('-', $reservation_time);
         if (count($reservation) !== 3) {
             throw new BusinessException(ResponseEnum::HTTP_ERROR, '预约时间格式非法');
         }
-
-        // 再次校验预约时间是否被锁定
-        if (0 !== Redis::connection('order')->exists('reservation_date_' . $reservation_date->format('Y-m-d') . '-' . $reservation[0])) {
-            if (!$dateService->checkTimeRange(
-                ['start' => $reservation[1], 'end' => $reservation[2]],
-                array_map(fn($item) => json_decode($item, true), Redis::connection('order')->lrange('reservation_date_' . $reservation_date . '-' . $reservation[0], 0, -1))
-            )) {
-                throw new BusinessException(ResponseEnum::HTTP_ERROR, '当前时间已被抢先预约，请重新选择时间');
-            }
+        if (strtotime($reservation[1] >= $reservation[2])) {
+            throw new BusinessException(ResponseEnum::HTTP_ERROR, '结束时间必须大于开始时间');
         }
 
-        $pet->gender_conv = GenderEnum::from($pet->gender)->name('animal');
-        $out_trade_no = $orderService->create([
-            'total' => $sku->price === $payer_total ? $sku->price : $payer_total,
-            'payer_total' => max($payer_total, 0),
+        $payer_total = applyFloatToIntegerModifier($payer_total);
+        $reservation_date = CarbonImmutable::createFromTimeStamp($reservation_date / 1000, config('app.timezone'));
+
+        $orderService->create([
+            'payer_total' => $payer_total,
             'spu_id' => $spu_id,
-            'spu_json' => $spu->toArray(),
-            'category_id' => $category_id,
-            'category_title' => $category_id,
-            'trademark_id' => $trademark_id,
-            'trademark_title' => $trademark_id,
             'sku_id' => $sku_id,
-            'sku_json' => $sku->toArray(),
             'address_id' => $client_user_address_id,
-            'address_json' => $address->toArray(),
             'pet_id' => $client_user_pet_id,
-            'pet_json' => $pet->makeHidden('deleted_at')->toArray(),
             'remark' => $remark,
             'pay_channel' => $pay_channel,
             'pay_method' => null,
-            'reservation_date' => $reservation_date->format('Y-m-d'),
+            'reservation_date' => $reservation_date,
             'reservation_car' => $reservation[0],
             'reservation_time_start' => $reservation[1],
             'reservation_time_end' => $reservation[2],
-            'is_revise_price' => !($sku->price === $payer_total),
-            'revise_by' => $sku->price === $payer_total ? null : $validated['user'],
-            'coupon_id' => !is_null($coupon) ? $coupon->id : null,
-            'coupon_json' => !is_null($coupon) ? $coupon->toArray() : null,
-            'coupon_total' => !is_null($coupon) ? $coupon->amount : 0,
-            'pay_success_at' => max($payer_total, 0) === 0 || in_array($pay_channel, PayChannelEnum::getOffLineChannels()) ? CarbonImmutable::now(config('app.timezone')) : null,
-        ], $client_user_id, max($payer_total, 0) === 0 || in_array($pay_channel, PayChannelEnum::getOffLineChannels()) ? OrderStatusEnum::finishing : OrderStatusEnum::paying);
-
-        if (max($payer_total, 0) !== 0 && !in_array($pay_channel, PayChannelEnum::getOffLineChannels())) {
-            // 入库前锁定时间
-            Redis::connection('order')->rpush('reservation_date_' . $reservation_date->format('Y-m-d') . '-' . $reservation[0], json_encode([
-                'start' => $reservation[1],
-                'end' => $reservation[2],
-            ], JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
-        }
+            'is_revise_price' => false,
+            'coupon_id' => null,
+//            'coupon_code' => $client_user_coupon_code,
+            'revise_by' => $user
+        ], $client_user_id);
 
         return $this->success();
     }

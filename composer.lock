@@ -1233,16 +1233,16 @@
         },
         {
             "name": "hongyi/designer",
-            "version": "1.0.5",
+            "version": "1.0.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zhubaiming/Designer_PHP.git",
-                "reference": "ea7cc01fa879446a4814fdf29d36566c5b756294"
+                "reference": "69f8879636318501619ba1c694c8d06df97ac189"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zhubaiming/Designer_PHP/zipball/ea7cc01fa879446a4814fdf29d36566c5b756294",
-                "reference": "ea7cc01fa879446a4814fdf29d36566c5b756294",
+                "url": "https://api.github.com/repos/zhubaiming/Designer_PHP/zipball/69f8879636318501619ba1c694c8d06df97ac189",
+                "reference": "69f8879636318501619ba1c694c8d06df97ac189",
                 "shasum": ""
             },
             "require": {
@@ -1277,9 +1277,9 @@
             "description": "一个极具优秀设计且简单易用的第三方 API 请求架包，实现PSR标准",
             "support": {
                 "issues": "https://github.com/zhubaiming/Designer_PHP/issues",
-                "source": "https://github.com/zhubaiming/Designer_PHP/tree/1.0.5"
+                "source": "https://github.com/zhubaiming/Designer_PHP/tree/1.0.7"
             },
-            "time": "2025-04-02T16:18:20+00:00"
+            "time": "2025-05-23T14:34:03+00:00"
         },
         {
             "name": "hongyi/message",

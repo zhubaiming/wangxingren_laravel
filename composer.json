@@ -9,6 +9,7 @@
   "license": "MIT",
   "require": {
     "php": "^8.2",
+    "hongyi/message": "^1.0.0",
     "laravel/framework": "^11.9",
     "laravel/reverb": "^1.0",
     "laravel/sanctum": "^4.0",
@@ -35,9 +36,7 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "Tests\\": "tests/",
-      "Zhenzhu\\MessagePusher\\": "packages/zhenzhu/message-pusher/src/",
-      "Zhubaiming\\Pay\\": "packages/Zhubaiming/pay/src/"
+      "Tests\\": "tests/"
     }
   },
   "scripts": {
